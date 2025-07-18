@@ -4,10 +4,10 @@
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, CheckCircle } from 'lucide-react';
-import { tasks, transactions, users } from '@/lib/data';
+import { tasks, transactions } from '@/lib/data';
 import { Transaction } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -31,8 +31,9 @@ export default function TaskDetailPage() {
   }
 
   const handleStartTask = () => {
-    const currentUser = users[0];
-    const existingTask = transactions.find(t => t.taskId === task.id && t.userId === currentUser.id);
+    // In a real app, you'd get the current user from auth state.
+    const currentUserId = 1; 
+    const existingTask = transactions.find(t => t.taskId === task.id && t.userId === currentUserId);
     if(existingTask) {
        toast({
         title: "Task Already Started",
@@ -44,7 +45,7 @@ export default function TaskDetailPage() {
 
     const newTransaction: Transaction = {
       id: transactions.length + 1,
-      userId: currentUser.id,
+      userId: currentUserId,
       taskId: task.id,
       app: task.name,
       amount: task.reward,
@@ -117,12 +118,18 @@ export default function TaskDetailPage() {
                   ))}
               </ul>
             </div>
-
-            <Separator />
-
-            <div className="space-y-6 pt-2">
-                 <Button onClick={handleStartTask} size="lg" className="w-full shadow-lg">Start Task & Earn ₹{task.reward}</Button>
             
+            <Separator />
+            
+            <Button onClick={handleStartTask} size="lg" className="w-full shadow-lg">Start Task & Earn ₹{task.reward}</Button>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-md rounded-lg w-full">
+            <CardHeader>
+                <CardTitle>Tutorial & FAQ</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
                  <div>
                     <h3 className="text-lg font-semibold mb-4">Watch How To Do It:</h3>
                     <div className="aspect-video rounded-lg overflow-hidden">
@@ -152,8 +159,7 @@ export default function TaskDetailPage() {
                         ))}
                     </Accordion>
                 </div>
-            </div>
-          </CardContent>
+            </CardContent>
         </Card>
       </main>
 
