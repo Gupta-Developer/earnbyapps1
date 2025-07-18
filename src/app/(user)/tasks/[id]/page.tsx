@@ -127,38 +127,39 @@ export default function TaskDetailPage() {
 
         <Card className="shadow-md rounded-lg w-full">
             <CardHeader>
-                <CardTitle>Tutorial & FAQ</CardTitle>
+                <CardTitle>Watch How To Do It</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-                 <div>
-                    <h3 className="text-lg font-semibold mb-4">Watch How To Do It:</h3>
-                    <div className="aspect-video rounded-lg overflow-hidden">
-                        <iframe 
-                            width="100%" 
-                            height="100%" 
-                            src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
-                            title="YouTube video player" 
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                            allowFullScreen
-                            className="border-0"
-                            >
-                        </iframe>
-                    </div>
+            <CardContent>
+                <div className="aspect-video rounded-lg overflow-hidden">
+                    <iframe 
+                        width="100%" 
+                        height="100%" 
+                        src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
+                        title="YouTube video player" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowFullScreen
+                        className="border-0"
+                        >
+                    </iframe>
                 </div>
+            </CardContent>
+        </Card>
 
-                <div>
-                    <h3 className="text-lg font-semibold mb-4">Frequently Asked Questions:</h3>
-                    <Accordion type="single" collapsible className="w-full">
-                        {faqs.map((faq, index) => (
-                             <AccordionItem value={`item-${index}`} key={index}>
-                                <AccordionTrigger>{faq.question}</AccordionTrigger>
-                                <AccordionContent>
-                                    {faq.answer}
-                                </AccordionContent>
-                            </AccordionItem>
-                        ))}
-                    </Accordion>
-                </div>
+        <Card className="shadow-md rounded-lg w-full">
+            <CardHeader>
+                <CardTitle>Frequently Asked Questions</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <Accordion type="single" collapsible className="w-full">
+                    {faqs.map((faq, index) => (
+                         <AccordionItem value={`item-${index}`} key={index}>
+                            <AccordionTrigger>{faq.question}</AccordionTrigger>
+                            <AccordionContent>
+                                {faq.answer}
+                            </AccordionContent>
+                        </AccordionItem>
+                    ))}
+                </Accordion>
             </CardContent>
         </Card>
       </main>
