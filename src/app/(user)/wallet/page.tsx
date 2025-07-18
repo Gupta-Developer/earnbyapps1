@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -79,7 +80,6 @@ export default function WalletPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Task</TableHead>
-                <TableHead>Amount</TableHead>
                 <TableHead className="text-center">Status</TableHead>
                 <TableHead>Support</TableHead>
                 <TableHead className="text-right">Date</TableHead>
@@ -90,8 +90,6 @@ export default function WalletPage() {
                 <TableRow key={item.id}>
                   <TableCell>
                     <div className="font-medium">{item.app}</div>
-                  </TableCell>
-                  <TableCell>
                     <div className="text-sm text-muted-foreground">₹{item.amount}</div>
                   </TableCell>
                   <TableCell className="text-center">
@@ -115,7 +113,7 @@ export default function WalletPage() {
                 </TableRow>
               )) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground h-24">
+                  <TableCell colSpan={4} className="text-center text-muted-foreground h-24">
                     No transactions yet.
                   </TableCell>
                 </TableRow>
