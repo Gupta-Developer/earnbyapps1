@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { ChevronRight, Instagram, Youtube } from "lucide-react";
 import { tasks } from "@/lib/data";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const WhatsAppIcon = () => (
   <svg
@@ -42,14 +44,35 @@ const socialLinks = [
     },
 ]
 
+type FilterType = "all" | "high-paying";
+
 export default function HomePage() {
+  const [filter, setFilter] = useState<FilterType>("all");
+
+  const filteredTasks = tasks.filter((task) => {
+    if (filter === "high-paying") {
+      return task.reward >= 50;
+    }
+    return true;
+  });
+
   return (
     <div className="p-4 space-y-4">
       <header className="py-2">
         <p className="text-center text-muted-foreground">Complete tasks and earn rewards!</p>
       </header>
+      
+      <div className="flex justify-center">
+        <Tabs value={filter} onValueChange={(value) => setFilter(value as FilterType)} className="w-auto">
+          <TabsList>
+            <TabsTrigger value="all">All Apps</TabsTrigger>
+            <TabsTrigger value="high-paying">High Paying</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+
       <div className="space-y-3">
-        {tasks.map((task) => (
+        {filteredTasks.map((task) => (
           <Link href={`/tasks/${task.id}`} key={task.id} className="block">
             <Card className="shadow-md rounded-lg overflow-hidden transition-transform hover:scale-[1.02] active:scale-[0.98]">
               <CardContent className="p-4 flex items-center justify-between">
