@@ -6,7 +6,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { UserCircle2 } from "lucide-react";
+import { Mail, UserCircle2 } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+
+const GoogleIcon = () => (
+    <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="h-5 w-5">
+        <title>Google</title>
+        <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.85 3.18-1.73 4.1-1.02 1.02-2.3 1.62-3.92 1.62-3.27 0-5.93-2.66-5.93-5.93s2.66-5.93 5.93-5.93c1.7 0 2.95.65 3.89 1.55l2.64-2.59c-1.62-1.5-3.75-2.4-6.53-2.4-5.35 0-9.68 4.34-9.68 9.68s4.33 9.68 9.68 9.68c2.83 0 5.17-1 6.9-2.73 1.76-1.74 2.64-4.2 2.64-6.34 0-.6-.05-1.16-.16-1.72h-9.3z" fill="currentColor"/>
+    </svg>
+)
 
 type ProfileData = {
   fullName: string;
@@ -44,12 +52,35 @@ export default function ProfilePage() {
   return (
     <div className="p-4 space-y-6">
       {!isLoggedIn ? (
-        <div className="flex flex-col items-center justify-center pt-24 gap-4 text-center">
+        <div className="flex flex-col items-center justify-center pt-12 gap-6 text-center">
             <UserCircle2 className="w-24 h-24 text-muted-foreground/50" />
-            <p className="text-muted-foreground">Sign in to manage your profile and earnings.</p>
-            <Button onClick={handleLogin} size="lg" className="shadow-md rounded-full">
-                Sign In with Google
-            </Button>
+            <div className="space-y-2">
+                <h1 className="text-2xl font-bold">Sign In to Your Account</h1>
+                <p className="text-muted-foreground">Manage your profile and earnings.</p>
+            </div>
+            
+            <div className="w-full max-w-sm space-y-4">
+                <Button onClick={handleLogin} size="lg" className="w-full shadow-md rounded-full" variant="outline">
+                    <GoogleIcon />
+                    Continue with Google
+                </Button>
+                
+                <div className="flex items-center gap-2">
+                    <Separator className="flex-1" />
+                    <span className="text-xs text-muted-foreground">OR</span>
+                    <Separator className="flex-1" />
+                </div>
+
+                <form onSubmit={handleLogin} className="space-y-4">
+                     <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Input id="email" type="email" placeholder="Continue with Email" className="pl-10 h-11 rounded-full" required />
+                    </div>
+                    <Button type="submit" size="lg" className="w-full shadow-md rounded-full">
+                        Continue
+                    </Button>
+                </form>
+            </div>
         </div>
       ) : (
         <div className="space-y-8">
@@ -93,4 +124,5 @@ export default function ProfilePage() {
       )}
     </div>
   );
-}
+
+    
