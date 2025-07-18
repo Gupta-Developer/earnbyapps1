@@ -1,54 +1,55 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { ShieldAlert } from "lucide-react";
-
-type TaskStatus = "Pending" | "Approved" | "Rejected" | "Paid";
-
-type UserTask = {
-  id: number;
-  userName: string;
-  phone: string;
-  upiId: string;
-  taskName: string;
-  status: TaskStatus;
-};
-
-const initialUserTasks: UserTask[] = [
-  { id: 1, userName: 'John Doe', phone: '9876543210', upiId: 'john@bank', taskName: 'GrowMeOrganic', status: 'Approved' },
-  { id: 2, userName: 'Jane Smith', phone: '8765432109', upiId: 'jane@upi', taskName: 'AppCreator', status: 'Paid' },
-  { id: 3, userName: 'Peter Jones', phone: '7654321098', upiId: 'peter@bank', taskName: 'TaskRunner', status: 'Pending' },
-  { id: 4, userName: 'Mary Jane', phone: '6543210987', upiId: 'mary@upi', taskName: 'DataMiner', status: 'Rejected' },
-];
+import { tasks, transactions as allTransactions, users } from "@/lib/data";
+import { TaskStatus, Transaction } from "@/lib/types";
 
 // In a real app, this would be based on user authentication and roles.
 const isAdmin = true;
 
 export default function AdminPage() {
-  const [tasks, setTasks] = useState<UserTask[]>(initialUserTasks);
+  const [transactions, setTransactions] = useState<Transaction[]>(allTransactions);
   const { toast } = useToast();
 
-  const handleStatusChange = (taskId: number, newStatus: TaskStatus) => {
-    setTasks(prevTasks =>
-      prevTasks.map(task =>
-        task.id === taskId ? { ...task, status: newStatus } : task
-      )
-    );
+  useEffect(() => {
+    // This is a trick to force re-render when the underlying data changes.
+    // In a real app, you would use a state management library.
+    const interval = setInterval(() => {
+       if (transactions.length !== allTransactions.length) {
+         setTransactions([...allTransactions]);
+       }
+    }, 500);
+    return () => clearInterval(interval);
+  }, [transactions]);
+
+
+  const handleStatusChange = (transactionId: number, newStatus: TaskStatus) => {
+    const transaction = allTransactions.find(t => t.id === transactionId);
+    if(transaction) {
+        transaction.status = newStatus;
+        setTransactions([...allTransactions]);
+    }
   };
 
   const handleSaveChanges = () => {
-    // Here you would typically send the updated data to your backend.
+    // In a real app, this would send updates to the backend.
+    // Here, the changes are already in the in-memory 'allTransactions' array.
     toast({
       title: "Changes Saved",
       description: "All task statuses have been updated.",
       className: "bg-accent text-accent-foreground border-accent"
     });
   };
+
+  const getUserById = (id: number) => users.find(u => u.id === id);
+  const getTaskById = (id: number) => tasks.find(t => t.id === id);
+
 
   if (!isAdmin) {
     return (
@@ -81,36 +82,42 @@ export default function AdminPage() {
                                     <TableHead>User</TableHead>
                                     <TableHead>Contact</TableHead>
                                     <TableHead>Task</TableHead>
-                                    <TableHead className="w-[150px]">Status</TableHead>
+                                    <TableHead className="w-[200px]">Status</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {tasks.map((task) => (
-                                    <TableRow key={task.id}>
-                                        <TableCell className="font-medium">{task.userName}</TableCell>
-                                        <TableCell>
-                                            <div className="text-sm">{task.phone}</div>
-                                            <div className="text-xs text-muted-foreground">{task.upiId}</div>
-                                        </TableCell>
-                                        <TableCell>{task.taskName}</TableCell>
-                                        <TableCell>
-                                        <Select
-                                            value={task.status}
-                                            onValueChange={(value: TaskStatus) => handleStatusChange(task.id, value)}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Set status" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="Pending">Pending</SelectItem>
-                                                <SelectItem value="Approved">Approved</SelectItem>
-                                                <SelectItem value="Rejected">Rejected</SelectItem>
-                                                <SelectItem value="Paid">Paid</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
+                                {transactions.map((transaction) => {
+                                    const user = getUserById(transaction.userId);
+                                    const task = getTaskById(transaction.taskId);
+                                    if (!user || !task) return null;
+
+                                    return (
+                                        <TableRow key={transaction.id}>
+                                            <TableCell className="font-medium">{user.fullName}</TableCell>
+                                            <TableCell>
+                                                <div className="text-sm">{user.phone}</div>
+                                                <div className="text-xs text-muted-foreground">{user.upiId}</div>
+                                            </TableCell>
+                                            <TableCell>{task.name}</TableCell>
+                                            <TableCell>
+                                            <Select
+                                                value={transaction.status}
+                                                onValueChange={(value: TaskStatus) => handleStatusChange(transaction.id, value)}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Set status" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="Under Verification">Under Verification</SelectItem>
+                                                    <SelectItem value="Approved">Approved</SelectItem>
+                                                    <SelectItem value="Rejected">Rejected</SelectItem>
+                                                    <SelectItem value="Paid">Paid</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                })}
                             </TableBody>
                         </Table>
                     </div>

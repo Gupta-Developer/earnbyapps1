@@ -7,79 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
+import { tasks, transactions, users } from '@/lib/data';
+import { UserTask, Transaction } from '@/lib/types';
 
-const tasks = [
-  { 
-    id: 1, 
-    name: "GrowMeOrganic", 
-    reward: 20, 
-    icon: "https://placehold.co/80x80.png", 
-    hint: "growth chart",
-    description: "Help test a new app for organic gardening enthusiasts.",
-    steps: [
-        "Download the GrowMeOrganic app from the link provided.",
-        "Create an account using your email.",
-        "Use the plant identification feature on 3 different plants.",
-        "Submit feedback through the in-app form.",
-    ]
-  },
-  { 
-    id: 2, 
-    name: "AppCreator", 
-    reward: 50, 
-    icon: "https://placehold.co/80x80.png", 
-    hint: "mobile app",
-    description: "Test the beta version of our no-code app builder.",
-    steps: [
-        "Sign up for a beta account on the AppCreator website.",
-        "Build a simple one-page app using the drag-and-drop editor.",
-        "Publish your test app.",
-        "Complete the user experience survey.",
-    ]
-  },
-  { 
-    id: 3, 
-    name: "TaskRunner", 
-    reward: 15, 
-    icon: "https://placehold.co/80x80.png", 
-    hint: "running shoe",
-    description: "Get paid to complete simple local errands and tasks.",
-     steps: [
-        "Install the TaskRunner application.",
-        "Complete your profile and identity verification.",
-        "Accept and complete one 'demo' task in the app.",
-        "Confirm task completion to receive your reward.",
-    ]
-  },
-  { 
-    id: 4, 
-    name: "DataMiner", 
-    reward: 100, 
-    icon: "https://placehold.co/80x80.png", 
-    hint: "data analysis",
-    description: "Help us improve our data analysis algorithms.",
-    steps: [
-        "Download and install the DataMiner software.",
-        "Run the software on a dataset of your choice (min 1000 rows).",
-        "Export the analysis report.",
-        "Upload the report to the specified cloud drive.",
-    ]
-  },
-  { 
-    id: 5, 
-    name: "SocialBoost", 
-    reward: 25, 
-    icon: "https://placehold.co/80x80.png", 
-    hint: "social media",
-    description: "Boost your social media presence with our new tool.",
-    steps: [
-        "Connect your primary social media account.",
-        "Schedule 5 posts using the SocialBoost scheduler.",
-        "Let the posts be published automatically.",
-        "Take a screenshot of your scheduled posts queue.",
-    ]
-  },
-];
 
 export default function TaskDetailPage() {
   const router = useRouter();
@@ -100,12 +30,37 @@ export default function TaskDetailPage() {
   }
 
   const handleStartTask = () => {
+    // For demo, we'll assume the first user is logged in.
+    const currentUser = users[0];
+
+    // Check if task is already started
+    const existingTask = transactions.find(t => t.taskId === task.id && t.userId === currentUser.id);
+    if(existingTask) {
+       toast({
+        title: "Task Already Started",
+        description: `You have already started the "${task.name}" task.`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const newTransaction: Transaction = {
+      id: transactions.length + 1,
+      userId: currentUser.id,
+      taskId: task.id,
+      app: task.name,
+      amount: task.reward,
+      status: 'Under Verification',
+      date: new Date(),
+    };
+    transactions.push(newTransaction);
+    
     toast({
       title: "Task Started!",
-      description: `You have started the "${task.name}" task. Good luck!`,
+      description: `"${task.name}" is now under verification in your wallet.`,
     });
-    // Here you would typically redirect the user to an external link
-    // or start a process in your backend.
+    
+    router.push('/wallet');
   };
 
   return (

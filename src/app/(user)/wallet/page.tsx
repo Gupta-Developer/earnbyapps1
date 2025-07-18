@@ -1,15 +1,12 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from 'date-fns';
-
-const transactionHistory = [
-  { id: 1, app: 'GrowMeOrganic', amount: 20, status: 'Approved', date: new Date(2023, 10, 15) },
-  { id: 2, app: 'AppCreator', amount: 50, status: 'Paid', date: new Date(2023, 10, 14) },
-  { id: 3, app: 'TaskRunner', amount: 15, status: 'Pending', date: new Date(2023, 10, 18) },
-  { id: 4, app: 'DataMiner', amount: 100, status: 'Pending', date: new Date(2023, 10, 20) },
-  { id: 5, app: 'SocialBoost', amount: 25, status: 'Paid', date: new Date(2023, 9, 28) },
-];
+import { transactions as allTransactions, users } from "@/lib/data";
+import { Transaction } from "@/lib/types";
 
 const getBadgeVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
     switch (status) {
@@ -17,15 +14,36 @@ const getBadgeVariant = (status: string): "default" | "secondary" | "destructive
             return 'default'; // Uses accent color via custom css
         case 'Approved':
             return 'secondary';
-        case 'Pending':
+        case 'Under Verification':
             return 'outline';
+        case 'Rejected':
+            return 'destructive';
         default:
             return 'destructive';
     }
 }
 
 export default function WalletPage() {
-  const totalEarnings = transactionHistory
+  // Rerender component when transactions change
+  const [transactions, setTransactions] = useState<Transaction[]>(allTransactions);
+
+  useEffect(() => {
+    // This is a trick to force re-render when the underlying data changes.
+    // In a real app, you would use a state management library.
+    const interval = setInterval(() => {
+       if (transactions.length !== allTransactions.length) {
+         setTransactions([...allTransactions]);
+       }
+    }, 500);
+    return () => clearInterval(interval);
+  }, [transactions]);
+
+
+  // Assuming user is the first user for demo purposes
+  const currentUserId = 1;
+  const userTransactions = transactions.filter(t => t.userId === currentUserId);
+
+  const totalEarnings = userTransactions
     .filter(t => t.status === 'Paid' || t.status === 'Approved')
     .reduce((sum, t) => sum + t.amount, 0);
 
@@ -57,7 +75,7 @@ export default function WalletPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {transactionHistory.map((item) => (
+              {userTransactions.length > 0 ? userTransactions.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell className="font-medium">{item.app}</TableCell>
                   <TableCell className="text-center">₹{item.amount}</TableCell>
@@ -68,7 +86,13 @@ export default function WalletPage() {
                   </TableCell>
                   <TableCell className="text-right">{format(item.date, 'dd MMM, yy')}</TableCell>
                 </TableRow>
-              ))}
+              )) : (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center text-muted-foreground h-24">
+                    No transactions yet.
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </Card>
