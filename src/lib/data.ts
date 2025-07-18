@@ -18,7 +18,8 @@ export const tasks: Task[] = [
         "Create an account using your email.",
         "Use the plant identification feature on 3 different plants.",
         "Submit feedback through the in-app form.",
-    ]
+    ],
+    isInstant: false,
   },
   { 
     id: 2, 
@@ -32,7 +33,8 @@ export const tasks: Task[] = [
         "Build a simple one-page app using the drag-and-drop editor.",
         "Publish your test app.",
         "Complete the user experience survey.",
-    ]
+    ],
+    isInstant: false,
   },
   { 
     id: 3, 
@@ -46,7 +48,8 @@ export const tasks: Task[] = [
         "Complete your profile and identity verification.",
         "Accept and complete one 'demo' task in the app.",
         "Confirm task completion to receive your reward.",
-    ]
+    ],
+    isInstant: true,
   },
   { 
     id: 4, 
@@ -60,7 +63,8 @@ export const tasks: Task[] = [
         "Run the software on a dataset of your choice (min 1000 rows).",
         "Export the analysis report.",
         "Upload the report to the specified cloud drive.",
-    ]
+    ],
+    isInstant: false,
   },
   { 
     id: 5, 
@@ -74,7 +78,8 @@ export const tasks: Task[] = [
         "Schedule 5 posts using the SocialBoost scheduler.",
         "Let the posts be published automatically.",
         "Take a screenshot of your scheduled posts queue.",
-    ]
+    ],
+    isInstant: true,
   },
 ];
 

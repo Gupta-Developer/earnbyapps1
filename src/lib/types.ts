@@ -8,6 +8,7 @@ export type Task = {
   hint: string;
   description: string;
   steps: string[];
+  isInstant: boolean;
 };
 
 export type User = {
