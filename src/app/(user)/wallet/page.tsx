@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -106,7 +105,7 @@ export default function WalletPage() {
                         className="p-0 h-auto text-xs text-muted-foreground gap-1"
                         asChild
                       >
-                        <a href={`https://wa.me/918319250462?text=Hi, I have a question about my task: ${item.app} (ID: ${item.id})`} target="_blank" rel="noopener noreferrer">
+                        <a href={`https://wa.me/918319250462?text=Hi, I have a question about my task: ${item.app}`} target="_blank" rel="noopener noreferrer">
                           <WhatsAppIcon />
                           Contact
                         </a>
