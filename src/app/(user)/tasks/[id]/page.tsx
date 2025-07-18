@@ -4,12 +4,13 @@
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, CheckCircle } from 'lucide-react';
 import { tasks, transactions, users } from '@/lib/data';
 import { Transaction } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 export default function TaskDetailPage() {
   const router = useRouter();
@@ -30,10 +31,7 @@ export default function TaskDetailPage() {
   }
 
   const handleStartTask = () => {
-    // For demo, we'll assume the first user is logged in.
     const currentUser = users[0];
-
-    // Check if task is already started
     const existingTask = transactions.find(t => t.taskId === task.id && t.userId === currentUser.id);
     if(existingTask) {
        toast({
@@ -63,6 +61,21 @@ export default function TaskDetailPage() {
     router.push('/wallet');
   };
 
+  const faqs = [
+      {
+          question: "What if I don't complete all the steps?",
+          answer: "You must complete all the steps as listed to be eligible for the reward. Partial completions are not rewarded."
+      },
+      {
+          question: "How long does verification take?",
+          answer: "Verification typically takes 24-48 hours. Once approved, the status will update in your wallet."
+      },
+      {
+          question: "Can I do the same task twice?",
+          answer: "No, each task can only be completed once per user account to ensure fair opportunities for everyone."
+      }
+  ]
+
   return (
     <div className="flex flex-col h-full">
       <header className="p-4 flex items-center gap-4 sticky top-0 bg-card/80 backdrop-blur-sm z-10 border-b">
@@ -72,7 +85,7 @@ export default function TaskDetailPage() {
         <h1 className="text-xl font-bold text-foreground truncate">{task.name}</h1>
       </header>
       
-      <main className="flex-grow p-4">
+      <main className="flex-grow p-4 space-y-4">
         <Card className="shadow-md rounded-lg w-full">
           <CardContent className="p-6 space-y-6">
             <div className="flex flex-col items-center text-center gap-4">
@@ -104,13 +117,46 @@ export default function TaskDetailPage() {
                   ))}
               </ul>
             </div>
+
+            <Separator />
+
+            <div className="space-y-6 pt-2">
+                 <Button onClick={handleStartTask} size="lg" className="w-full shadow-lg">Start Task & Earn ₹{task.reward}</Button>
+            
+                 <div>
+                    <h3 className="text-lg font-semibold mb-4">Watch How To Do It:</h3>
+                    <div className="aspect-video rounded-lg overflow-hidden">
+                        <iframe 
+                            width="100%" 
+                            height="100%" 
+                            src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
+                            title="YouTube video player" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowFullScreen
+                            className="border-0"
+                            >
+                        </iframe>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 className="text-lg font-semibold mb-4">Frequently Asked Questions:</h3>
+                    <Accordion type="single" collapsible className="w-full">
+                        {faqs.map((faq, index) => (
+                             <AccordionItem value={`item-${index}`} key={index}>
+                                <AccordionTrigger>{faq.question}</AccordionTrigger>
+                                <AccordionContent>
+                                    {faq.answer}
+                                </AccordionContent>
+                            </AccordionItem>
+                        ))}
+                    </Accordion>
+                </div>
+            </div>
           </CardContent>
         </Card>
       </main>
 
-      <footer className="p-4 sticky bottom-0 bg-card/80 backdrop-blur-sm z-10 border-t">
-        <Button onClick={handleStartTask} size="lg" className="w-full shadow-lg">Start Task & Earn ₹{task.reward}</Button>
-      </footer>
     </div>
   );
 }
