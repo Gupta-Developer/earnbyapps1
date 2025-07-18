@@ -43,10 +43,6 @@ export default function ProfilePage() {
 
   return (
     <div className="p-4 space-y-6">
-      <header className="py-2">
-        <h1 className="text-2xl font-bold text-center">Profile</h1>
-      </header>
-
       {!isLoggedIn ? (
         <div className="flex flex-col items-center justify-center pt-24 gap-4 text-center">
             <UserCircle2 className="w-24 h-24 text-muted-foreground/50" />

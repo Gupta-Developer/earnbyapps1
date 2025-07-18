@@ -49,10 +49,6 @@ export default function WalletPage() {
 
   return (
     <div className="p-4 space-y-6">
-      <header className="py-2">
-        <h1 className="text-2xl font-bold text-center">Wallet</h1>
-      </header>
-
       <Card className="text-center shadow-lg rounded-lg">
         <CardHeader>
           <CardTitle className="text-muted-foreground">Total Earnings</CardTitle>

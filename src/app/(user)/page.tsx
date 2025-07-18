@@ -5,20 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-
-const tasks = [
-  { id: 1, name: "GrowMeOrganic", reward: 20, icon: "https://placehold.co/60x60.png", hint: "growth chart" },
-  { id: 2, name: "AppCreator", reward: 50, icon: "https://placehold.co/60x60.png", hint: "mobile app" },
-  { id: 3, name: "TaskRunner", reward: 15, icon: "https://placehold.co/60x60.png", hint: "running shoe" },
-  { id: 4, name: "DataMiner", reward: 100, icon: "https://placehold.co/60x60.png", hint: "data analysis" },
-  { id: 5, name: "SocialBoost", reward: 25, icon: "https://placehold.co/60x60.png", hint: "social media" },
-];
+import { tasks } from "@/lib/data";
 
 export default function HomePage() {
   return (
     <div className="p-4 space-y-4">
       <header className="py-2">
-        <h1 className="text-2xl font-bold text-center text-foreground">EarnByApps</h1>
         <p className="text-center text-muted-foreground">Complete tasks and earn rewards!</p>
       </header>
       <div className="space-y-3">
