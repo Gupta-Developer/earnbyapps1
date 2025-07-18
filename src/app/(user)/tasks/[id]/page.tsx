@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useParams, useRouter } from 'next/navigation';
@@ -6,10 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, CheckCircle } from 'lucide-react';
-import Link from 'next/link';
 import { tasks, transactions, users } from '@/lib/data';
-import { UserTask, Transaction } from '@/lib/types';
-
+import { Transaction } from '@/lib/types';
+import { Separator } from '@/components/ui/separator';
 
 export default function TaskDetailPage() {
   const router = useRouter();
@@ -72,42 +72,40 @@ export default function TaskDetailPage() {
         <h1 className="text-xl font-bold text-foreground truncate">{task.name}</h1>
       </header>
       
-      <main className="flex-grow p-4 space-y-6">
-        <Card className="shadow-md rounded-lg text-center">
-          <CardContent className="p-6 flex flex-col items-center gap-4">
-             <Image 
-                src={task.icon} 
-                alt={`${task.name} icon`} 
-                width={70} 
-                height={70} 
-                className="rounded-xl"
-                data-ai-hint={task.hint} 
-              />
-              <div>
-                <h2 className="font-bold text-2xl">{task.name}</h2>
-                <p className="text-accent font-semibold text-xl mt-1">Earn ₹{task.reward}</p>
-                <p className="text-muted-foreground mt-2 text-sm">{task.description}</p>
-              </div>
+      <main className="flex-grow p-4">
+        <Card className="shadow-md rounded-lg w-full">
+          <CardContent className="p-6 space-y-6">
+            <div className="flex flex-col items-center text-center gap-4">
+               <Image 
+                  src={task.icon} 
+                  alt={`${task.name} icon`} 
+                  width={70} 
+                  height={70} 
+                  className="rounded-xl"
+                  data-ai-hint={task.hint} 
+                />
+                <div>
+                  <h2 className="font-bold text-2xl">{task.name}</h2>
+                  <p className="text-accent font-semibold text-xl mt-1">Earn ₹{task.reward}</p>
+                  <p className="text-muted-foreground mt-2 text-sm">{task.description}</p>
+                </div>
+            </div>
+
+            <Separator />
+            
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Steps to Follow:</h3>
+              <ul className="space-y-4">
+                  {task.steps.map((step, index) => (
+                      <li key={index} className="flex items-start gap-3">
+                          <CheckCircle className="h-5 w-5 text-accent mt-0.5 shrink-0" />
+                          <span className="text-foreground text-sm">{step}</span>
+                      </li>
+                  ))}
+              </ul>
+            </div>
           </CardContent>
         </Card>
-
-        <Card className="shadow-md rounded-lg">
-          <CardHeader>
-            <CardTitle>Steps to Follow</CardTitle>
-            <CardDescription>Complete these steps to earn your reward.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-4">
-                {task.steps.map((step, index) => (
-                    <li key={index} className="flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 text-accent mt-0.5 shrink-0" />
-                        <span className="text-foreground">{step}</span>
-                    </li>
-                ))}
-            </ul>
-          </CardContent>
-        </Card>
-
       </main>
 
       <footer className="p-4 sticky bottom-0 bg-card/80 backdrop-blur-sm z-10 border-t">
