@@ -82,6 +82,7 @@ export default function WalletPage() {
                 <TableHead>Task</TableHead>
                 <TableHead>Amount</TableHead>
                 <TableHead className="text-center">Status</TableHead>
+                <TableHead>Support</TableHead>
                 <TableHead className="text-right">Date</TableHead>
               </TableRow>
             </TableHeader>
@@ -90,16 +91,6 @@ export default function WalletPage() {
                 <TableRow key={item.id}>
                   <TableCell>
                     <div className="font-medium">{item.app}</div>
-                     <Button
-                        variant="link"
-                        className="p-0 h-auto text-xs text-muted-foreground gap-1"
-                        asChild
-                      >
-                        <a href={`https://wa.me/918319250462?text=Hi, I have a question about my task: ${item.app} (ID: ${item.id})`} target="_blank" rel="noopener noreferrer">
-                          <WhatsAppIcon />
-                          Contact Support
-                        </a>
-                      </Button>
                   </TableCell>
                   <TableCell>
                     <div className="text-sm text-muted-foreground">₹{item.amount}</div>
@@ -109,11 +100,23 @@ export default function WalletPage() {
                       {item.status}
                     </Badge>
                   </TableCell>
+                   <TableCell>
+                     <Button
+                        variant="link"
+                        className="p-0 h-auto text-xs text-muted-foreground gap-1"
+                        asChild
+                      >
+                        <a href={`https://wa.me/918319250462?text=Hi, I have a question about my task: ${item.app} (ID: ${item.id})`} target="_blank" rel="noopener noreferrer">
+                          <WhatsAppIcon />
+                          Contact
+                        </a>
+                      </Button>
+                  </TableCell>
                   <TableCell className="text-right">{format(item.date, 'dd MMM, yy')}</TableCell>
                 </TableRow>
               )) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground h-24">
+                  <TableCell colSpan={5} className="text-center text-muted-foreground h-24">
                     No transactions yet.
                   </TableCell>
                 </TableRow>
