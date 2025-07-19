@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -91,7 +92,7 @@ export default function HomePage() {
                   />
                   <div>
                     <h2 className="font-bold text-lg">{task.name}</h2>
-                    <p className="text-accent font-semibold">Earn ₹{task.reward}</p>
+                    <p className="text-accent font-semibold">₹{task.reward}</p>
                   </div>
                 </div>
                 <ChevronRight className="h-6 w-6 text-muted-foreground" />
