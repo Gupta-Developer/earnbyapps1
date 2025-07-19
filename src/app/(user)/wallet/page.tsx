@@ -59,7 +59,7 @@ export default function WalletPage() {
   const userTransactions = transactions.filter(t => t.userId === currentUserId);
 
   const totalEarnings = userTransactions
-    .filter(t => t.status === 'Paid' || t.status === 'Approved')
+    .filter(t => t.status === 'Paid')
     .reduce((sum, t) => sum + t.amount, 0);
 
   return (
