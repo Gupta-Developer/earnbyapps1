@@ -5,9 +5,9 @@ import Link from "next/link";
 import React from "react";
 
 const footerLinks = [
-  { href: "#", label: "About Us" },
-  { href: "#", label: "Privacy Policy" },
-  { href: "#", label: "Contact" },
+  { href: "/about", label: "About Us" },
+  { href: "/privacy", label: "Privacy Policy" },
+  { href: "/contact", label: "Contact" },
 ];
 
 export default function Footer() {
