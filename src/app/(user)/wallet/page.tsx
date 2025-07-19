@@ -79,10 +79,9 @@ export default function WalletPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Task</TableHead>
+                <TableHead>Task Details</TableHead>
                 <TableHead className="text-center">Status</TableHead>
                 <TableHead>Support</TableHead>
-                <TableHead className="text-right">Date</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -90,7 +89,8 @@ export default function WalletPage() {
                 <TableRow key={item.id}>
                   <TableCell>
                     <div className="font-medium">{item.app}</div>
-                    <div className="text-sm text-muted-foreground">₹{item.amount}</div>
+                    <div className="text-sm text-accent">₹{item.amount}</div>
+                    <div className="text-xs text-muted-foreground">{format(item.date, 'dd MMM, yyyy')}</div>
                   </TableCell>
                   <TableCell className="text-center">
                     <Badge variant={getBadgeVariant(item.status)} className={item.status === 'Paid' ? 'bg-accent text-accent-foreground' : ''}>
@@ -109,11 +109,10 @@ export default function WalletPage() {
                         </a>
                       </Button>
                   </TableCell>
-                  <TableCell className="text-right">{format(item.date, 'dd MMM, yy')}</TableCell>
                 </TableRow>
               )) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground h-24">
+                  <TableCell colSpan={3} className="text-center text-muted-foreground h-24">
                     No transactions yet.
                   </TableCell>
                 </TableRow>
