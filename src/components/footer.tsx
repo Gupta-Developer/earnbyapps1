@@ -1,6 +1,8 @@
+
 "use client";
 
 import Link from "next/link";
+import React from "react";
 
 const footerLinks = [
   { href: "#", label: "About Us" },
@@ -13,7 +15,7 @@ export default function Footer() {
     <footer className="w-full max-w-[480px] bg-card border-t py-4 px-6 mb-16">
       <div className="flex justify-center items-center gap-4 text-sm text-muted-foreground">
         {footerLinks.map((link, index) => (
-          <React.Fragment key={link.href}>
+          <React.Fragment key={link.label}>
             <Link href={link.href} className="hover:text-primary transition-colors">
               {link.label}
             </Link>
@@ -27,5 +29,3 @@ export default function Footer() {
     </footer>
   );
 }
-
-import * as React from "react";
