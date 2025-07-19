@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, CheckCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Copy } from 'lucide-react';
 import { tasks, transactions } from '@/lib/data';
 import { Transaction } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
@@ -29,6 +29,16 @@ export default function TaskDetailPage() {
         </div>
     );
   }
+
+  const referralCode = `EBA${task.id}WIN`;
+
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(referralCode);
+    toast({
+      title: "Copied!",
+      description: "Referral code copied to clipboard.",
+    });
+  };
 
   const handleStartTask = () => {
     // In a real app, you'd get the current user from auth state.
@@ -120,29 +130,39 @@ export default function TaskDetailPage() {
             </div>
             
             <Separator />
+
+            <div>
+                <h3 className="text-lg font-semibold mb-3">Special Referral Code:</h3>
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-secondary/50 border border-dashed">
+                    <span className="font-mono text-lg text-accent flex-grow tracking-widest">{referralCode}</span>
+                    <Button variant="ghost" size="sm" onClick={handleCopyCode}>
+                        <Copy className="h-4 w-4 mr-2"/>
+                        Copy
+                    </Button>
+                </div>
+            </div>
             
+            <Separator />
+
             <Button onClick={handleStartTask} size="lg" className="w-full shadow-lg">Start Task &amp; Earn ₹{task.reward}</Button>
           </CardContent>
         </Card>
 
         <Card className="shadow-md rounded-lg w-full overflow-hidden">
-          <CardHeader className="p-4">
-              <CardTitle className="text-base">Watch How To Do It</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-              <div className="aspect-video">
-                  <iframe 
-                      width="100%" 
-                      height="100%" 
-                      src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
-                      title="YouTube video player" 
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                      allowFullScreen
-                      className="border-0"
-                      >
-                  </iframe>
-              </div>
-          </CardContent>
+            <CardContent className="p-0">
+                <div className="aspect-video">
+                    <iframe 
+                        width="100%" 
+                        height="100%" 
+                        src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
+                        title="YouTube video player" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowFullScreen
+                        className="border-0"
+                        >
+                    </iframe>
+                </div>
+            </CardContent>
         </Card>
 
         <Card className="shadow-md rounded-lg w-full">
