@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useRef } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +10,7 @@ import { ChevronRight, Instagram, Youtube } from "lucide-react";
 import { tasks } from "@/lib/data";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
 
 const WhatsAppIcon = () => (
     <svg
@@ -69,6 +70,7 @@ type FilterType = "all" | "high-paying" | "instant";
 
 export default function HomePage() {
   const [filter, setFilter] = useState<FilterType>("all");
+  const plugin = useRef(Autoplay({ delay: 5000, stopOnInteraction: true }));
 
   const filteredTasks = tasks.filter((task) => {
     if (filter === "high-paying") {
@@ -86,7 +88,13 @@ export default function HomePage() {
         <p className="text-center text-muted-foreground">Complete tasks and earn rewards!</p>
       </header>
 
-      <Carousel className="w-full" opts={{ loop: true }}>
+      <Carousel 
+        className="w-full" 
+        opts={{ loop: true }}
+        plugins={[plugin.current]}
+        onMouseEnter={plugin.current.stop}
+        onMouseLeave={plugin.current.reset}
+      >
         <CarouselContent>
           {carouselItems.map((item) => (
             <CarouselItem key={item.id}>
