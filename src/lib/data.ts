@@ -89,4 +89,8 @@ export const transactions: Transaction[] = [
   { id: 2, userId: 2, taskId: 5, app: 'SocialBoost', amount: 25, status: 'Paid', date: new Date(2023, 9, 28) },
   { id: 3, userId: 1, taskId: 1, app: 'GrowMeOrganic', amount: 20, status: 'Approved', date: new Date(2023, 10, 15) },
   { id: 4, userId: 2, taskId: 3, app: 'TaskRunner', amount: 15, status: 'Rejected', date: new Date(2023, 10, 18) },
+  { id: 5, userId: 1, taskId: 4, app: 'DataMiner', amount: 100, status: 'Paid', date: new Date(2023, 10, 20) },
+  { id: 6, userId: 1, taskId: 5, app: 'SocialBoost', amount: 25, status: 'Under Verification', date: new Date(2023, 10, 22) },
+  { id: 7, userId: 2, taskId: 1, app: 'GrowMeOrganic', amount: 20, status: 'Paid', date: new Date(2023, 10, 25) },
+  { id: 8, userId: 1, taskId: 3, app: 'TaskRunner', amount: 15, status: 'Rejected', date: new Date(2023, 10, 28) },
 ];
