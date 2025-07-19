@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, User, Wallet2 } from "lucide-react";
+import { Home, User, Wallet2, Gift } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/", label: "Home", icon: Home },
+  { href: "/offerwall", label: "Offerwall", icon: Gift },
   { href: "/wallet", label: "Wallet", icon: Wallet2 },
   { href: "/profile", label: "Profile", icon: User },
 ];
