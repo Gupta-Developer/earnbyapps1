@@ -121,7 +121,7 @@ export default function TaskDetailPage() {
             
             <Separator />
             
-            <Button onClick={handleStartTask} size="lg" className="w-full shadow-lg">Start Task & Earn ₹{task.reward}</Button>
+            <Button onClick={handleStartTask} size="lg" className="w-full shadow-lg">Start Task &amp; Earn ₹{task.reward}</Button>
           </CardContent>
         </Card>
 
