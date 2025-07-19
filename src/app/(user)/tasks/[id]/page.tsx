@@ -125,24 +125,24 @@ export default function TaskDetailPage() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-md rounded-lg w-full">
-            <CardHeader>
-                <CardTitle>Watch How To Do It</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="aspect-video rounded-lg overflow-hidden">
-                    <iframe 
-                        width="100%" 
-                        height="100%" 
-                        src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
-                        title="YouTube video player" 
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                        allowFullScreen
-                        className="border-0"
-                        >
-                    </iframe>
-                </div>
-            </CardContent>
+        <Card className="shadow-md rounded-lg w-full overflow-hidden">
+          <CardHeader className="p-4">
+              <CardTitle className="text-base">Watch How To Do It</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+              <div className="aspect-video">
+                  <iframe 
+                      width="100%" 
+                      height="100%" 
+                      src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
+                      title="YouTube video player" 
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                      allowFullScreen
+                      className="border-0"
+                      >
+                  </iframe>
+              </div>
+          </CardContent>
         </Card>
 
         <Card className="shadow-md rounded-lg w-full">
