@@ -9,6 +9,7 @@ import Link from "next/link";
 import { ChevronRight, Instagram, Youtube } from "lucide-react";
 import { tasks } from "@/lib/data";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 
 const WhatsAppIcon = () => (
     <svg
@@ -45,6 +46,25 @@ const socialLinks = [
     },
 ]
 
+const carouselItems = [
+  {
+    id: 1,
+    imageUrl: 'https://placehold.co/600x400.png',
+    hint: 'money gift',
+  },
+  {
+    id: 2,
+    imageUrl: 'https://placehold.co/600x400.png',
+    hint: 'people sharing',
+  },
+  {
+    id: 3,
+    imageUrl: 'https://placehold.co/600x400.png',
+    hint: 'money stack',
+  },
+];
+
+
 type FilterType = "all" | "high-paying" | "instant";
 
 export default function HomePage() {
@@ -65,6 +85,27 @@ export default function HomePage() {
       <header className="py-2">
         <p className="text-center text-muted-foreground">Complete tasks and earn rewards!</p>
       </header>
+
+      <Carousel className="w-full" opts={{ loop: true }}>
+        <CarouselContent>
+          {carouselItems.map((item) => (
+            <CarouselItem key={item.id}>
+              <Card className="rounded-lg overflow-hidden shadow-md">
+                <CardContent className="p-0">
+                  <Image
+                    src={item.imageUrl}
+                    alt="Promotional offer"
+                    width={600}
+                    height={300}
+                    className="w-full h-auto aspect-[2/1] object-cover"
+                    data-ai-hint={item.hint}
+                  />
+                </CardContent>
+              </Card>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
       
       <div className="flex justify-center">
         <Tabs value={filter} onValueChange={(value) => setFilter(value as FilterType)} className="w-auto">
