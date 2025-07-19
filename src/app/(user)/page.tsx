@@ -70,7 +70,7 @@ export default function HomePage() {
           <TabsList>
             <TabsTrigger value="all">All Apps</TabsTrigger>
             <TabsTrigger value="high-paying">High Paying</TabsTrigger>
-            <TabsTrigger value="instant">Instant</TabsTrigger>
+            <TabsTrigger value="instant">Instant Paying</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
