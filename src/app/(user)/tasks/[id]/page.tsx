@@ -132,7 +132,10 @@ export default function TaskDetailPage() {
             <Separator />
 
             <div>
-                <h3 className="text-lg font-semibold mb-3">Special Referral Code:</h3>
+                <h3 className="text-lg font-semibold mb-2">Your Special Referral Code</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                    Using this code helps us track your task completion and ensures you get your reward faster. Make sure to use it when prompted in the app!
+                </p>
                 <div className="flex items-center gap-2 p-3 rounded-lg bg-secondary/50 border border-dashed">
                     <span className="font-mono text-lg text-accent flex-grow tracking-widest">{referralCode}</span>
                     <Button variant="ghost" size="sm" onClick={handleCopyCode}>
