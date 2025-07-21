@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 import { transactions as allTransactions, users } from "@/lib/data";
 import { Transaction } from "@/lib/types";
 import { Button } from "@/components/ui/button";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 const getBadgeVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
     switch (status) {
@@ -34,9 +35,28 @@ const WhatsAppIcon = () => (
       fill="currentColor"
     >
       <title>WhatsApp</title>
-      <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.79.46 3.48 1.32 4.95L2.05 22l5.25-1.38c1.41.79 3.02 1.22 4.74 1.22 5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zM17.62 15.2c-.23.41-.85.76-1.47.91-.62.15-1.23.2-1.8.1-1.12-.2-2.12-.74-2.98-1.5-.96-.85-1.63-1.9-1.93-3.08-.21-.85-.1-1.6.32-2.31.3-.5.7-.75 1.13-.9.42-.15.86-.1 1.28.08.35.15.6.45.75.8.15.35.15.75.1 1.1-.05.35-.15.7-.3.95-.15.25-.3.45-.5.6s-.4.3-.6.35c-.2.05-.4.1-.6.05-.2-.05-.4-.1-.6-.2s-.35-.2-.5-.35c-.15-.15-.3-.3-.4-.5s-.2-.4-.25-.6c-.05-.2-.05-.4.05-.6.1-.2.25-.35.45-.5s.4-.25.65-.3c.25-.05.5-.05.7,0s.4.1.55.25.25.3.35.5.15.35.2.55.05.4,0 .6-.05.4-.15.55c-.1.15-.2.3-.35.4s-.3.2-.45.25c-.15.05-.3.05-.45,0-.15,0-.3-.05-.4-.1s-.2-.15-.3-.2c-.1-.05-.2-.1-.25-.2-.05-.05-.1-.1-.15-.15-.05-.05-.1-.1-.1-.15s-.05-.1-.05-.15c0-.05,0-.1.05-.15s.05-.1.1-.15.1-.05.15-.05.1,0,.15,0c.05,0,.1,0,.15,0s.1,0,.15,0 .1,0,.15,0 .1,0,.15-.05.1-.05.15-.05.1,0,.15,0 .1,0,.15,0 .1,0,.15,0 .1,0,.15,0c.05,0,.1,0,.15,0s.1,0,.1,0 .05,0,.1,0 .05,0,.05,0 .05,0,.05,0 .05,0,.05,0 .05,0,0,0c.05,0,0,0,0,0,.35,0,.65-.15.9-.45.25-.3.45-.7.5-1.15.05-.45,0-.9-.1-1.35s-.3-.85-.5-1.2c-.2-.35-.5-.65-.85-.85s-.75-.3-1.15-.3-1.2.1-1.7.4c-.5.3-1,.7-1.3,1.2-.3.5-.5,1.05-.6,1.65-.1.6-.05,1.2.15,1.75.2.55.5,1.05.9,1.5.4.45.85.8,1.35,1.1.5.3,1.05.5,1.6.6.55.1,1.1.1,1.65,0 .6-.1,1.1-.35,1.5-.75.3-.3.5-.7.6-1.15.05-.3.05-.6,0-.85-.05-.25-.15-.5-.3-.7-.15-.2-.35-.35-.55-.45-.2-.1-.45-.1-.65,0-.2.05-.4.15-.55.3-.15.15-.25.3-.3.5s-.1.4-.05.6.1.4.2.55c.1.15.25.3.4.35s.3.1.5,0c.15-.05.3-.15.4-.25.1-.1.2-.2.25-.35s.1-.3.1-.45,0-.3-.05-.45c-.05-.15-.1-.3-.2-.4s-.15-.2-.25-.25-.2-.1-.3-.1-.2,0-.3.05c-.1.05-.2.1-.25.2s-.1.15-.15.25c-.05.1-.05.15-.05.25s0,.2.05.3.1.15.15.25.15.15.2.2c.05.05.1.1.15.1s.1.05.15.05c.05,0,.1,0,.1,0s.05,0,.1,0 .05,0,.1,0 .05,0,.05,0 .05,0,0,0 .05,0,0,0h0c.05,0,0,0,0,0z"/>
+      <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.79.46 3.48 1.32 4.95L2.05 22l5.25-1.38c1.41.79 3.02 1.22 4.74 1.22 5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zM17.62 15.2c-.23.41-.85.76-1.47.91-.62.15-1.23.2-1.8.1-1.12-.2-2.12-.74-2.98-1.5-.96-.85-1.63-1.9-1.93-3.08-.21-.85-.1-1.6.32-2.31.3-.5.7-.75 1.13-.9.42-.15.86-.1 1.28.08.35.15.6.45.75.8.15.35.15.75.1 1.1-.05.35-.15.7-.3.95-.15.25-.3.45-.5.6s-.4.3-.6.35c-.2.05-.4.1-.6.05-.2-.05-.4-.1-.6-.2s-.35-.2-.5-.35c-.15-.15-.3-.3-.4-.5s-.2-.4-.25-.6c-.05-.2-.05-.4.05-.6.1-.2.25-.35.45-.5s.4-.25.65-.3c.25-.05.5-.05.7,0s.4.1.55.25.25.3.35.5.15.35.2.55.05.4,0 .6-.05.4-.15.55c-.1.15-.2.3-.35.4s-.3.2-.45.25c-.15.05-.3.05-.45,0-.15,0-.3-.05-.4-.1s-.2-.15-.3-.2c-.1-.05-.2-.1-.25-.2-.05-.05-.1-.1-.15-.15-.05-.05-.1-.1-.1-.15s-.05-.1-.05-.15c0-.05,0-.1.05-.15s.05-.1.1-.15.1-.05.15-.05.1,0,.15,0c.05,0,.1,0,.15,0s.1,0,.15,0 .1,0,.15,0 .1,0,.15-.05.1-.05.15-.05.1,0,.15,0 .1,0,.15,0 .1,0,.15,0 .1,0,.15,0c.05,0,.1,0,.15,0s.1,0,.1,0 .05,0,.1,0 .05,0,.05,0 .05,0,.05,0 .05,0,0,0c.05,0,0,0,0,0,.35,0,.65-.15.9-.45.25-.3.45-.7.5-1.15.05-.45,0-.9-.1-1.35s-.3-.85-.5-1.2c-.2-.35-.5-.65-.85-.85s-.75-.3-1.15-.3-1.2.1-1.7.4c-.5.3-1,.7-1.3,1.2-.3.5-.5,1.05-.6,1.65-.1.6-.05,1.2.15,1.75.2.55.5,1.05.9,1.5.4.45.85.8,1.35,1.1.5.3,1.05.5,1.6.6.55.1,1.1.1,1.65,0 .6-.1,1.1-.35,1.5-.75.3-.3.5-.7.6-1.15.05-.3.05-.6,0-.85-.05-.25-.15-.5-.3-.7-.15-.2-.35-.35-.55-.45-.2-.1-.45-.1-.65,0-.2.05-.4.15-.55.3-.15.15-.25.3-.3.5s-.1.4-.05.6.1.4.2.55c.1.15.25.3.4.35s.3.1.5,0c.15-.05.3-.15.4-.25.1-.1.2-.2.25-.35s.1-.3.1-.45,0-.3-.05-.45c-.05-.15-.1-.3-.2-.4s-.15-.2-.25-.25-.2-.1-.3-.1-.2,0-.3.05c-.1.05-.2.1-.25.2s-.1.15-.15.25c-.05.1-.05.15-.05.25s0,.2.05.3.1.15.15.25.15.15.2.2c.05.05.1.1.15.1s.1.05.15.05c.05,0,.1,0,.1,0s.05,0,.1,0 .05,0,.1,0 .05,0,.05,0 .05,0,.05,0 .05,0,0,0c.05,0,0,0,0,0z"/>
     </svg>
   );
+
+const statusFaqs = [
+    {
+        question: "What does 'Under Verification' mean?",
+        answer: "Your task submission has been received and is currently being reviewed by our team to ensure all steps were completed correctly. This process usually takes 24-48 hours."
+    },
+    {
+        question: "What does 'Approved' mean?",
+        answer: "Congratulations! Your task has been successfully verified by our team. The reward amount has been approved and is now scheduled for payout in the next payment cycle."
+    },
+     {
+        question: "What does 'Paid' mean?",
+        answer: "The reward for this task has been successfully sent to the UPI ID registered in your profile. You can check your bank account to confirm the transaction."
+    },
+    {
+        question: "What does 'Rejected' mean?",
+        answer: "Unfortunately, your submission did not meet the required criteria for the task. This could be due to incomplete steps, incorrect information, or other issues. Please contact our support for more details if needed."
+    }
+]
 
 export default function WalletPage() {
   // Rerender component when transactions change
@@ -121,6 +141,27 @@ export default function WalletPage() {
           </Table>
         </Card>
       </div>
+      <Card className="shadow-md rounded-lg w-full">
+            <CardHeader>
+                <CardTitle>Understanding Statuses</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <Accordion type="single" collapsible className="w-full">
+                    {statusFaqs.map((faq, index) => (
+                         <AccordionItem value={`item-${index}`} key={index} className="border-b-0 border-t">
+                            <AccordionTrigger className="text-left hover:no-underline rounded-lg px-4 data-[state=open]:bg-secondary/50">
+                                {faq.question}
+                            </AccordionTrigger>
+                            <AccordionContent className="text-muted-foreground pt-2 px-4 pb-4">
+                                {faq.answer}
+                            </AccordionContent>
+                        </AccordionItem>
+                    ))}
+                </Accordion>
+            </CardContent>
+        </Card>
     </div>
   );
 }
+
+    
