@@ -183,9 +183,11 @@ export default function TaskDetailPage() {
             <CardContent>
                 <Accordion type="single" collapsible className="w-full">
                     {faqs.map((faq, index) => (
-                         <AccordionItem value={`item-${index}`} key={index}>
-                            <AccordionTrigger className="text-left hover:no-underline">{faq.question}</AccordionTrigger>
-                            <AccordionContent className="text-muted-foreground">
+                         <AccordionItem value={`item-${index}`} key={index} className="border-b-0 border-t">
+                            <AccordionTrigger className="text-left hover:no-underline rounded-lg px-4 data-[state=open]:bg-secondary/50">
+                                {faq.question}
+                            </AccordionTrigger>
+                            <AccordionContent className="text-muted-foreground pt-2 px-4 pb-4">
                                 {faq.answer}
                             </AccordionContent>
                         </AccordionItem>
