@@ -38,12 +38,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
     });
 
-    // Check for redirect result
+    // Handle the redirect result from Google sign-in
     getRedirectResult(auth)
+      .then((result) => {
+        if (result) {
+          // User has successfully signed in.
+          setUser(result.user);
+        }
+      })
       .catch((error) => {
+        // Handle Errors here.
         setError(error.message);
       })
       .finally(() => {
+        // Set loading to false once the redirect check is complete.
         setLoading(false);
       });
 
@@ -83,6 +91,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
     try {
       const provider = new GoogleAuthProvider();
+      // Use signInWithRedirect for a more robust web flow
       await signInWithRedirect(auth, provider);
     } catch (error: any) {
        setError(error.message);
@@ -95,6 +104,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
     try {
       await firebaseSignOut(auth);
+      setUser(null); // Explicitly set user to null on sign out
     } catch (error: any) {
       setError(error.message);
     } finally {
