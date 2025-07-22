@@ -15,6 +15,11 @@ export function ThemeToggle() {
     setMounted(true)
   }, [])
 
+  if (!mounted) {
+    // Render a placeholder on the server and during initial client render
+    return <div className="h-10 w-10" />;
+  }
+
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light")
   }
