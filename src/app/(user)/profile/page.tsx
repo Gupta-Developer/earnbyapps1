@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { users } from "@/lib/data";
 
 const GoogleIcon = () => (
     <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2">
@@ -73,8 +74,23 @@ export default function ProfilePage() {
 
   const profileForm = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
-    defaultValues: { fullName: user?.displayName || "", phone: "", upiId: "" },
+    defaultValues: { fullName: "", phone: "", upiId: "" },
   });
+
+  useEffect(() => {
+    if (user) {
+      // In a real app, you would fetch this from a database.
+      // For now, we find the user in our mock data.
+      // We will assume the first user is the logged in user for this demo.
+      const currentUserData = users[0];
+
+      profileForm.reset({
+        fullName: user.displayName || currentUserData.fullName,
+        phone: currentUserData.phone,
+        upiId: currentUserData.upiId,
+      });
+    }
+  }, [user, profileForm]);
 
   const handleSignIn = async (data: z.infer<typeof signInSchema>) => {
     const { email, password } = data;
@@ -90,6 +106,13 @@ export default function ProfilePage() {
   
   const handleProfileSubmit = (data: z.infer<typeof profileSchema>) => {
     console.log("Profile data to save:", data);
+    // Here you would typically save the data to your backend.
+    // For now, we update the mock data in memory.
+    const currentUserData = users[0];
+    currentUserData.fullName = data.fullName;
+    currentUserData.phone = data.phone || "";
+    currentUserData.upiId = data.upiId || "";
+
     toast({ 
         title: "Profile Saved!",
         description: "Your information has been updated.",
