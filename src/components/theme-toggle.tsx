@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -8,9 +9,18 @@ import { Button } from "@/components/ui/button"
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light")
+  }
+  
+  if (!mounted) {
+    return <div className="h-10 w-10" />
   }
 
   return (
