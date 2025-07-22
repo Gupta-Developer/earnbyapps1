@@ -97,12 +97,6 @@ export default function TaskDetailPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <header className="p-4 flex items-center gap-4 sticky top-0 bg-card/80 backdrop-blur-sm z-10 border-b">
-        <Button variant="ghost" size="icon" onClick={() => router.back()}>
-          <ArrowLeft />
-        </Button>
-      </header>
-      
       <main className="flex-grow p-4 space-y-4">
         <Card className="shadow-md rounded-lg w-full">
           <CardContent className="p-6 space-y-6">
