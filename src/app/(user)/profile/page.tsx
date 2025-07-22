@@ -80,14 +80,13 @@ export default function ProfilePage() {
   useEffect(() => {
     if (user) {
       // In a real app, you would fetch this from a database.
-      // For now, we find the user in our mock data.
-      // We will assume the first user is the logged in user for this demo.
-      const currentUserData = users[0];
+      // For now, we find the user in our mock data by their display name.
+      const currentUserData = users.find(u => u.fullName === user.displayName);
 
       profileForm.reset({
-        fullName: user.displayName || currentUserData.fullName,
-        phone: currentUserData.phone,
-        upiId: currentUserData.upiId,
+        fullName: user.displayName || "",
+        phone: currentUserData?.phone || "",
+        upiId: currentUserData?.upiId || "",
       });
     }
   }, [user, profileForm]);
@@ -107,11 +106,13 @@ export default function ProfilePage() {
   const handleProfileSubmit = (data: z.infer<typeof profileSchema>) => {
     console.log("Profile data to save:", data);
     // Here you would typically save the data to your backend.
-    // For now, we update the mock data in memory.
-    const currentUserData = users[0];
-    currentUserData.fullName = data.fullName;
-    currentUserData.phone = data.phone || "";
-    currentUserData.upiId = data.upiId || "";
+    // For now, we find and update the mock data in memory.
+    const currentUserData = users.find(u => u.fullName === user?.displayName);
+    if (currentUserData) {
+        currentUserData.fullName = data.fullName;
+        currentUserData.phone = data.phone || "";
+        currentUserData.upiId = data.upiId || "";
+    }
 
     toast({ 
         title: "Profile Saved!",
