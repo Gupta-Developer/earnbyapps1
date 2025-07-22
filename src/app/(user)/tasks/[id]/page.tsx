@@ -107,21 +107,24 @@ export default function TaskDetailPage() {
       <main className="flex-grow p-4 space-y-4">
         <Card className="shadow-md rounded-lg w-full">
           <CardContent className="p-6 space-y-6">
-            <div className="flex flex-col items-center text-center gap-4">
-               <Image 
-                  src={task.icon} 
-                  alt={`${task.name} icon`} 
-                  width={70} 
-                  height={70} 
-                  className="rounded-xl"
-                  data-ai-hint={task.hint} 
-                />
-                <div>
-                  <h2 className="font-bold text-2xl">{task.name}</h2>
-                  <p className="text-accent font-semibold text-xl mt-1">Earn ₹{task.reward}</p>
-                  <p className="text-muted-foreground mt-2 text-sm">{task.description}</p>
-                </div>
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <Image 
+                    src={task.icon} 
+                    alt={`${task.name} icon`} 
+                    width={70} 
+                    height={70} 
+                    className="rounded-xl"
+                    data-ai-hint={task.hint} 
+                  />
+                  <div>
+                    <h2 className="font-bold text-2xl">{task.name}</h2>
+                    <p className="text-accent font-semibold text-xl mt-1">Earn ₹{task.reward}</p>
+                  </div>
+              </div>
+              <p className="text-muted-foreground text-sm">{task.description}</p>
             </div>
+
 
             <Separator />
             
