@@ -101,7 +101,6 @@ export default function TaskDetailPage() {
         <Button variant="ghost" size="icon" onClick={() => router.back()}>
           <ArrowLeft />
         </Button>
-        <h1 className="text-xl font-bold text-foreground truncate">{task.name}</h1>
       </header>
       
       <main className="flex-grow p-4 space-y-4">
