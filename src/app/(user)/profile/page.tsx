@@ -7,9 +7,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, UserCircle2, KeyRound } from "lucide-react";
+import { Mail, UserCircle2, KeyRound, LogOut } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/hooks/use-auth";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 const GoogleIcon = () => (
     <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2">
@@ -34,39 +39,57 @@ const GoogleIcon = () => (
     </svg>
 );
 
-type ProfileData = {
-  fullName: string;
-  phone: string;
-  upiId: string;
-};
+const signInSchema = z.object({
+  email: z.string().email({ message: "Invalid email address." }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+});
+
+const signUpSchema = z.object({
+  fullName: z.string().min(2, { message: "Name must be at least 2 characters." }),
+  email: z.string().email({ message: "Invalid email address." }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+});
+
+const profileSchema = z.object({
+    fullName: z.string().min(2, { message: "Name must be at least 2 characters." }),
+    phone: z.string().optional(),
+    upiId: z.string().optional(),
+});
+
 
 export default function ProfilePage() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [profile, setProfile] = useState<ProfileData>({
-    fullName: "",
-    phone: "",
-    upiId: "",
-  });
-
+  const { user, loading, error, signUp, signIn, signInWithGoogle, signOut } = useAuth();
   const { toast } = useToast();
 
-  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoggedIn(true);
+  const signInForm = useForm<z.infer<typeof signInSchema>>({
+    resolver: zodResolver(signInSchema),
+    defaultValues: { email: "", password: "" },
+  });
+
+  const signUpForm = useForm<z.infer<typeof signUpSchema>>({
+    resolver: zodResolver(signUpSchema),
+     defaultValues: { fullName: "", email: "", password: "" },
+  });
+
+  const profileForm = useForm<z.infer<typeof profileSchema>>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: { fullName: user?.displayName || "", phone: "", upiId: "" },
+  });
+
+  const handleSignIn = async (data: z.infer<typeof signInSchema>) => {
+    const { email, password } = data;
+    await signIn(email, password);
     toast({ title: "Logged in successfully!" });
   };
 
-  const handleSignUp = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoggedIn(true);
+  const handleSignUp = async (data: z.infer<typeof signUpSchema>) => {
+    const { fullName, email, password } = data;
+    await signUp(email, password, fullName);
     toast({ title: "Account created and logged in!" });
   };
   
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const data = Object.fromEntries(formData.entries()) as { fullName: string, phone: string, upiId: string };
-    setProfile(data);
+  const handleProfileSubmit = (data: z.infer<typeof profileSchema>) => {
+    console.log("Profile data to save:", data);
     toast({ 
         title: "Profile Saved!",
         description: "Your information has been updated.",
@@ -74,9 +97,17 @@ export default function ProfilePage() {
     });
   };
 
+  if (loading) {
+      return (
+          <div className="flex items-center justify-center h-full">
+              <p>Loading...</p>
+          </div>
+      )
+  }
+
   return (
     <div className="p-4 space-y-6">
-      {!isLoggedIn ? (
+      {!user ? (
         <div className="flex flex-col items-center justify-center pt-8 gap-6 text-center">
             <UserCircle2 className="w-20 h-20 text-muted-foreground/50" />
             <div className="space-y-1">
@@ -96,25 +127,50 @@ export default function ProfilePage() {
                             <CardDescription>Enter your credentials to access your account.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <form onSubmit={handleLogin} className="space-y-4">
-                                <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                                    <Input id="email-signin" type="email" placeholder="Email" className="pl-10 h-11" required />
-                                </div>
-                                <div className="relative">
-                                    <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                                    <Input id="password-signin" type="password" placeholder="Password" className="pl-10 h-11" required />
-                                </div>
-                                <Button type="submit" size="lg" className="w-full shadow-md">
-                                    Continue
-                                </Button>
-                            </form>
+                            <Form {...signInForm}>
+                                <form onSubmit={signInForm.handleSubmit(handleSignIn)} className="space-y-4">
+                                    <FormField
+                                        control={signInForm.control}
+                                        name="email"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormControl>
+                                                    <div className="relative">
+                                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                                        <Input type="email" placeholder="Email" className="pl-10 h-11" {...field} />
+                                                    </div>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={signInForm.control}
+                                        name="password"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormControl>
+                                                     <div className="relative">
+                                                        <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                                        <Input type="password" placeholder="Password" className="pl-10 h-11" {...field} />
+                                                    </div>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                   
+                                    <Button type="submit" size="lg" className="w-full shadow-md" disabled={signInForm.formState.isSubmitting}>
+                                        {signInForm.formState.isSubmitting ? "Signing In..." : "Continue"}
+                                    </Button>
+                                </form>
+                            </Form>
                              <div className="flex items-center gap-2">
                                 <Separator className="flex-1" />
                                 <span className="text-xs text-muted-foreground">OR</span>
                                 <Separator className="flex-1" />
                             </div>
-                             <Button onClick={() => setIsLoggedIn(true)} size="lg" className="w-full shadow-md" variant="outline">
+                             <Button onClick={signInWithGoogle} size="lg" className="w-full shadow-md" variant="outline">
                                 <GoogleIcon />
                                 Continue with Google
                             </Button>
@@ -126,75 +182,140 @@ export default function ProfilePage() {
                             <CardDescription>Create an account to start your journey.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                             <form onSubmit={handleSignUp} className="space-y-4">
-                                <div className="relative">
-                                    <UserCircle2 className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                                    <Input id="fullName-signup" placeholder="Full Name" className="pl-10 h-11" required />
-                                </div>
-                                <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                                    <Input id="email-signup" type="email" placeholder="Email" className="pl-10 h-11" required />
-                                </div>
-                                <div className="relative">
-                                    <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                                    <Input id="password-signup" type="password" placeholder="Password" className="pl-10 h-11" required />
-                                </div>
-                                <Button type="submit" size="lg" className="w-full shadow-md">
-                                    Create Account
-                                </Button>
-                            </form>
+                            <Form {...signUpForm}>
+                                <form onSubmit={signUpForm.handleSubmit(handleSignUp)} className="space-y-4">
+                                     <FormField
+                                        control={signUpForm.control}
+                                        name="fullName"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormControl>
+                                                    <div className="relative">
+                                                        <UserCircle2 className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                                        <Input placeholder="Full Name" className="pl-10 h-11" {...field} />
+                                                    </div>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={signUpForm.control}
+                                        name="email"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormControl>
+                                                    <div className="relative">
+                                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                                        <Input type="email" placeholder="Email" className="pl-10 h-11" {...field} />
+                                                    </div>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={signUpForm.control}
+                                        name="password"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormControl>
+                                                     <div className="relative">
+                                                        <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                                        <Input type="password" placeholder="Password" className="pl-10 h-11" {...field} />
+                                                    </div>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <Button type="submit" size="lg" className="w-full shadow-md" disabled={signUpForm.formState.isSubmitting}>
+                                        {signUpForm.formState.isSubmitting ? "Creating Account..." : "Create Account"}
+                                    </Button>
+                                </form>
+                            </Form>
                              <div className="flex items-center gap-2">
                                 <Separator className="flex-1" />
                                 <span className="text-xs text-muted-foreground">OR</span>
                                 <Separator className="flex-1" />
                             </div>
-                             <Button onClick={() => setIsLoggedIn(true)} size="lg" className="w-full shadow-md" variant="outline">
+                             <Button onClick={signInWithGoogle} size="lg" className="w-full shadow-md" variant="outline">
                                 <GoogleIcon />
                                 Continue with Google
                             </Button>
                         </CardContent>
                     </TabsContent>
                 </Tabs>
+                 {error && <p className="text-destructive text-sm mt-4 text-center">{error}</p>}
             </Card>
         </div>
       ) : (
         <div className="space-y-8">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Welcome, {user.displayName || "User"}!</CardTitle>
+                    <CardDescription>{user.email}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                     <Button onClick={signOut} variant="outline">
+                        <LogOut className="mr-2 h-4 w-4"/>
+                        Sign Out
+                    </Button>
+                </CardContent>
+            </Card>
+
           <Card className="shadow-md rounded-lg">
             <CardHeader>
               <CardTitle>Your Information</CardTitle>
               <CardDescription>Update your profile details below.</CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">Full Name</Label>
-                  <Input id="fullName" name="fullName" placeholder="e.g. John Doe" defaultValue={profile.fullName} required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input id="phone" name="phone" type="tel" placeholder="e.g. 9876543210" defaultValue={profile.phone} required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="upiId">UPI ID</Label>
-                  <Input id="upiId" name="upiId" placeholder="e.g. yourname@bank" defaultValue={profile.upiId} required />
-                </div>
-                <Button type="submit" className="w-full shadow-md">Save Changes</Button>
-              </form>
+                <Form {...profileForm}>
+                    <form onSubmit={profileForm.handleSubmit(handleProfileSubmit)} className="space-y-4">
+                         <FormField
+                            control={profileForm.control}
+                            name="fullName"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Full Name</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="e.g. John Doe" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                         <FormField
+                            control={profileForm.control}
+                            name="phone"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Phone Number</FormLabel>
+                                    <FormControl>
+                                        <Input type="tel" placeholder="e.g. 9876543210" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                         <FormField
+                            control={profileForm.control}
+                            name="upiId"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>UPI ID</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="e.g. yourname@bank" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <Button type="submit" className="w-full shadow-md">Save Changes</Button>
+                    </form>
+                </Form>
             </CardContent>
           </Card>
-          
-          {profile.fullName && (
-             <Card className="shadow-md rounded-lg">
-                <CardHeader>
-                    <CardTitle>Saved Data Preview</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3 text-sm">
-                    <div><strong className="text-muted-foreground">Full Name:</strong> {profile.fullName}</div>
-                    <div><strong className="text-muted-foreground">Phone:</strong> {profile.phone}</div>
-                    <div><strong className="text-muted-foreground">UPI ID:</strong> {profile.upiId}</div>
-                </CardContent>
-             </Card>
-          )}
         </div>
       )}
     </div>
