@@ -4,9 +4,9 @@
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, CheckCircle, Copy } from 'lucide-react';
+import { CheckCircle, Copy } from 'lucide-react';
 import { tasks, transactions } from '@/lib/data';
 import { Transaction } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
@@ -172,25 +172,21 @@ export default function TaskDetailPage() {
             </CardContent>
         </Card>
 
-        <Card className="shadow-md rounded-lg w-full">
-            <CardHeader>
-                <CardTitle>Frequently Asked Questions</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <Accordion type="single" collapsible className="w-full">
-                    {faqs.map((faq, index) => (
-                         <AccordionItem value={`item-${index}`} key={index} className="border-b-0 border-t">
-                            <AccordionTrigger className="text-left hover:no-underline rounded-lg px-4 data-[state=open]:bg-secondary/50">
-                                {faq.question}
-                            </AccordionTrigger>
-                            <AccordionContent className="text-muted-foreground pt-2 px-4 pb-4">
-                                {faq.answer}
-                            </AccordionContent>
-                        </AccordionItem>
-                    ))}
-                </Accordion>
-            </CardContent>
-        </Card>
+         <div className="space-y-4">
+            <h2 className="text-xl font-bold px-1">Frequently Asked Questions</h2>
+            <Accordion type="single" collapsible className="w-full space-y-2">
+                {faqs.map((faq, index) => (
+                      <AccordionItem value={`item-${index}`} key={index} className="bg-secondary/50 rounded-lg px-4 border-b-0">
+                        <AccordionTrigger className="text-left hover:no-underline">
+                            {faq.question}
+                        </AccordionTrigger>
+                        <AccordionContent className="text-muted-foreground pt-0 pb-4">
+                            {faq.answer}
+                        </AccordionContent>
+                    </AccordionItem>
+                ))}
+            </Accordion>
+        </div>
       </main>
 
     </div>

@@ -140,25 +140,21 @@ export default function WalletPage() {
           </Table>
         </Card>
       </div>
-      <Card className="shadow-md rounded-lg w-full">
-            <CardHeader>
-                <CardTitle>Understanding Statuses</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <Accordion type="single" collapsible className="w-full">
-                    {statusFaqs.map((faq, index) => (
-                         <AccordionItem value={`item-${index}`} key={index} className="border-b-0 border-t">
-                            <AccordionTrigger className="text-left hover:no-underline rounded-lg px-4 data-[state=open]:bg-secondary/50">
-                                {faq.question}
-                            </AccordionTrigger>
-                            <AccordionContent className="text-muted-foreground pt-2 px-4 pb-4">
-                                {faq.answer}
-                            </AccordionContent>
-                        </AccordionItem>
-                    ))}
-                </Accordion>
-            </CardContent>
-        </Card>
+       <div className="space-y-4">
+            <h2 className="text-xl font-bold px-1">Understanding Statuses</h2>
+            <Accordion type="single" collapsible className="w-full space-y-2">
+                {statusFaqs.map((faq, index) => (
+                    <AccordionItem value={`item-${index}`} key={index} className="bg-secondary/50 rounded-lg px-4 border-b-0">
+                        <AccordionTrigger className="text-left hover:no-underline">
+                            {faq.question}
+                        </AccordionTrigger>
+                        <AccordionContent className="text-muted-foreground pt-0 pb-4">
+                            {faq.answer}
+                        </AccordionContent>
+                    </AccordionItem>
+                ))}
+            </Accordion>
+        </div>
     </div>
   );
 }
