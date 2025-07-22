@@ -16,7 +16,7 @@ const AppLogo = () => (
       <path d="M6 4C4.89543 4 4 4.89543 4 6V26C4 27.1046 4.89543 28 6 28H26C27.1046 28 28 27.1046 28 26V6C28 4.89543 27.1046 4 26 4H6Z" fill="currentColor"/>
       <path d="M11.5366 22.4635L19.5 16.0001L11.5366 9.53674V22.4635Z" fill="#FFFFFF" className="dark:fill-white fill-primary-foreground"/>
     </svg>
-    <span className="text-xl font-bold text-foreground">TaskBucks</span>
+    <span className="text-xl font-bold text-foreground">EarnByApps</span>
   </Link>
 );
 

@@ -11,7 +11,7 @@ const ptSans = PT_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'TaskBucks',
+  title: 'EarnByApps',
   description: 'Earn rewards by completing tasks.',
 };
 
