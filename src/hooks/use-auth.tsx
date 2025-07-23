@@ -16,10 +16,13 @@ import {
 import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
+const ADMIN_EMAIL = "aashish.gupta.mails@gmail.com";
+
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   error: string | null;
+  isAdmin: boolean;
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -32,6 +35,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const handleUserCreation = async (user: User) => {
     const userRef = doc(db, "users", user.uid);
@@ -40,36 +44,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await setDoc(userRef, {
         fullName: user.displayName,
         email: user.email,
-        phone: "",
+        phone: user.phoneNumber || "",
         upiId: "",
-      });
+      }, { merge: true });
     }
   }
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setUser(user);
+      setLoading(true);
       if (user) {
+        setUser(user);
+        setIsAdmin(user.email === ADMIN_EMAIL);
         await handleUserCreation(user);
+      } else {
+        setUser(null);
+        setIsAdmin(false);
       }
       setLoading(false);
     });
-
-    const processRedirectResult = async () => {
-      try {
-        const result = await getRedirectResult(auth);
-        // If a redirect result is found, onAuthStateChanged will handle it.
-        // We just need to make sure loading is turned off if there's no result.
-        if (!result) {
-          setLoading(false);
-        }
-      } catch (error: any) {
+    
+    // This is for handling the redirect result from Google Sign-In
+    getRedirectResult(auth)
+      .then((result) => {
+        // This is the most likely place for onAuthStateChanged to pick up the user
+        // but we handle the loading state here to be sure.
+      })
+      .catch((error) => {
         setError(error.message);
+      })
+      .finally(() => {
         setLoading(false);
-      }
-    };
-
-    processRedirectResult();
+      });
 
     return () => unsubscribe();
   }, []);
@@ -81,7 +87,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       if (userCredential.user) {
         await updateProfile(userCredential.user, { displayName });
-        // onAuthStateChanged will handle setting the user and creating the doc
+        setUser({...userCredential.user, displayName}); // Manually update user state
+        await handleUserCreation({...userCredential.user, displayName});
       }
     } catch (error: any) {
       setError(error.message);
@@ -105,9 +112,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signInWithGoogle = async () => {
     setLoading(true);
     setError(null);
+    const provider = new GoogleAuthProvider();
     try {
-      const provider = new GoogleAuthProvider();
       await signInWithRedirect(auth, provider);
+      // The result is handled by getRedirectResult and onAuthStateChanged
     } catch (error: any) {
        setError(error.message);
        setLoading(false);
@@ -120,6 +128,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await firebaseSignOut(auth);
       setUser(null);
+      setIsAdmin(false);
     } catch (error: any) {
       setError(error.message);
     } finally {
@@ -131,13 +140,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     user,
     loading,
     error,
+    isAdmin,
     signUp,
     signIn,
     signOut,
     signInWithGoogle
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
 };
 
 export const useAuth = (): AuthContextType => {

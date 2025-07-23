@@ -12,15 +12,14 @@ import { Transaction, TaskStatus, User, Task } from "@/lib/types";
 import { collection, getDocs, doc, updateDoc, writeBatch } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Link from "next/link";
-
-// In a real app, this would be based on user authentication and roles.
-const isAdmin = true;
+import { useAuth } from "@/hooks/use-auth";
 
 export default function AdminPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [users, setUsers] = useState<Record<string, User>>({});
   const [tasks, setTasks] = useState<Record<string, Task>>({});
   const { toast } = useToast();
+  const { isAdmin, loading } = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -56,8 +55,10 @@ export default function AdminPage() {
       setTransactions(formattedTransactions);
     };
 
-    fetchData();
-  }, []);
+    if (isAdmin) {
+        fetchData();
+    }
+  }, [isAdmin]);
 
 
   const handleStatusChange = (transactionId: string, newStatus: TaskStatus) => {
@@ -96,6 +97,13 @@ export default function AdminPage() {
   const getUserById = (id: string) => users[id];
   const getTaskById = (id: string) => tasks[id];
 
+  if (loading) {
+    return (
+        <div className="flex items-center justify-center h-full">
+            <p>Loading...</p>
+        </div>
+    )
+  }
 
   if (!isAdmin) {
     return (

@@ -13,14 +13,14 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, ShieldAlert } from "lucide-react";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { useAuth } from "@/hooks/use-auth";
 
-// In a real app, this would be based on user authentication and roles.
-const isAdmin = true;
 
 export default function AddTaskPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isAdmin, loading } = useAuth();
 
   const [task, setTask] = useState({
     name: "",
@@ -75,6 +75,14 @@ export default function AddTaskPage() {
         setIsSubmitting(false);
     }
   };
+
+  if (loading) {
+    return (
+        <div className="flex items-center justify-center h-full">
+            <p>Loading...</p>
+        </div>
+    )
+  }
 
   if (!isAdmin) {
     return (
