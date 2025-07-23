@@ -10,8 +10,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, ShieldAlert } from "lucide-react";
+import { ArrowLeft, ShieldAlert, PlusCircle, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { Faq } from "@/lib/types";
 
 
 export default function AddTaskPage() {
@@ -20,7 +21,7 @@ export default function AddTaskPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { isAdmin, loading } = useAuth();
   const [iconFile, setIconFile] = useState<File | null>(null);
-  const [faqs, setFaqs] = useState("");
+  const [faqs, setFaqs] = useState<Faq[]>([]);
 
 
   const [task, setTask] = useState({
@@ -43,6 +44,21 @@ export default function AddTaskPage() {
       setTask(prev => ({ ...prev, [name]: value }));
     }
   };
+  
+  const handleFaqChange = (index: number, field: 'question' | 'answer', value: string) => {
+    const newFaqs = [...faqs];
+    newFaqs[index][field] = value;
+    setFaqs(newFaqs);
+  };
+  
+  const addFaq = () => {
+    setFaqs([...faqs, { question: '', answer: '' }]);
+  };
+
+  const removeFaq = (index: number) => {
+    setFaqs(faqs.filter((_, i) => i !== index));
+  };
+
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -58,20 +74,7 @@ export default function AddTaskPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    let parsedFaqs = [];
-    try {
-        if (faqs) {
-            parsedFaqs = JSON.parse(faqs);
-        }
-    } catch (error) {
-        toast({
-            title: "Invalid FAQ JSON",
-            description: "Please check the format of your FAQs.",
-            variant: "destructive"
-        });
-        return;
-    }
-
+    
     if (!task.name || task.reward <= 0 || !task.description || !task.steps || !iconFile) {
         toast({
             title: "Missing Fields",
@@ -84,7 +87,7 @@ export default function AddTaskPage() {
     
     // In a real app, this is where you would upload the files and then
     // send the task data (including the returned file URLs) to your API.
-    console.log("Submitting task:", { ...task, faqs: parsedFaqs, icon: iconFile.name });
+    console.log("Submitting task:", { ...task, faqs, icon: iconFile.name });
 
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -159,9 +162,43 @@ export default function AddTaskPage() {
                         <Label htmlFor="youtubeLink">YouTube Video Link</Label>
                         <Input id="youtubeLink" name="youtubeLink" placeholder="e.g. https://www.youtube.com/embed/your_video_id" value={task.youtubeLink} onChange={handleChange} />
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="faqs">FAQs (JSON format)</Label>
-                        <Textarea id="faqs" name="faqs" placeholder='[{"question": "Q1?", "answer": "A1."}, {"question": "Q2?", "answer": "A2."}]' value={faqs} onChange={(e) => setFaqs(e.target.value)} className="min-h-[120px]" />
+                     <div className="space-y-4">
+                        <Label>Frequently Asked Questions</Label>
+                        {faqs.map((faq, index) => (
+                        <div key={index} className="p-4 border rounded-lg space-y-3 relative">
+                            <div className="space-y-1">
+                            <Label htmlFor={`faq-q-${index}`}>Question</Label>
+                            <Input
+                                id={`faq-q-${index}`}
+                                value={faq.question}
+                                onChange={(e) => handleFaqChange(index, "question", e.target.value)}
+                                placeholder="e.g. How long does verification take?"
+                            />
+                            </div>
+                            <div className="space-y-1">
+                            <Label htmlFor={`faq-a-${index}`}>Answer</Label>
+                             <Textarea
+                                id={`faq-a-${index}`}
+                                value={faq.answer}
+                                onChange={(e) => handleFaqChange(index, "answer", e.target.value)}
+                                placeholder="e.g. It usually takes 24-48 hours."
+                            />
+                            </div>
+                            <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeFaq(index)}
+                            className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"
+                            >
+                            <Trash2 className="h-4 w-4" />
+                            </Button>
+                        </div>
+                        ))}
+                         <Button type="button" variant="outline" size="sm" onClick={addFaq} className="w-full">
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Add FAQ
+                        </Button>
                     </div>
                     <div className="flex items-center space-x-2">
                         <Switch id="isHighPaying" checked={task.isHighPaying} onCheckedChange={handleSwitchChange('isHighPaying')} />
