@@ -36,8 +36,8 @@ export default function AddTaskPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
-     if (type === 'number') {
-      setTask(prev => ({ ...prev, [name]: value === '' ? 0 : parseFloat(value) }));
+    if (name === 'reward') {
+      setTask(prev => ({ ...prev, reward: value === '' ? 0 : parseFloat(value) }));
     } else {
       setTask(prev => ({ ...prev, [name]: value }));
     }
