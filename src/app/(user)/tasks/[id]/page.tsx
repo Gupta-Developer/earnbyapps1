@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,7 @@ import { MOCK_TASKS } from '@/lib/mock-data';
 export default function TaskDetailPage() {
   const router = useRouter();
   const params = useParams();
+  const pathname = usePathname();
   const { toast } = useToast();
   const { user } = useAuth();
   const taskId = params.id as string;
@@ -56,14 +57,8 @@ export default function TaskDetailPage() {
   };
 
   const handleStartTask = async () => {
-    if (!user) {
-        // This case is now handled by the button's onClick, but we keep it as a safeguard.
-        router.push('/profile');
-        return;
-    }
-    
     // This is where you would normally interact with a database.
-    console.log(`Starting task ${task.id} for user ${user.id}`);
+    console.log(`Starting task ${task.id} for user ${user!.id}`);
 
     toast({
     title: "Task Started!",
@@ -139,7 +134,7 @@ export default function TaskDetailPage() {
                     </a>
                 </Button>
             ) : (
-                <Button size="lg" className="w-full shadow-lg" onClick={() => router.push('/profile')}>
+                <Button size="lg" className="w-full shadow-lg" onClick={() => router.push(`/profile?redirect_to=${pathname}`)}>
                     Login to Start Task
                 </Button>
             )}

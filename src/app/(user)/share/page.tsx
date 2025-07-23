@@ -15,18 +15,12 @@ export default function SharePage() {
   const { user } = useAuth();
 
   const handleStartTask = async () => {
-    if (!user) {
-        // This case is now handled by the button's onClick, but we keep it as a safeguard.
-        router.push('/profile');
-        return;
-    }
-    
     // This is where you would normally interact with a database.
-    console.log(`Sharing task for user ${user.id}`);
+    console.log(`Sharing task for user ${user!.id}`);
     
     // Construct the referral link
     const baseUrl = window.location.origin;
-    const referralLink = `${baseUrl}/profile?ref=${user.id}`;
+    const referralLink = `${baseUrl}/profile?ref=${user!.id}`;
     const message = `Hey! I'm earning money by completing simple tasks on EarnByApps. Join me and earn rewards! Use my referral link: ${referralLink}`;
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     
@@ -79,7 +73,7 @@ export default function SharePage() {
                     Start Task &amp; Earn ₹5
                 </Button>
             ) : (
-                <Button size="lg" className="w-full shadow-lg" onClick={() => router.push('/profile')}>
+                <Button size="lg" className="w-full shadow-lg" onClick={() => router.push('/profile?redirect_to=/share')}>
                     Login to Start Task
                 </Button>
             )}

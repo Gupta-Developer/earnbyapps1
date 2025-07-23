@@ -15,6 +15,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { MOCK_USERS } from "@/lib/mock-data";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const GoogleIcon = () => (
     <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2">
@@ -52,15 +53,19 @@ const signUpSchema = z.object({
 
 const profileSchema = z.object({
     fullName: z.string().min(2, { message: "Name must be at least 2 characters." }),
-    phone: z.string().optional(),
-    upiId: z.string().optional(),
+    phone: z.string().min(10, { message: "Please enter a valid phone number." }).optional().or(z.literal('')),
+    upiId: z.string().refine(val => !val || /.+@.+/.test(val), { message: "Please enter a valid UPI ID." }).optional().or(z.literal('')),
 });
 
 
 export default function ProfilePage() {
   const { user, loading, error, signUp, signIn, signInWithGoogle, signOut } = useAuth();
   const { toast } = useToast();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [isEditing, setIsEditing] = useState(false);
+  const redirectTo = searchParams.get('redirect_to');
+
 
   const signInForm = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
@@ -77,29 +82,32 @@ export default function ProfilePage() {
     defaultValues: { fullName: "", phone: "", upiId: "" },
   });
   
-  const fetchUserData = async () => {
-      if (user) {
-        // In a real app, you'd fetch this from your backend.
-        // For now, we use mock data.
-        const mockUser = MOCK_USERS[user.id];
-        if (mockUser) {
-           profileForm.reset({
-            fullName: mockUser.fullName || "",
-            phone: mockUser.phone || "",
-            upiId: mockUser.upiId || "",
-          });
-        } else {
-            profileForm.reset({
-            fullName: user.displayName || "",
-            phone: "",
-            upiId: "",
-          });
+  const fetchUserData = (currentUser: any) => {
+      if (currentUser) {
+        const mockUser = MOCK_USERS[currentUser.id];
+        const userDetails = {
+            fullName: mockUser?.fullName || currentUser.displayName || "",
+            phone: mockUser?.phone || "",
+            upiId: mockUser?.upiId || "",
+        }
+        profileForm.reset(userDetails);
+        
+        // If user was redirected here to log in, check if their profile is complete.
+        if (redirectTo && (!userDetails.phone || !userDetails.upiId)) {
+            setIsEditing(true);
+            toast({
+                title: "Complete Your Profile",
+                description: "Please fill in your details to continue.",
+            });
         }
       }
     };
 
   useEffect(() => {
-    fetchUserData();
+    if (user) {
+        fetchUserData(user);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const handleSignIn = async (data: z.infer<typeof signInSchema>) => {
@@ -122,6 +130,9 @@ export default function ProfilePage() {
 
     // This is where you would normally save to a database.
     console.log("Saving profile data:", data);
+    
+    // Update mock data for this session
+    MOCK_USERS[user.id] = { ...MOCK_USERS[user.id], ...data, id: user.id, email: user.email };
 
     toast({ 
         title: "Profile Saved!",
@@ -129,10 +140,14 @@ export default function ProfilePage() {
         className: "bg-accent text-accent-foreground border-accent"
     });
     setIsEditing(false);
+
+    if (redirectTo) {
+        router.push(redirectTo);
+    }
   };
   
   const handleCancelEdit = () => {
-    fetchUserData(); // Refetch data to discard changes
+    if(user) fetchUserData(user); // Refetch data to discard changes
     setIsEditing(false);
   }
 
@@ -385,14 +400,14 @@ export default function ProfilePage() {
                             <Phone className="h-6 w-6 text-muted-foreground" />
                             <div>
                                 <p className="text-sm text-muted-foreground">Phone Number</p>
-                                <p className="font-semibold">{profileForm.getValues().phone ? '••••••••••' : 'Not set'}</p>
+                                <p className="font-semibold">{profileForm.getValues().phone || 'Not set'}</p>
                             </div>
                         </div>
                          <div className="flex items-center gap-4">
                             <Landmark className="h-6 w-6 text-muted-foreground" />
                             <div>
                                 <p className="text-sm text-muted-foreground">UPI ID</p>
-                                <p className="font-semibold">{profileForm.getValues().upiId ? '••••••••••' : 'Not set'}</p>
+                                <p className="font-semibold">{profileForm.getValues().upiId || 'Not set'}</p>
                             </div>
                         </div>
                     </CardContent>
