@@ -277,7 +277,9 @@ export default function AdminPage() {
                         <TableCell>
                            <div className="font-medium">{user.fullName}</div>
                            <div className="text-sm text-muted-foreground">{task.name}</div>
-                           <div className="text-xs text-muted-foreground/80 mt-1">{user.upiId || 'No UPI ID'}</div>
+                           <div className="text-xs text-muted-foreground/80 mt-1">
+                             {user.phone || 'No Phone'} &bull; {user.upiId || 'No UPI ID'}
+                           </div>
                         </TableCell>
                         <TableCell>
                           <Select
