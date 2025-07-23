@@ -9,6 +9,7 @@ import { ChevronRight, Instagram, Youtube, Gift } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Task } from "@/lib/types";
 import { MOCK_TASKS } from "@/lib/mock-data";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 const WhatsAppIcon = () => (
     <svg 
@@ -46,12 +47,22 @@ const socialLinks = [
 type FilterType = "all" | "high-paying" | "instant";
 
 export default function HomePage() {
-  const [filter, setFilter] = useState<FilterType>("all");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  
   const [tasks, setTasks] = useState<Task[]>([]);
+  
+  const filter = searchParams.get('tab') as FilterType || 'all';
 
   useEffect(() => {
     setTasks(MOCK_TASKS);
   }, []);
+  
+  const handleTabChange = (value: string) => {
+    router.replace(`${pathname}?tab=${value}`, { scroll: false });
+  };
+
 
   const filteredTasks = tasks.filter((task) => {
     if (filter === "high-paying") {
@@ -65,15 +76,18 @@ export default function HomePage() {
 
   return (
     <div className="p-4 space-y-4">
-      <div className="flex justify-center pt-4">
-        <Tabs value={filter} onValueChange={(value) => setFilter(value as FilterType)} className="w-auto">
-          <TabsList>
-            <TabsTrigger value="all">All Apps</TabsTrigger>
-            <TabsTrigger value="high-paying">High Paying</TabsTrigger>
-            <TabsTrigger value="instant">Instant Paying</TabsTrigger>
-          </TabsList>
-        </Tabs>
+       <div className="sticky top-16 bg-card z-10 py-4 -mx-4 px-4 border-b">
+         <div className="flex justify-center">
+            <Tabs value={filter} onValueChange={handleTabChange} className="w-auto">
+              <TabsList>
+                <TabsTrigger value="all">All Apps</TabsTrigger>
+                <TabsTrigger value="high-paying">High Paying</TabsTrigger>
+                <TabsTrigger value="instant">Instant Paying</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
       </div>
+
 
       <div className="space-y-3">
         {filteredTasks.map((task) => (
