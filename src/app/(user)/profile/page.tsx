@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, UserCircle2, KeyRound, LogOut } from "lucide-react";
+import { Mail, UserCircle2, KeyRound, LogOut, Pencil, Phone, Landmark } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/use-auth";
@@ -61,6 +61,7 @@ const profileSchema = z.object({
 export default function ProfilePage() {
   const { user, loading, error, signUp, signIn, signInWithGoogle, signOut } = useAuth();
   const { toast } = useToast();
+  const [isEditing, setIsEditing] = useState(false);
 
   const signInForm = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
@@ -76,9 +77,8 @@ export default function ProfilePage() {
     resolver: zodResolver(profileSchema),
     defaultValues: { fullName: "", phone: "", upiId: "" },
   });
-
-  useEffect(() => {
-    const fetchUserData = async () => {
+  
+  const fetchUserData = async () => {
       if (user) {
         const userRef = doc(db, "users", user.uid);
         const userDoc = await getDoc(userRef);
@@ -98,8 +98,10 @@ export default function ProfilePage() {
         }
       }
     };
+
+  useEffect(() => {
     fetchUserData();
-  }, [user, profileForm]);
+  }, [user]);
 
   const handleSignIn = async (data: z.infer<typeof signInSchema>) => {
     const { email, password } = data;
@@ -125,18 +127,24 @@ export default function ProfilePage() {
             fullName: data.fullName,
             phone: data.phone,
             upiId: data.upiId,
-         }, { merge: true }); // merge: true prevents overwriting other fields like email
+         }, { merge: true });
 
         toast({ 
             title: "Profile Saved!",
             description: "Your information has been updated.",
             className: "bg-accent text-accent-foreground border-accent"
         });
+        setIsEditing(false);
     } catch (e) {
         console.error("Error updating profile: ", e);
         toast({ title: "Error", description: "Could not save your profile.", variant: "destructive" });
     }
   };
+  
+  const handleCancelEdit = () => {
+    fetchUserData(); // Refetch data to discard changes
+    setIsEditing(false);
+  }
 
   if (loading) {
       return (
@@ -305,60 +313,102 @@ export default function ProfilePage() {
                 </CardContent>
             </Card>
 
-          <Card className="shadow-md rounded-lg">
-            <CardHeader>
-              <CardTitle>Your Information</CardTitle>
-              <CardDescription>Update your profile details below.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <Form {...profileForm}>
-                    <form onSubmit={profileForm.handleSubmit(handleProfileSubmit)} className="space-y-4">
-                         <FormField
-                            control={profileForm.control}
-                            name="fullName"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Full Name</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="e.g. John Doe" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                         <FormField
-                            control={profileForm.control}
-                            name="phone"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Phone Number</FormLabel>
-                                    <FormControl>
-                                        <Input type="tel" placeholder="e.g. 9876543210" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                         <FormField
-                            control={profileForm.control}
-                            name="upiId"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>UPI ID</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="e.g. yourname@bank" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <Button type="submit" className="w-full shadow-md" disabled={profileForm.formState.isSubmitting}>
-                          {profileForm.formState.isSubmitting ? "Saving..." : "Save Changes"}
+            {isEditing ? (
+                 <Card className="shadow-md rounded-lg">
+                    <CardHeader>
+                    <CardTitle>Edit Your Information</CardTitle>
+                    <CardDescription>Update your profile details below.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Form {...profileForm}>
+                            <form onSubmit={profileForm.handleSubmit(handleProfileSubmit)} className="space-y-4">
+                                <FormField
+                                    control={profileForm.control}
+                                    name="fullName"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Full Name</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="e.g. John Doe" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={profileForm.control}
+                                    name="phone"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Phone Number</FormLabel>
+                                            <FormControl>
+                                                <Input type="tel" placeholder="e.g. 9876543210" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={profileForm.control}
+                                    name="upiId"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>UPI ID</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="e.g. yourname@bank" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <div className="flex gap-2 justify-end pt-4">
+                                    <Button type="button" variant="outline" onClick={handleCancelEdit}>Cancel</Button>
+                                    <Button type="submit" className="shadow-md" disabled={profileForm.formState.isSubmitting}>
+                                    {profileForm.formState.isSubmitting ? "Saving..." : "Save Changes"}
+                                    </Button>
+                                </div>
+                            </form>
+                        </Form>
+                    </CardContent>
+                </Card>
+            ) : (
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <div>
+                            <CardTitle>Your Information</CardTitle>
+                            <CardDescription>View your saved details.</CardDescription>
+                        </div>
+                        <Button variant="ghost" size="icon" onClick={() => setIsEditing(true)}>
+                            <Pencil className="h-5 w-5"/>
+                            <span className="sr-only">Edit Information</span>
                         </Button>
-                    </form>
-                </Form>
-            </CardContent>
-          </Card>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="flex items-center gap-4">
+                            <UserCircle2 className="h-6 w-6 text-muted-foreground" />
+                            <div>
+                                <p className="text-sm text-muted-foreground">Full Name</p>
+                                <p className="font-semibold">{profileForm.getValues().fullName || 'Not set'}</p>
+                            </div>
+                        </div>
+                         <div className="flex items-center gap-4">
+                            <Phone className="h-6 w-6 text-muted-foreground" />
+                            <div>
+                                <p className="text-sm text-muted-foreground">Phone Number</p>
+                                <p className="font-semibold">{profileForm.getValues().phone || 'Not set'}</p>
+                            </div>
+                        </div>
+                         <div className="flex items-center gap-4">
+                            <Landmark className="h-6 w-6 text-muted-foreground" />
+                            <div>
+                                <p className="text-sm text-muted-foreground">UPI ID</p>
+                                <p className="font-semibold">{profileForm.getValues().upiId || 'Not set'}</p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+
         </div>
       )}
     </div>
