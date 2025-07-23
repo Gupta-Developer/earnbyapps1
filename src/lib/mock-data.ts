@@ -153,7 +153,6 @@ export const MOCK_USERS: Record<string, User> = {
         email: 'john.doe@example.com',
         phone: '987-654-3210',
         upiId: 'johndoe@upi',
-        referredBy: 'admin-user-id'
     },
     'google-user-id': {
         id: 'google-user-id',
@@ -161,7 +160,6 @@ export const MOCK_USERS: Record<string, User> = {
         email: 'google.user@example.com',
         phone: '111-222-3333',
         upiId: 'google@upi',
-        referredBy: 'user-123'
     }
 }
 
@@ -238,14 +236,6 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
         status: 'Under Verification',
         date: new Date('2023-10-30T18:00:00Z'),
     },
-    {
-        id: 'txn-9',
-        userId: 'admin-user-id',
-        title: 'Referral Bonus for John Doe',
-        amount: 25,
-        status: 'Approved',
-        date: new Date('2023-10-31T10:00:00Z'),
-    }
 ]
 
     

@@ -150,11 +150,6 @@ export default function AdminPage() {
     });
   }, [searchQuery, transactions, users]);
 
-  const referredUsers = useMemo(() => {
-    return Object.values(users).filter(u => u.referredBy);
-  }, [users]);
-
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -271,55 +266,6 @@ export default function AdminPage() {
         </CardContent>
       </Card>
       
-      <Card className="shadow-lg rounded-lg">
-        <CardHeader>
-          <CardTitle>User Referrals</CardTitle>
-          <CardDescription>
-            Track which users have been referred.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-0">
-           <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Referred User</TableHead>
-                  <TableHead>Referred By</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {referredUsers.length > 0 ? (
-                  referredUsers.map((user) => {
-                    const referrer = user.referredBy ? getUserById(user.referredBy) : null;
-                    if (!referrer) return null;
-
-                    return (
-                      <TableRow key={user.id}>
-                        <TableCell>
-                           <div className="font-medium">{user.fullName}</div>
-                           <div className="text-sm text-muted-foreground">{user.phone || 'No Phone'}</div>
-                        </TableCell>
-                        <TableCell>
-                           <div className="font-medium">{referrer.fullName}</div>
-                           <div className="text-sm text-muted-foreground">{referrer.phone || 'No Phone'}</div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={2} className="h-24 text-center">
-                      No referrals yet.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
-
-
       <Card className="shadow-lg rounded-lg">
         <CardHeader>
           <CardTitle>User Submissions</CardTitle>

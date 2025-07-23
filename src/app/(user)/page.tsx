@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
-import { ChevronRight, Instagram, Youtube, UserPlus } from "lucide-react";
+import { ChevronRight, Instagram, Youtube } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
@@ -130,23 +130,6 @@ export default function HomePage() {
       </div>
 
       <div className="space-y-3">
-         <Link href="/refer" className="block">
-            <Card className="shadow-md rounded-lg overflow-hidden transition-transform hover:scale-[1.02] active:scale-[0.98]">
-              <CardContent className="p-4 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <div className="bg-primary/10 p-3 rounded-lg">
-                        <UserPlus className="h-6 w-6 text-primary" />
-                    </div>
-                  <div>
-                    <h2 className="font-bold text-lg">Refer & Earn</h2>
-                    <p className="text-accent font-semibold">Bonus for you and your friends!</p>
-                  </div>
-                </div>
-                <ChevronRight className="h-6 w-6 text-muted-foreground" />
-              </CardContent>
-            </Card>
-          </Link>
-
         {filteredTasks.map((task) => (
           <Link href={`/tasks/${task.id}`} key={task.id} className="block">
             <Card className="shadow-md rounded-lg overflow-hidden transition-transform hover:scale-[1.02] active:scale-[0.98]">

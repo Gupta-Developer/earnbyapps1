@@ -27,14 +27,12 @@ export type User = {
     email?: string;
     phone?: string;
     upiId?: string;
-    referredBy?: string; // UID of the user who referred them
-    referralCode?: string; // The user's own referral code
 };
 
 export type Transaction = {
   id?: string; // Document ID from Firestore
   userId: string;
-  taskId?: string; // Optional, as a transaction could be for a referral
+  taskId: string;
   title: string; // e.g., "PlayerzPot Task" or "Referral Bonus"
   amount: number;
   status: TaskStatus;

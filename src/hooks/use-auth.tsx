@@ -15,7 +15,7 @@ interface AuthContextType {
   loading: boolean;
   error: string | null;
   isAdmin: boolean;
-  signUp: (email: string, password: string, displayName: string, referralCode?: string) => Promise<void>;
+  signUp: (email: string, password: string, displayName: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
@@ -47,10 +47,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [user]);
 
-  const signUp = async (email: string, password: string, displayName: string, referralCode?: string) => {
+  const signUp = async (email: string, password: string, displayName: string) => {
     setLoading(true);
     setError(null);
-    console.log("Simulating sign up for:", { email, displayName, referralCode });
+    console.log("Simulating sign up for:", { email, displayName });
     // In a real app, you would handle the referral code logic here.
     // For now, we'll just log it.
     const newUser: MockUser = { id: `user-${Date.now()}`, email, displayName };
