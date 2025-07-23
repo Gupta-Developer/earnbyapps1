@@ -6,6 +6,7 @@ export type Task = {
   name: string;
   reward: number;
   icon: string;
+  image?: string; // Optional banner image for the task detail page
   hint: string;
   description: string;
   steps: string; // Storing as a single string, separated by newlines
