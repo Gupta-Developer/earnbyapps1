@@ -48,4 +48,10 @@ export type UserTask = {
   date: Date;
 };
 
+export type UserActivity = {
+    id?: string;
+    userName: string;
+    taskName: string;
+    reward: number;
+}
     
