@@ -47,28 +47,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   useEffect(() => {
+    const processRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result) {
+          // User has successfully signed in via redirect.
+          // This will trigger the onAuthStateChanged listener below.
+          await handleUserCreation(result.user);
+        }
+      } catch (error: any) {
+        setError(error.message);
+      } finally {
+        // This ensures loading is only set to false after checking for a redirect.
+        setLoading(false);
+      }
+    };
+    
+    processRedirectResult();
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
-      setLoading(false);
-    });
-
-    // Handle the redirect result from Google sign-in
-    getRedirectResult(auth)
-      .then((result) => {
-        if (result) {
-          // User has successfully signed in.
-          setUser(result.user);
-          handleUserCreation(result.user);
-        }
-      })
-      .catch((error) => {
-        // Handle Errors here.
-        setError(error.message);
-      })
-      .finally(() => {
-        // Set loading to false once the redirect check is complete.
+      // Don't set loading to false here immediately, 
+      // let the redirect handler do it.
+      if (!loading) {
         setLoading(false);
-      });
+      }
+    });
 
     return () => unsubscribe();
   }, []);
@@ -111,7 +115,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await signInWithRedirect(auth, provider);
     } catch (error: any) {
        setError(error.message);
-       setLoading(false);
+       setLoading(false); // Only set loading to false if there's an immediate error
     }
   }
 
