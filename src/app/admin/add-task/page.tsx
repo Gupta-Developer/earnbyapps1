@@ -35,13 +35,14 @@ export default function AddTaskPage() {
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target;
-    if (type === 'number') {
-        setTask(prev => ({ ...prev, [name]: value === '' ? 0 : parseFloat(value) }));
-    } else {
-        setTask(prev => ({ ...prev, [name]: value }));
-    }
+    const { name, value } = e.target;
+    setTask(prev => ({ ...prev, [name]: value }));
   };
+  
+  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setTask(prev => ({ ...prev, [name]: value === '' ? 0 : parseFloat(value) }));
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -141,7 +142,7 @@ export default function AddTaskPage() {
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="reward">Reward Amount (₹)</Label>
-                            <Input id="reward" name="reward" type="number" placeholder="e.g. 120" value={task.reward} onChange={handleChange} required />
+                            <Input id="reward" name="reward" type="number" placeholder="e.g. 120" value={task.reward} onChange={handleNumberChange} required />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="icon">Task Icon</Label>
