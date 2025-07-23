@@ -3,6 +3,10 @@ import { Toaster } from "@/components/ui/toaster"
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { PT_Sans } from 'next/font/google';
+import { AuthProvider } from '@/hooks/use-auth';
+import Header from '@/components/header';
+import BottomNav from '@/components/bottom-nav';
+import Footer from '@/components/footer';
 
 const ptSans = PT_Sans({
   subsets: ['latin'],
@@ -29,7 +33,16 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <AuthProvider>
+             <div className="flex justify-center bg-background">
+                <div className="w-full max-w-[480px] min-h-screen bg-card shadow-lg relative flex flex-col">
+                  <Header />
+                  <main className="flex-grow pt-16 pb-20">{children}</main>
+                  <Footer />
+                  <BottomNav />
+                </div>
+              </div>
+          </AuthProvider>
           <Toaster />
         </ThemeProvider>
       </body>

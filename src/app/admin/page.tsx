@@ -3,16 +3,33 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { PlusCircle, ShieldAlert } from "lucide-react";
+import { PlusCircle, ShieldAlert, ArrowLeft } from "lucide-react";
 import { Transaction, TaskStatus, User, Task } from "@/lib/types";
 import { collection, getDocs, doc, writeBatch } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
+import { useRouter } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
+
+const getBadgeVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
+    switch (status) {
+        case 'Paid':
+            return 'default';
+        case 'Approved':
+            return 'secondary';
+        case 'Under Verification':
+            return 'outline';
+        case 'Rejected':
+            return 'destructive';
+        default:
+            return 'destructive';
+    }
+}
 
 export default function AdminPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -20,10 +37,10 @@ export default function AdminPage() {
   const [tasks, setTasks] = useState<Record<string, Task>>({});
   const { toast } = useToast();
   const { isAdmin, loading } = useAuth();
+  const router = useRouter();
 
   const fetchData = async () => {
     try {
-        // Fetch all users
         const usersSnapshot = await getDocs(collection(db, "users"));
         const usersData: Record<string, User> = {};
         usersSnapshot.forEach((doc) => {
@@ -31,7 +48,6 @@ export default function AdminPage() {
         });
         setUsers(usersData);
 
-        // Fetch all tasks
         const tasksSnapshot = await getDocs(collection(db, "tasks"));
         const tasksData: Record<string, Task> = {};
         tasksSnapshot.forEach((doc) => {
@@ -39,14 +55,12 @@ export default function AdminPage() {
         });
         setTasks(tasksData);
 
-        // Fetch all transactions
         const transactionsSnapshot = await getDocs(collection(db, "transactions"));
         const transactionsData = transactionsSnapshot.docs.map(doc => {
             const data = doc.data();
             return {
                 id: doc.id,
                 ...data,
-                // Convert Firestore Timestamps to JS Dates
                 date: data.date ? (data.date as any).toDate() : new Date(),
             } as Transaction;
         });
@@ -119,32 +133,79 @@ export default function AdminPage() {
             <ShieldAlert className="w-16 h-16 text-destructive mb-4" />
             <h1 className="text-2xl font-bold text-destructive">Access Denied</h1>
             <p className="text-lg text-muted-foreground mt-2">Only administrators can access this page.</p>
+             <Button onClick={() => router.push('/')} className="mt-4">Go to Home</Button>
         </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-        <div className="container mx-auto p-4 sm:p-8 space-y-6">
-            <header className="flex justify-between items-center">
-                <div>
-                    <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-                    <p className="text-muted-foreground">Manage user tasks and statuses.</p>
-                </div>
-                 <Button asChild>
-                    <Link href="/admin/add-task">
-                        <PlusCircle className="mr-2" />
-                        Add New Task
-                    </Link>
-                </Button>
-            </header>
+    <div className="p-4 space-y-6">
+        <header className="flex justify-between items-center">
+            <div>
+                <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+                <p className="text-muted-foreground text-sm">Manage user tasks and statuses.</p>
+            </div>
+             <Button asChild size="sm">
+                <Link href="/admin/add-task">
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Add Task
+                </Link>
+            </Button>
+        </header>
 
+        {/* Mobile View */}
+        <div className="md:hidden space-y-4">
+             {transactions.length > 0 ? transactions.map((transaction) => {
+                const user = getUserById(transaction.userId);
+                const task = getTaskById(transaction.taskId);
+                if (!user || !task) return null;
+                return (
+                    <Card key={transaction.id} className="shadow-md rounded-lg">
+                        <CardHeader>
+                            <CardTitle>{task.name}</CardTitle>
+                            <CardDescription>User: {user.fullName}</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                             <div>
+                                <p className="text-sm font-medium text-muted-foreground">Contact</p>
+                                <p>{user.phone || "N/A"} / {user.upiId || "N/A"}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">Status</p>
+                                 <Select
+                                    value={transaction.status}
+                                    onValueChange={(value: TaskStatus) => handleStatusChange(transaction.id as string, value)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Under Verification">Under Verification</SelectItem>
+                                        <SelectItem value="Approved">Approved</SelectItem>
+                                        <SelectItem value="Rejected">Rejected</SelectItem>
+                                        <SelectItem value="Paid">Paid</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </CardContent>
+                         <CardFooter>
+                           <Badge variant={getBadgeVariant(transaction.status)}>{transaction.status}</Badge>
+                        </CardFooter>
+                    </Card>
+                )
+             }) : (
+                 <Card>
+                    <CardContent className="h-24 flex items-center justify-center text-muted-foreground">
+                        No transactions to display.
+                    </CardContent>
+                 </Card>
+             )}
+        </div>
+
+        {/* Desktop View */}
+        <div className="hidden md:block">
             <Card className="shadow-lg rounded-lg">
-                <CardHeader>
-                    <CardTitle>User Task Management</CardTitle>
-                    <CardDescription>Review and update the status of each user's task.</CardDescription>
-                </CardHeader>
-                <CardContent>
+                <CardContent className="p-0">
                     <div className="overflow-x-auto">
                         <Table>
                             <TableHeader>
@@ -199,12 +260,11 @@ export default function AdminPage() {
                     </div>
                 </CardContent>
             </Card>
-            
-            <div className="flex justify-end">
-                <Button onClick={handleSaveChanges} size="lg" className="shadow-md" disabled={transactions.length === 0}>Save Changes</Button>
-            </div>
+        </div>
+        
+        <div className="flex justify-end pt-4">
+            <Button onClick={handleSaveChanges} size="lg" className="shadow-md" disabled={transactions.length === 0}>Save All Changes</Button>
         </div>
     </div>
   );
 }
-

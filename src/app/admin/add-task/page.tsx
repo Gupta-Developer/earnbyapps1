@@ -35,9 +35,9 @@ export default function AddTaskPage() {
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
     if (name === 'reward') {
-      setTask(prev => ({ ...prev, reward: value === '' ? 0 : parseFloat(value) }));
+      setTask(prev => ({ ...prev, reward: value === '' ? 0 : parseFloat(value) || 0 }));
     } else {
       setTask(prev => ({ ...prev, [name]: value }));
     }
@@ -122,61 +122,59 @@ export default function AddTaskPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-        <div className="container mx-auto p-4 sm:p-8">
-             <Button variant="outline" size="sm" onClick={() => router.back()} className="mb-4">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Dashboard
-            </Button>
-            <Card className="shadow-lg rounded-lg max-w-2xl mx-auto">
-                <CardHeader>
-                    <CardTitle>Add a New Task</CardTitle>
-                    <CardDescription>Fill in the details for the new task to make it available to users.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="name">Task Name</Label>
-                            <Input id="name" name="name" placeholder="e.g. PlayerzPot" value={task.name} onChange={handleChange} required />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="reward">Reward Amount (₹)</Label>
-                            <Input id="reward" name="reward" type="number" placeholder="e.g. 120" value={task.reward} onChange={handleChange} required />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="icon">Task Icon</Label>
-                            <Input id="icon" name="icon" type="file" accept="image/*" onChange={handleFileChange} required />
-                            {iconFile && <p className="text-sm text-muted-foreground">Selected: {iconFile.name}</p>}
-                        </div>
-                         <div className="space-y-2">
-                            <Label htmlFor="hint">Icon AI Hint</Label>
-                            <Input id="hint" name="hint" placeholder="e.g. cricket player" value={task.hint} onChange={handleChange} />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="description">Description</Label>
-                            <Textarea id="description" name="description" placeholder="A short, engaging description for the user." value={task.description} onChange={handleChange} required />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="steps">Steps to Complete (one per line)</Label>
-                            <Textarea id="steps" name="steps" placeholder="1. Download the app.\n2. Register an account.\n3. Complete one level." value={task.steps} onChange={handleChange} required className="min-h-[120px]" />
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <Switch id="isHighPaying" checked={task.isHighPaying} onCheckedChange={handleSwitchChange('isHighPaying')} />
-                            <Label htmlFor="isHighPaying">High Paying Task?</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <Switch id="isInstant" checked={task.isInstant} onCheckedChange={handleSwitchChange('isInstant')} />
-                            <Label htmlFor="isInstant">Instant Payment?</Label>
-                        </div>
-                        <div className="flex justify-end pt-4">
-                            <Button type="submit" size="lg" className="shadow-md" disabled={isSubmitting}>
-                                {isSubmitting ? 'Adding Task...' : 'Add Task'}
-                            </Button>
-                        </div>
-                    </form>
-                </CardContent>
-            </Card>
-        </div>
+    <div className="p-4">
+         <Button variant="ghost" size="sm" onClick={() => router.back()} className="mb-4">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Dashboard
+        </Button>
+        <Card className="shadow-lg rounded-lg max-w-2xl mx-auto">
+            <CardHeader>
+                <CardTitle>Add a New Task</CardTitle>
+                <CardDescription>Fill in the details for the new task to make it available to users.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="space-y-2">
+                        <Label htmlFor="name">Task Name</Label>
+                        <Input id="name" name="name" placeholder="e.g. PlayerzPot" value={task.name} onChange={handleChange} required />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="reward">Reward Amount (₹)</Label>
+                        <Input id="reward" name="reward" type="number" placeholder="e.g. 120" value={task.reward} onChange={handleChange} required />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="icon">Task Icon</Label>
+                        <Input id="icon" name="icon" type="file" accept="image/*" onChange={handleFileChange} required />
+                        {iconFile && <p className="text-sm text-muted-foreground mt-2">Selected: {iconFile.name}</p>}
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="hint">Icon AI Hint</Label>
+                        <Input id="hint" name="hint" placeholder="e.g. cricket player" value={task.hint} onChange={handleChange} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="description">Description</Label>
+                        <Textarea id="description" name="description" placeholder="A short, engaging description for the user." value={task.description} onChange={handleChange} required />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="steps">Steps to Complete (one per line)</Label>
+                        <Textarea id="steps" name="steps" placeholder="1. Download the app.&#10;2. Register an account.&#10;3. Complete one level." value={task.steps} onChange={handleChange} required className="min-h-[120px]" />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Switch id="isHighPaying" checked={task.isHighPaying} onCheckedChange={handleSwitchChange('isHighPaying')} />
+                        <Label htmlFor="isHighPaying">High Paying Task?</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Switch id="isInstant" checked={task.isInstant} onCheckedChange={handleSwitchChange('isInstant')} />
+                        <Label htmlFor="isInstant">Instant Payment?</Label>
+                    </div>
+                    <div className="flex justify-end pt-4">
+                        <Button type="submit" size="lg" className="shadow-md" disabled={isSubmitting}>
+                            {isSubmitting ? 'Adding Task...' : 'Add Task'}
+                        </Button>
+                    </div>
+                </form>
+            </CardContent>
+        </Card>
     </div>
   );
 }
