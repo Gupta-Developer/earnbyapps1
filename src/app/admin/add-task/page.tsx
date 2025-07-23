@@ -36,8 +36,9 @@ export default function AddTaskPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
+    // This is the critical fix. Ensure reward is handled as a number.
     if (type === 'number') {
-        setTask(prev => ({ ...prev, [name]: parseFloat(value) || 0 }));
+        setTask(prev => ({ ...prev, [name]: value === '' ? 0 : parseFloat(value) }));
     } else {
         setTask(prev => ({ ...prev, [name]: value }));
     }
