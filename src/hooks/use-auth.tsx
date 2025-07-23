@@ -47,32 +47,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setUser(user);
+      if (user) {
+        await handleUserCreation(user);
+      }
+      setLoading(false);
+    });
+
     const processRedirectResult = async () => {
       try {
         const result = await getRedirectResult(auth);
-        if (result) {
-          // User has successfully signed in via redirect.
-          // This will trigger the onAuthStateChanged listener below.
-          await handleUserCreation(result.user);
+        // If a redirect result is found, onAuthStateChanged will handle it.
+        // We just need to make sure loading is turned off if there's no result.
+        if (!result) {
+          setLoading(false);
         }
       } catch (error: any) {
         setError(error.message);
-      } finally {
-        // This ensures loading is only set to false after checking for a redirect.
         setLoading(false);
       }
     };
-    
-    processRedirectResult();
 
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      // Don't set loading to false here immediately, 
-      // let the redirect handler do it.
-      if (!loading) {
-        setLoading(false);
-      }
-    });
+    processRedirectResult();
 
     return () => unsubscribe();
   }, []);
@@ -84,8 +81,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       if (userCredential.user) {
         await updateProfile(userCredential.user, { displayName });
-        setUser(userCredential.user);
-        await handleUserCreation(userCredential.user);
+        // onAuthStateChanged will handle setting the user and creating the doc
       }
     } catch (error: any) {
       setError(error.message);
@@ -111,11 +107,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
     try {
       const provider = new GoogleAuthProvider();
-      // Use signInWithRedirect for a more robust web flow
       await signInWithRedirect(auth, provider);
     } catch (error: any) {
        setError(error.message);
-       setLoading(false); // Only set loading to false if there's an immediate error
+       setLoading(false);
     }
   }
 
@@ -124,7 +119,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
     try {
       await firebaseSignOut(auth);
-      setUser(null); // Explicitly set user to null on sign out
+      setUser(null);
     } catch (error: any) {
       setError(error.message);
     } finally {
