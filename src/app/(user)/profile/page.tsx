@@ -294,7 +294,7 @@ export default function ProfilePage() {
         <div className="space-y-8">
             <Card>
                 <CardHeader>
-                    <CardTitle>Welcome, {user.displayName || "User"}!</CardTitle>
+                    <CardTitle>Welcome, {profileForm.getValues().fullName || user.displayName || "User"}!</CardTitle>
                     <CardDescription>{user.email}</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -364,3 +364,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    
