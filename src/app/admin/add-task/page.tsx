@@ -32,6 +32,7 @@ export default function AddTaskPage() {
     description: "",
     steps: "",
     isInstant: false,
+    isHighPaying: false,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -49,8 +50,8 @@ export default function AddTaskPage() {
     }
   };
 
-  const handleSwitchChange = (checked: boolean) => {
-    setTask(prev => ({ ...prev, isInstant: checked }));
+  const handleSwitchChange = (field: 'isInstant' | 'isHighPaying') => (checked: boolean) => {
+    setTask(prev => ({ ...prev, [field]: checked }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -151,7 +152,11 @@ export default function AddTaskPage() {
                             <Textarea id="steps" name="steps" placeholder="1. Download the app.\n2. Register an account.\n3. Complete one level." value={task.steps} onChange={handleChange} required className="min-h-[120px]" />
                         </div>
                         <div className="flex items-center space-x-2">
-                            <Switch id="isInstant" checked={task.isInstant} onCheckedChange={handleSwitchChange} />
+                            <Switch id="isHighPaying" checked={task.isHighPaying} onCheckedChange={handleSwitchChange('isHighPaying')} />
+                            <Label htmlFor="isHighPaying">High Paying Task?</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <Switch id="isInstant" checked={task.isInstant} onCheckedChange={handleSwitchChange('isInstant')} />
                             <Label htmlFor="isInstant">Instant Payment?</Label>
                         </div>
                         <div className="flex justify-end pt-4">

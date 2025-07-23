@@ -10,6 +10,7 @@ export type Task = {
   description: string;
   steps: string; // Storing as a single string, separated by newlines
   isInstant: boolean;
+  isHighPaying: boolean;
 };
 
 export type User = {

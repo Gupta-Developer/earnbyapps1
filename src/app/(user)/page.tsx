@@ -88,7 +88,7 @@ export default function HomePage() {
 
   const filteredTasks = tasks.filter((task) => {
     if (filter === "high-paying") {
-      return task.reward >= 50;
+      return task.isHighPaying;
     }
     if (filter === "instant") {
         return task.isInstant;
