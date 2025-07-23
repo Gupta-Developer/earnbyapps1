@@ -1,3 +1,4 @@
+
 import { Task, Transaction, User } from "./types";
 
 export const MOCK_TASKS: Task[] = [
@@ -144,5 +145,41 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
         amount: 200,
         status: 'Rejected',
         date: new Date('2023-10-23T09:00:00Z'),
+    },
+    {
+        id: 'txn-5',
+        userId: 'admin-user-id',
+        taskId: 'task-5',
+        app: 'A23 Games',
+        amount: 80,
+        status: 'Under Verification',
+        date: new Date('2023-10-27T12:00:00Z'),
+    },
+    {
+        id: 'txn-6',
+        userId: 'user-123',
+        taskId: 'task-6',
+        app: 'Upstox',
+        amount: 250,
+        status: 'Paid',
+        date: new Date('2023-10-28T14:45:00Z'),
+    },
+    {
+        id: 'txn-7',
+        userId: 'admin-user-id',
+        taskId: 'task-7',
+        app: 'Paytm First Games',
+        amount: 60,
+        status: 'Approved',
+        date: new Date('2023-10-29T16:20:00Z'),
+    },
+    {
+        id: 'txn-8',
+        userId: 'user-123',
+        taskId: 'task-8',
+        app: 'PhonePe',
+        amount: 75,
+        status: 'Under Verification',
+        date: new Date('2023-10-30T18:00:00Z'),
     }
 ]
