@@ -37,44 +37,45 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  // This function handles creating the user document in Firestore.
   const handleUserCreation = async (user: User) => {
     const userRef = doc(db, "users", user.uid);
     const userDoc = await getDoc(userRef);
+    // If the user document doesn't exist, create it.
     if (!userDoc.exists()) {
       await setDoc(userRef, {
-        fullName: user.displayName,
+        fullName: user.displayName || "User", // Fallback for display name
         email: user.email,
         phone: user.phoneNumber || "",
         upiId: "",
-      }, { merge: true });
+      }, { merge: true }); // Use merge to be safe
     }
-  }
+  };
+
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setLoading(true);
       if (user) {
+        // A user is logged in.
         setUser(user);
         setIsAdmin(user.email === ADMIN_EMAIL);
+        // Ensure user document exists in Firestore.
         await handleUserCreation(user);
       } else {
+        // No user is logged in.
         setUser(null);
         setIsAdmin(false);
       }
       setLoading(false);
     });
-    
-    // This is for handling the redirect result from Google Sign-In
+
+    // Handle the redirect result from Google Sign-In
+    // This is useful to catch any errors during the redirect.
     getRedirectResult(auth)
-      .then((result) => {
-        // This is the most likely place for onAuthStateChanged to pick up the user
-        // but we handle the loading state here to be sure.
-      })
       .catch((error) => {
+        console.error("Google sign-in redirect error:", error);
         setError(error.message);
-      })
-      .finally(() => {
-        setLoading(false);
       });
 
     return () => unsubscribe();
@@ -85,11 +86,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      if (userCredential.user) {
-        await updateProfile(userCredential.user, { displayName });
-        setUser({...userCredential.user, displayName}); // Manually update user state
-        await handleUserCreation({...userCredential.user, displayName});
-      }
+      // After creating the user, update their profile with the display name.
+      await updateProfile(userCredential.user, { displayName });
+      // The onAuthStateChanged listener will handle the rest (setting user, creating doc).
     } catch (error: any) {
       setError(error.message);
     } finally {
@@ -102,6 +101,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
     try {
       await signInWithEmailAndPassword(auth, email, password);
+       // onAuthStateChanged handles setting user state.
     } catch (error: any) {
       setError(error.message);
     } finally {
@@ -114,11 +114,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
     const provider = new GoogleAuthProvider();
     try {
+      // Start the redirect process.
       await signInWithRedirect(auth, provider);
-      // The result is handled by getRedirectResult and onAuthStateChanged
+      // After redirect, onAuthStateChanged and getRedirectResult will handle the user.
     } catch (error: any) {
        setError(error.message);
-       setLoading(false);
+       setLoading(false); // Only set loading false if there's an immediate error
     }
   }
 
@@ -127,8 +128,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
     try {
       await firebaseSignOut(auth);
-      setUser(null);
-      setIsAdmin(false);
+      // onAuthStateChanged will handle clearing user state.
     } catch (error: any) {
       setError(error.message);
     } finally {
