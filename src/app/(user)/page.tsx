@@ -1,16 +1,18 @@
 
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { ChevronRight, Instagram, Youtube } from "lucide-react";
-import { tasks } from "@/lib/mock-data";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
+import { collection, getDocs, orderBy, query } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { Task } from "@/lib/types";
 
 const WhatsAppIcon = () => (
     <svg
@@ -69,7 +71,20 @@ type FilterType = "all" | "high-paying" | "instant";
 
 export default function HomePage() {
   const [filter, setFilter] = useState<FilterType>("all");
+  const [tasks, setTasks] = useState<Task[]>([]);
   const plugin = useRef(Autoplay({ delay: 5000, stopOnInteraction: true }));
+
+  useEffect(() => {
+    const fetchTasks = async () => {
+      const tasksCollection = collection(db, "tasks");
+      const q = query(tasksCollection, orderBy("reward", "desc"));
+      const tasksSnapshot = await getDocs(q);
+      const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Task));
+      setTasks(tasksList);
+    };
+
+    fetchTasks();
+  }, []);
 
   const filteredTasks = tasks.filter((task) => {
     if (filter === "high-paying") {

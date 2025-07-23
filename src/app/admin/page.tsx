@@ -7,11 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { ShieldAlert } from "lucide-react";
-import { tasks } from "@/lib/mock-data";
-import { Transaction, TaskStatus, User } from "@/lib/types";
+import { PlusCircle, ShieldAlert } from "lucide-react";
+import { Transaction, TaskStatus, User, Task } from "@/lib/types";
 import { collection, getDocs, doc, updateDoc, writeBatch } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import Link from "next/link";
 
 // In a real app, this would be based on user authentication and roles.
 const isAdmin = true;
@@ -19,6 +19,7 @@ const isAdmin = true;
 export default function AdminPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [users, setUsers] = useState<Record<string, User>>({});
+  const [tasks, setTasks] = useState<Record<string, Task>>({});
   const { toast } = useToast();
 
   useEffect(() => {
@@ -30,6 +31,14 @@ export default function AdminPage() {
         usersData[doc.id] = { id: doc.id, ...doc.data() } as User;
       });
       setUsers(usersData);
+
+      // Fetch all tasks
+      const tasksSnapshot = await getDocs(collection(db, "tasks"));
+      const tasksData: Record<string, Task> = {};
+      tasksSnapshot.forEach((doc) => {
+          tasksData[doc.id] = { id: doc.id, ...doc.data() } as Task;
+      });
+      setTasks(tasksData);
 
       // Fetch all transactions
       const transactionsSnapshot = await getDocs(collection(db, "transactions"));
@@ -85,7 +94,7 @@ export default function AdminPage() {
   };
 
   const getUserById = (id: string) => users[id];
-  const getTaskById = (id: number) => tasks.find(t => t.id === id);
+  const getTaskById = (id: string) => tasks[id];
 
 
   if (!isAdmin) {
@@ -101,9 +110,17 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-gray-50">
         <div className="container mx-auto p-4 sm:p-8 space-y-6">
-            <header>
-                <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-                <p className="text-muted-foreground">Manage user tasks and statuses.</p>
+            <header className="flex justify-between items-center">
+                <div>
+                    <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+                    <p className="text-muted-foreground">Manage user tasks and statuses.</p>
+                </div>
+                 <Button asChild>
+                    <Link href="/admin/add-task">
+                        <PlusCircle className="mr-2" />
+                        Add New Task
+                    </Link>
+                </Button>
             </header>
 
             <Card className="shadow-lg rounded-lg">

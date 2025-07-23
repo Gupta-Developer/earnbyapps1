@@ -2,18 +2,18 @@
 "use client";
 
 import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { CheckCircle, Copy } from 'lucide-react';
-import { tasks } from '@/lib/mock-data';
-import { Transaction } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, serverTimestamp, doc, getDoc } from 'firebase/firestore';
+import { Task } from '@/lib/types';
 
 
 export default function TaskDetailPage() {
@@ -21,21 +21,35 @@ export default function TaskDetailPage() {
   const params = useParams();
   const { toast } = useToast();
   const { user } = useAuth();
-  const taskId = params.id;
+  const taskId = params.id as string;
+  const [task, setTask] = useState<Task | null>(null);
 
-  const task = tasks.find(t => t.id.toString() === taskId);
+  useEffect(() => {
+    if (!taskId) return;
+    const fetchTask = async () => {
+      const taskRef = doc(db, "tasks", taskId);
+      const taskDoc = await getDoc(taskRef);
+      if (taskDoc.exists()) {
+        setTask({ id: taskDoc.id, ...taskDoc.data() } as Task);
+      } else {
+        // Handle task not found
+        console.error("No such document!");
+      }
+    };
+
+    fetchTask();
+  }, [taskId]);
 
   if (!task) {
     return (
         <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-            <h2 className="text-xl font-semibold">Task not found</h2>
-            <p className="text-muted-foreground mt-2">This task may no longer be available.</p>
-            <Button onClick={() => router.push('/')} className="mt-6">Go Home</Button>
+            <h2 className="text-xl font-semibold">Loading Task...</h2>
+            <p className="text-muted-foreground mt-2">Just a moment.</p>
         </div>
     );
   }
 
-  const referralCode = `EBA${task.id}WIN`;
+  const referralCode = `EBA${task.id.substring(0,5).toUpperCase()}WIN`;
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(referralCode);
@@ -111,6 +125,8 @@ export default function TaskDetailPage() {
       }
   ]
 
+  const stepsArray = typeof task.steps === 'string' ? task.steps.split('\n').filter(s => s.trim() !== '') : [];
+
   return (
     <div className="flex flex-col h-full">
       <main className="flex-grow p-4 space-y-4">
@@ -140,7 +156,7 @@ export default function TaskDetailPage() {
             <div>
               <h3 className="text-lg font-semibold mb-4">Steps to Follow:</h3>
               <ul className="space-y-4">
-                  {task.steps.map((step, index) => (
+                  {stepsArray.map((step, index) => (
                       <li key={index} className="flex items-start gap-3">
                           <CheckCircle className="h-5 w-5 text-accent mt-0.5 shrink-0" />
                           <span className="text-foreground text-sm">{step}</span>

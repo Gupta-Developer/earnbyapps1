@@ -2,13 +2,13 @@
 export type TaskStatus = "Under Verification" | "Approved" | "Rejected" | "Paid";
 
 export type Task = {
-  id: number;
+  id: string; // Document ID from Firestore
   name: string;
   reward: number;
   icon: string;
   hint: string;
   description: string;
-  steps: string[];
+  steps: string; // Storing as a single string, separated by newlines
   isInstant: boolean;
 };
 
@@ -23,7 +23,7 @@ export type User = {
 export type Transaction = {
   id?: string; // Document ID from Firestore
   userId: string;
-  taskId: number;
+  taskId: string;
   app: string;
   amount: number;
   status: TaskStatus;
