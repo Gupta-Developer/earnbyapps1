@@ -16,7 +16,7 @@ export default function SharePage() {
 
   const handleStartTask = async () => {
     if (!user) {
-        toast({ title: "Please sign in", description: "You need to be logged in to share.", variant: "destructive" });
+        // This case is now handled by the button's onClick, but we keep it as a safeguard.
         router.push('/profile');
         return;
     }
@@ -74,9 +74,15 @@ export default function SharePage() {
             
             <Separator />
 
-             <Button size="lg" className="w-full shadow-lg" onClick={handleStartTask}>
-                Start Task &amp; Earn ₹5
-            </Button>
+            {user ? (
+                <Button size="lg" className="w-full shadow-lg" onClick={handleStartTask}>
+                    Start Task &amp; Earn ₹5
+                </Button>
+            ) : (
+                <Button size="lg" className="w-full shadow-lg" onClick={() => router.push('/profile')}>
+                    Login to Start Task
+                </Button>
+            )}
           </div>
         </Card>
       </main>

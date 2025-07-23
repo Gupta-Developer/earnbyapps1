@@ -57,7 +57,7 @@ export default function TaskDetailPage() {
 
   const handleStartTask = async () => {
     if (!user) {
-        toast({ title: "Please sign in", description: "You need to be logged in to start a task.", variant: "destructive" });
+        // This case is now handled by the button's onClick, but we keep it as a safeguard.
         router.push('/profile');
         return;
     }
@@ -132,11 +132,17 @@ export default function TaskDetailPage() {
             
             <Separator />
 
-             <Button asChild size="lg" className="w-full shadow-lg" onClick={handleStartTask}>
-                <a href={task.link} target="_blank" rel="noopener noreferrer">
-                    Start Task &amp; Earn ₹{task.reward}
-                </a>
-            </Button>
+            {user ? (
+                <Button asChild size="lg" className="w-full shadow-lg" onClick={handleStartTask}>
+                    <a href={task.link} target="_blank" rel="noopener noreferrer">
+                        Start Task &amp; Earn ₹{task.reward}
+                    </a>
+                </Button>
+            ) : (
+                <Button size="lg" className="w-full shadow-lg" onClick={() => router.push('/profile')}>
+                    Login to Start Task
+                </Button>
+            )}
           </div>
         </Card>
 
