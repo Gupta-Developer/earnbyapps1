@@ -82,7 +82,7 @@ export default function ProfilePage() {
     defaultValues: { fullName: "", phone: "", upiId: "" },
   });
   
-  const fetchUserData = (currentUser: any) => {
+  const fetchUserData = (currentUser: any, currentRedirectTo: string | null) => {
       if (currentUser) {
         const mockUser = MOCK_USERS[currentUser.id];
         const userDetails = {
@@ -92,8 +92,7 @@ export default function ProfilePage() {
         }
         profileForm.reset(userDetails);
         
-        // If user was redirected here to log in, check if their profile is complete.
-        if (redirectTo && (!userDetails.phone || !userDetails.upiId)) {
+        if (currentRedirectTo && (!userDetails.phone || !userDetails.upiId)) {
             setIsEditing(true);
             toast({
                 title: "Complete Your Profile",
@@ -105,10 +104,10 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (user) {
-        fetchUserData(user);
+        fetchUserData(user, redirectTo);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [user, redirectTo]);
 
   const handleSignIn = async (data: z.infer<typeof signInSchema>) => {
     const { email, password } = data;
@@ -128,10 +127,8 @@ export default function ProfilePage() {
         return;
     }
 
-    // This is where you would normally save to a database.
     console.log("Saving profile data:", data);
     
-    // Update mock data for this session
     MOCK_USERS[user.id] = { ...MOCK_USERS[user.id], ...data, id: user.id, email: user.email };
 
     toast({ 
@@ -147,7 +144,7 @@ export default function ProfilePage() {
   };
   
   const handleCancelEdit = () => {
-    if(user) fetchUserData(user); // Refetch data to discard changes
+    if(user) fetchUserData(user, null); // Refetch data to discard changes, pass null for redirectTo
     setIsEditing(false);
   }
 
