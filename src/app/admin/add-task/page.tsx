@@ -30,6 +30,7 @@ export default function AddTaskPage() {
     hint: "",
     description: "",
     steps: "",
+    link: "",
     youtubeLink: "",
     isInstant: false,
     isHighPaying: false,
@@ -75,10 +76,10 @@ export default function AddTaskPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!task.name || task.reward <= 0 || !task.description || !task.steps || !iconFile) {
+    if (!task.name || task.reward <= 0 || !task.description || !task.steps || !iconFile || !task.link) {
         toast({
             title: "Missing Fields",
-            description: "Please fill out all required fields, including the icon.",
+            description: "Please fill out all required fields, including the icon and link.",
             variant: "destructive"
         });
         return;
@@ -140,6 +141,10 @@ export default function AddTaskPage() {
                     <div className="space-y-2">
                         <Label htmlFor="reward">Reward Amount (₹)</Label>
                         <Input id="reward" name="reward" type="number" placeholder="e.g. 120" value={task.reward} onChange={handleChange} required />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="link">Task Link</Label>
+                        <Input id="link" name="link" placeholder="e.g. https://example.com/download" value={task.link} onChange={handleChange} required />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="icon">Task Icon</Label>

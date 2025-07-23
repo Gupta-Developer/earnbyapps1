@@ -70,7 +70,8 @@ export default function TaskDetailPage() {
     description: `"${task.name}" is now under verification in your wallet.`,
     });
     
-    router.push('/wallet');
+    // We don't redirect to the wallet anymore, since the user is sent to an external link.
+    // router.push('/wallet');
   };
 
   const stepsArray = typeof task.steps === 'string' ? task.steps.split('\n').filter(s => s.trim() !== '') : [];
@@ -131,7 +132,11 @@ export default function TaskDetailPage() {
             
             <Separator />
 
-            <Button onClick={handleStartTask} size="lg" className="w-full shadow-lg">Start Task &amp; Earn ₹{task.reward}</Button>
+             <Button asChild size="lg" className="w-full shadow-lg" onClick={handleStartTask}>
+                <a href={task.link} target="_blank" rel="noopener noreferrer">
+                    Start Task &amp; Earn ₹{task.reward}
+                </a>
+            </Button>
           </div>
         </Card>
 

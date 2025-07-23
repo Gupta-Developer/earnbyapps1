@@ -14,6 +14,7 @@ export type Task = {
   hint: string;
   description: string;
   steps: string; // Storing as a single string, separated by newlines
+  link: string;
   isInstant: boolean;
   isHighPaying: boolean;
   youtubeLink?: string;
