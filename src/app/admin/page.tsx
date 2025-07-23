@@ -139,9 +139,14 @@ export default function AdminPage() {
     if (!searchQuery) {
         return transactions;
     }
+    const normalizedSearch = searchQuery.replace(/\D/g, '');
+    if (!normalizedSearch) {
+        return transactions;
+    }
     return transactions.filter(transaction => {
         const user = getUserById(transaction.userId);
-        return user?.phone?.includes(searchQuery);
+        const userPhone = user?.phone?.replace(/\D/g, '');
+        return userPhone?.includes(normalizedSearch);
     });
   }, [searchQuery, transactions, users]);
 
