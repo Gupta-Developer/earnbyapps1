@@ -20,7 +20,6 @@ export default function AddTaskPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { isAdmin, loading } = useAuth();
   const [iconFile, setIconFile] = useState<File | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
   const [faqs, setFaqs] = useState("");
 
 
@@ -49,8 +48,6 @@ export default function AddTaskPage() {
     if (e.target.files && e.target.files[0]) {
       if (e.target.name === 'icon') {
           setIconFile(e.target.files[0]);
-      } else if (e.target.name === 'image') {
-          setImageFile(e.target.files[0]);
       }
     }
   };
@@ -87,7 +84,7 @@ export default function AddTaskPage() {
     
     // In a real app, this is where you would upload the files and then
     // send the task data (including the returned file URLs) to your API.
-    console.log("Submitting task:", { ...task, faqs: parsedFaqs, icon: iconFile.name, image: imageFile?.name });
+    console.log("Submitting task:", { ...task, faqs: parsedFaqs, icon: iconFile.name });
 
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -141,17 +138,10 @@ export default function AddTaskPage() {
                         <Label htmlFor="reward">Reward Amount (₹)</Label>
                         <Input id="reward" name="reward" type="number" placeholder="e.g. 120" value={task.reward} onChange={handleChange} required />
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                          <Label htmlFor="icon">Task Icon</Label>
-                          <Input id="icon" name="icon" type="file" accept="image/*" onChange={handleFileChange} required />
-                          {iconFile && <p className="text-sm text-muted-foreground mt-2">Selected: {iconFile.name}</p>}
-                      </div>
-                       <div className="space-y-2">
-                          <Label htmlFor="image">Banner Image (Optional)</Label>
-                          <Input id="image" name="image" type="file" accept="image/*" onChange={handleFileChange} />
-                          {imageFile && <p className="text-sm text-muted-foreground mt-2">Selected: {imageFile.name}</p>}
-                      </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="icon">Task Icon</Label>
+                        <Input id="icon" name="icon" type="file" accept="image/*" onChange={handleFileChange} required />
+                        {iconFile && <p className="text-sm text-muted-foreground mt-2">Selected: {iconFile.name}</p>}
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="hint">Icon AI Hint</Label>

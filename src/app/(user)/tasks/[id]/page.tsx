@@ -79,17 +79,6 @@ export default function TaskDetailPage() {
     <div className="flex flex-col h-full">
       <main className="flex-grow p-4 space-y-4">
         <Card className="shadow-md rounded-lg w-full overflow-hidden">
-           {task.image && (
-             <div className="aspect-video relative">
-                <Image 
-                    src={task.image} 
-                    alt={`${task.name} banner`} 
-                    layout="fill"
-                    objectFit="cover"
-                    data-ai-hint={`${task.hint} banner`} 
-                />
-             </div>
-           )}
           <div className="p-6 space-y-6">
             <div className="space-y-4">
               <div className="flex items-center gap-4">
