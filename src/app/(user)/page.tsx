@@ -49,17 +49,17 @@ const socialLinks = [
 const carouselItems = [
   {
     id: 1,
-    imageUrl: 'https://placehold.co/600x400.png',
+    imageUrl: 'https://placehold.co/600x300.png',
     hint: 'money gift',
   },
   {
     id: 2,
-    imageUrl: 'https://placehold.co/600x400.png',
+    imageUrl: 'https://placehold.co/600x300.png',
     hint: 'people sharing',
   },
   {
     id: 3,
-    imageUrl: 'https://placehold.co/600x400.png',
+    imageUrl: 'https://placehold.co/600x300.png',
     hint: 'money stack',
   },
 ];
