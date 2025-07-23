@@ -41,19 +41,19 @@ const WhatsAppIcon = () => (
 const statusFaqs = [
     {
         question: "What does 'Under Verification' mean?",
-        answer: "Your task submission has been received and is currently being reviewed by our team to ensure all steps were completed correctly. This process usually takes 24-48 hours."
+        answer: "Your task submission or referral is being reviewed by our team. This process usually takes 24-48 hours."
     },
     {
         question: "What does 'Approved' mean?",
-        answer: "Congratulations! Your task has been successfully verified by our team. The reward amount has been approved and is now scheduled for payout in the next payment cycle."
+        answer: "Congratulations! Your submission has been successfully verified. The reward amount has been approved and is now scheduled for payout in the next payment cycle."
     },
      {
         question: "What does 'Paid' mean?",
-        answer: "The reward for this task has been successfully sent to the UPI ID registered in your profile. You can check your bank account to confirm the transaction."
+        answer: "The reward for this item has been successfully sent to the UPI ID registered in your profile. You can check your bank account to confirm the transaction."
     },
     {
         question: "What does 'Rejected' mean?",
-        answer: "Unfortunately, your submission did not meet the required criteria for the task. This could be due to incomplete steps, incorrect information, or other issues. Please contact our support for more details if needed."
+        answer: "Unfortunately, your submission did not meet the required criteria. Please contact our support for more details if needed."
     }
 ]
 
@@ -90,12 +90,12 @@ export default function WalletPage() {
       </Card>
       
       <div>
-        <h2 className="text-lg font-semibold mb-2 px-1">Task History</h2>
+        <h2 className="text-lg font-semibold mb-2 px-1">Earnings History</h2>
         <Card className="shadow-md rounded-lg">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Task Details</TableHead>
+                <TableHead>Details</TableHead>
                 <TableHead className="text-center">Status</TableHead>
                 <TableHead>Support</TableHead>
               </TableRow>
@@ -104,7 +104,7 @@ export default function WalletPage() {
               {transactions.length > 0 ? transactions.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell>
-                    <div className="font-medium">{item.app}</div>
+                    <div className="font-medium">{item.title}</div>
                     <div className="text-sm text-accent">₹{item.amount}</div>
                     <div className="text-xs text-muted-foreground">{format(item.date, 'dd MMM, yyyy')}</div>
                   </TableCell>
@@ -119,7 +119,7 @@ export default function WalletPage() {
                         className="p-0 h-auto text-xs text-muted-foreground gap-1"
                         asChild
                       >
-                        <a href={`https://wa.me/918319250462?text=Hi, I have a question about my task: ${item.app}`} target="_blank" rel="noopener noreferrer">
+                        <a href={`https://wa.me/918319250462?text=Hi, I have a question about my transaction: ${item.title}`} target="_blank" rel="noopener noreferrer">
                           <WhatsAppIcon />
                           Contact
                         </a>
@@ -155,3 +155,5 @@ export default function WalletPage() {
     </div>
   );
 }
+
+    

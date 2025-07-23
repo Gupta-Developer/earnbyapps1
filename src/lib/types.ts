@@ -34,8 +34,8 @@ export type User = {
 export type Transaction = {
   id?: string; // Document ID from Firestore
   userId: string;
-  taskId: string;
-  app: string;
+  taskId?: string; // Optional, as a transaction could be for a referral
+  title: string; // e.g., "PlayerzPot Task" or "Referral Bonus"
   amount: number;
   status: TaskStatus;
   date: Date;
@@ -49,3 +49,5 @@ export type UserTask = {
   status: TaskStatus;
   date: Date;
 };
+
+    

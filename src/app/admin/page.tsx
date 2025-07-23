@@ -324,7 +324,7 @@ export default function AdminPage() {
         <CardHeader>
           <CardTitle>User Submissions</CardTitle>
           <CardDescription>
-            Review and update the status of user-submitted tasks. You can search by phone number.
+            Review and update the status of user-submitted tasks and referrals. You can search by phone number.
           </CardDescription>
           <div className="pt-2">
              <Input 
@@ -340,7 +340,7 @@ export default function AdminPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>User & Task</TableHead>
+                  <TableHead>User & Task/Referral</TableHead>
                   <TableHead className="w-[180px]">Status</TableHead>
                 </TableRow>
               </TableHeader>
@@ -348,14 +348,13 @@ export default function AdminPage() {
                 {filteredTransactions.length > 0 ? (
                   filteredTransactions.map((transaction) => {
                     const user = getUserById(transaction.userId);
-                    const task = getTaskById(transaction.taskId);
-                    if (!user || !task) return null;
+                    if (!user) return null;
 
                     return (
                       <TableRow key={transaction.id}>
                         <TableCell>
                            <div className="font-medium">{user.fullName}</div>
-                           <div className="text-sm text-muted-foreground">{task.name}</div>
+                           <div className="text-sm text-muted-foreground">{transaction.title}</div>
                            <div className="text-xs text-muted-foreground/80 mt-1">
                              {user.phone || 'No Phone'} &bull; {user.upiId || 'No UPI ID'}
                            </div>
@@ -415,3 +414,5 @@ export default function AdminPage() {
     </div>
   );
 }
+
+    
