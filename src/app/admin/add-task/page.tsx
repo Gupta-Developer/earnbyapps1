@@ -72,8 +72,16 @@ export default function AddTaskPage() {
             iconUrl = await getDownloadURL(snapshot.ref);
         }
 
-        const taskData = { ...task, icon: iconUrl };
-        await addDoc(collection(db, "tasks"), taskData);
+        await addDoc(collection(db, "tasks"), {
+          name: task.name,
+          reward: task.reward,
+          hint: task.hint,
+          description: task.description,
+          steps: task.steps,
+          isInstant: task.isInstant,
+          isHighPaying: task.isHighPaying,
+          icon: iconUrl,
+        });
 
         toast({
             title: "Task Added!",
