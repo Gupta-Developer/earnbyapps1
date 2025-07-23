@@ -10,9 +10,8 @@ import { ChevronRight, Instagram, Youtube } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
-import { collection, getDocs, orderBy, query } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import { Task } from "@/lib/types";
+import { MOCK_TASKS } from "@/lib/mock-data";
 
 const WhatsAppIcon = () => (
     <svg
@@ -75,15 +74,9 @@ export default function HomePage() {
   const plugin = useRef(Autoplay({ delay: 5000, stopOnInteraction: true }));
 
   useEffect(() => {
-    const fetchTasks = async () => {
-      const tasksCollection = collection(db, "tasks");
-      const q = query(tasksCollection, orderBy("reward", "desc"));
-      const tasksSnapshot = await getDocs(q);
-      const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Task));
-      setTasks(tasksList);
-    };
-
-    fetchTasks();
+    // In a real app, you'd fetch this from an API.
+    // For now, we use mock data.
+    setTasks(MOCK_TASKS);
   }, []);
 
   const filteredTasks = tasks.filter((task) => {

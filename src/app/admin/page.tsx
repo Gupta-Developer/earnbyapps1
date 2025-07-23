@@ -7,10 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { PlusCircle, ShieldAlert, ArrowLeft } from "lucide-react";
+import { PlusCircle, ShieldAlert } from "lucide-react";
 import { Transaction, TaskStatus, User, Task } from "@/lib/types";
-import { collection, getDocs, doc, writeBatch } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { MOCK_TRANSACTIONS, MOCK_USERS, MOCK_TASKS } from "@/lib/mock-data";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
@@ -40,40 +39,18 @@ export default function AdminPage() {
   const router = useRouter();
 
   const fetchData = async () => {
-    try {
-        const usersSnapshot = await getDocs(collection(db, "users"));
-        const usersData: Record<string, User> = {};
-        usersSnapshot.forEach((doc) => {
-            usersData[doc.id] = { id: doc.id, ...doc.data() } as User;
-        });
-        setUsers(usersData);
+    // In a real app, you'd fetch this from an API.
+    // For now, we use mock data.
+    setUsers(MOCK_USERS);
+    
+    // Convert array to Record for easy lookup
+    const tasksRecord = MOCK_TASKS.reduce((acc, task) => {
+        acc[task.id] = task;
+        return acc;
+    }, {} as Record<string, Task>);
+    setTasks(tasksRecord);
 
-        const tasksSnapshot = await getDocs(collection(db, "tasks"));
-        const tasksData: Record<string, Task> = {};
-        tasksSnapshot.forEach((doc) => {
-            tasksData[doc.id] = { id: doc.id, ...doc.data() } as Task;
-        });
-        setTasks(tasksData);
-
-        const transactionsSnapshot = await getDocs(collection(db, "transactions"));
-        const transactionsData = transactionsSnapshot.docs.map(doc => {
-            const data = doc.data();
-            return {
-                id: doc.id,
-                ...data,
-                date: data.date ? (data.date as any).toDate() : new Date(),
-            } as Transaction;
-        });
-        
-        setTransactions(transactionsData);
-    } catch (error) {
-        console.error("Error fetching data:", error);
-        toast({
-            title: "Error Fetching Data",
-            description: "Could not load required data from Firestore.",
-            variant: "destructive"
-        });
-    }
+    setTransactions(MOCK_TRANSACTIONS);
   };
 
   useEffect(() => {
@@ -90,30 +67,14 @@ export default function AdminPage() {
   };
 
   const handleSaveChanges = async () => {
-    const batch = writeBatch(db);
-    transactions.forEach(transaction => {
-      const { id, ...data } = transaction;
-      if (id) {
-          const transactionRef = doc(db, "transactions", id);
-          batch.update(transactionRef, { status: data.status });
-      }
-    });
+    // This is where you would normally send the updated statuses to your API.
+    console.log("Saving changes for transactions:", transactions);
 
-    try {
-        await batch.commit();
-        toast({
-            title: "Changes Saved",
-            description: "All task statuses have been updated.",
-            className: "bg-accent text-accent-foreground border-accent"
-        });
-    } catch (e) {
-        console.error("Error saving changes: ", e);
-        toast({
-            title: "Error",
-            description: "Could not save changes.",
-            variant: "destructive"
-        })
-    }
+    toast({
+        title: "Changes Saved (Simulated)",
+        description: "All task statuses have been updated.",
+        className: "bg-accent text-accent-foreground border-accent"
+    });
   };
 
   const getUserById = (id: string) => users[id];

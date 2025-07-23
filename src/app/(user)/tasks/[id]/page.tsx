@@ -11,9 +11,8 @@ import { CheckCircle, Copy } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useAuth } from '@/hooks/use-auth';
-import { db } from '@/lib/firebase';
-import { collection, addDoc, query, where, getDocs, serverTimestamp, doc, getDoc } from 'firebase/firestore';
 import { Task } from '@/lib/types';
+import { MOCK_TASKS } from '@/lib/mock-data';
 
 
 export default function TaskDetailPage() {
@@ -26,18 +25,15 @@ export default function TaskDetailPage() {
 
   useEffect(() => {
     if (!taskId) return;
-    const fetchTask = async () => {
-      const taskRef = doc(db, "tasks", taskId);
-      const taskDoc = await getDoc(taskRef);
-      if (taskDoc.exists()) {
-        setTask({ id: taskDoc.id, ...taskDoc.data() } as Task);
-      } else {
+    // In a real app, you'd fetch this from an API.
+    // For now, we find it in our mock data.
+    const foundTask = MOCK_TASKS.find(t => t.id === taskId);
+    if (foundTask) {
+        setTask(foundTask);
+    } else {
         // Handle task not found
-        console.error("No such document!");
-      }
-    };
-
-    fetchTask();
+        console.error("No such task!");
+    }
   }, [taskId]);
 
   if (!task) {
@@ -66,40 +62,15 @@ export default function TaskDetailPage() {
         return;
     }
     
-    const transactionsRef = collection(db, "transactions");
-    const q = query(transactionsRef, where("userId", "==", user.uid), where("taskId", "==", task.id));
-    const querySnapshot = await getDocs(q);
+    // This is where you would normally interact with a database.
+    console.log(`Starting task ${task.id} for user ${user.id}`);
 
-    if (!querySnapshot.empty) {
-       toast({
-        title: "Task Already Started",
-        description: `You have already started the "${task.name}" task.`,
-        variant: "destructive"
-      });
-      return;
-    }
-
-    try {
-        await addDoc(transactionsRef, {
-            userId: user.uid,
-            taskId: task.id,
-            app: task.name,
-            amount: task.reward,
-            status: 'Under Verification',
-            date: serverTimestamp(),
-        });
-
-        toast({
-        title: "Task Started!",
-        description: `"${task.name}" is now under verification in your wallet.`,
-        });
-        
-        router.push('/wallet');
-
-    } catch (e) {
-        console.error("Error starting task: ", e);
-         toast({ title: "Error", description: "Could not start the task.", variant: "destructive" });
-    }
+    toast({
+    title: "Task Started!",
+    description: `"${task.name}" is now under verification in your wallet.`,
+    });
+    
+    router.push('/wallet');
   };
 
   const faqs = [

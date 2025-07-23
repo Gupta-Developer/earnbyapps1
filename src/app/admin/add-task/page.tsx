@@ -11,10 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, ShieldAlert } from "lucide-react";
-import { collection, addDoc } from "firebase/firestore";
-import { db, storage } from "@/lib/firebase";
 import { useAuth } from "@/hooks/use-auth";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 
 export default function AddTaskPage() {
@@ -35,9 +32,10 @@ export default function AddTaskPage() {
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    if (name === 'reward') {
-      setTask(prev => ({ ...prev, reward: value === '' ? 0 : parseFloat(value) || 0 }));
+    const { name, value, type } = e.target;
+
+    if (type === 'number') {
+      setTask(prev => ({ ...prev, [name]: value === '' ? 0 : parseFloat(value) }));
     } else {
       setTask(prev => ({ ...prev, [name]: value }));
     }
@@ -64,43 +62,22 @@ export default function AddTaskPage() {
         return;
     }
     setIsSubmitting(true);
-    try {
-        let iconUrl = "";
-        if (iconFile) {
-            const storageRef = ref(storage, `task-icons/${Date.now()}_${iconFile.name}`);
-            const snapshot = await uploadBytes(storageRef, iconFile);
-            iconUrl = await getDownloadURL(snapshot.ref);
-        }
+    
+    // In a real app, this is where you would upload the file and then
+    // send the task data (including the returned file URL) to your API.
+    console.log("Submitting task:", { ...task, icon: iconFile.name });
 
-        const taskData = {
-          name: task.name,
-          reward: Number(task.reward),
-          hint: task.hint,
-          description: task.description,
-          steps: task.steps,
-          isInstant: task.isInstant,
-          isHighPaying: task.isHighPaying,
-          icon: iconUrl,
-        };
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
-        await addDoc(collection(db, "tasks"), taskData);
+    toast({
+        title: "Task Added (Simulated)!",
+        description: `${task.name} has been added successfully.`,
+        className: "bg-accent text-accent-foreground border-accent"
+    });
+    router.push("/admin");
 
-        toast({
-            title: "Task Added!",
-            description: `${task.name} has been added successfully.`,
-            className: "bg-accent text-accent-foreground border-accent"
-        });
-        router.push("/admin");
-    } catch (error) {
-        console.error("Error adding task: ", error);
-        toast({
-            title: "Error",
-            description: "Could not add the task. Check console for details.",
-            variant: "destructive"
-        });
-    } finally {
-        setIsSubmitting(false);
-    }
+    setIsSubmitting(false);
   };
 
   if (loading) {

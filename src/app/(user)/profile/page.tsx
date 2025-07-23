@@ -14,8 +14,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { MOCK_USERS } from "@/lib/mock-data";
 
 const GoogleIcon = () => (
     <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2">
@@ -80,17 +79,17 @@ export default function ProfilePage() {
   
   const fetchUserData = async () => {
       if (user) {
-        const userRef = doc(db, "users", user.uid);
-        const userDoc = await getDoc(userRef);
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          profileForm.reset({
-            fullName: userData.fullName || user.displayName || "",
-            phone: userData.phone || "",
-            upiId: userData.upiId || "",
+        // In a real app, you'd fetch this from your backend.
+        // For now, we use mock data.
+        const mockUser = MOCK_USERS[user.id];
+        if (mockUser) {
+           profileForm.reset({
+            fullName: mockUser.fullName || "",
+            phone: mockUser.phone || "",
+            upiId: mockUser.upiId || "",
           });
         } else {
-           profileForm.reset({
+            profileForm.reset({
             fullName: user.displayName || "",
             phone: "",
             upiId: "",
@@ -121,24 +120,15 @@ export default function ProfilePage() {
         return;
     }
 
-    try {
-        const userRef = doc(db, "users", user.uid);
-        await setDoc(userRef, { 
-            fullName: data.fullName,
-            phone: data.phone,
-            upiId: data.upiId,
-         }, { merge: true });
+    // This is where you would normally save to a database.
+    console.log("Saving profile data:", data);
 
-        toast({ 
-            title: "Profile Saved!",
-            description: "Your information has been updated.",
-            className: "bg-accent text-accent-foreground border-accent"
-        });
-        setIsEditing(false);
-    } catch (e) {
-        console.error("Error updating profile: ", e);
-        toast({ title: "Error", description: "Could not save your profile.", variant: "destructive" });
-    }
+    toast({ 
+        title: "Profile Saved!",
+        description: "Your information has been updated.",
+        className: "bg-accent text-accent-foreground border-accent"
+    });
+    setIsEditing(false);
   };
   
   const handleCancelEdit = () => {
@@ -414,5 +404,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-    

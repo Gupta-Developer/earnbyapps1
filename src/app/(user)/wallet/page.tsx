@@ -10,8 +10,7 @@ import { Transaction } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useAuth } from "@/hooks/use-auth";
-import { db } from "@/lib/firebase";
-import { collection, query, where, onSnapshot, orderBy } from "firebase/firestore";
+import { MOCK_TRANSACTIONS } from "@/lib/mock-data";
 
 const getBadgeVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
     switch (status) {
@@ -68,24 +67,12 @@ export default function WalletPage() {
         setTransactions([]);
         return;
     };
+    
+    // In a real app, you'd fetch this from an API for the current user.
+    // For now, we use mock data.
+    const userTransactions = MOCK_TRANSACTIONS.filter(t => t.userId === user.id);
+    setTransactions(userTransactions);
 
-    const transactionsRef = collection(db, "transactions");
-    const q = query(
-        transactionsRef, 
-        where("userId", "==", user.uid),
-        orderBy("date", "desc")
-    );
-
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        const userTransactions = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            date: doc.data().date.toDate(), // Convert Firestore Timestamp to JS Date
-        } as Transaction));
-        setTransactions(userTransactions);
-    });
-
-    return () => unsubscribe();
   }, [user]);
 
   const totalEarnings = transactions

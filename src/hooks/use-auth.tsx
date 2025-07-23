@@ -2,24 +2,16 @@
 "use client";
 
 import { useState, useEffect, createContext, useContext, type ReactNode } from 'react';
-import { 
-  onAuthStateChanged, 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  signOut as firebaseSignOut, 
-  updateProfile,
-  GoogleAuthProvider,
-  signInWithRedirect,
-  getRedirectResult,
-  type User 
-} from 'firebase/auth';
-import { auth, db } from '@/lib/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
 
-const ADMIN_EMAIL = "aashish.gupta.mails@gmail.com";
+// Mock User type, similar to Firebase's but simplified
+export interface MockUser {
+  id: string;
+  email: string | null;
+  displayName: string | null;
+}
 
 interface AuthContextType {
-  user: User | null;
+  user: MockUser | null;
   loading: boolean;
   error: string | null;
   isAdmin: boolean;
@@ -31,109 +23,68 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// A mock admin user for frontend development
+const MOCK_ADMIN_USER: MockUser = {
+  id: 'admin-user-id',
+  email: 'aashish.gupta.mails@gmail.com',
+  displayName: 'Admin User',
+};
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Default to being logged in as the admin user for easier development
+  const [user, setUser] = useState<MockUser | null>(MOCK_ADMIN_USER);
+  const [loading, setLoading] = useState(false); // No real auth, so no loading state needed initially
   const [error, setError] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  // This function handles creating the user document in Firestore.
-  const handleUserCreation = async (user: User) => {
-    const userRef = doc(db, "users", user.uid);
-    const userDoc = await getDoc(userRef);
-    // If the user document doesn't exist, create it.
-    if (!userDoc.exists()) {
-      await setDoc(userRef, {
-        fullName: user.displayName || "User", // Fallback for display name
-        email: user.email,
-        phone: user.phoneNumber || "",
-        upiId: "",
-      }, { merge: true }); // Use merge to be safe
-    }
-  };
-
+  const [isAdmin, setIsAdmin] = useState(true); // Default to admin for development
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setLoading(true);
-      if (user) {
-        // A user is logged in.
-        setUser(user);
-        setIsAdmin(user.email === ADMIN_EMAIL);
-        // Ensure user document exists in Firestore.
-        await handleUserCreation(user);
-      } else {
-        // No user is logged in.
-        setUser(null);
-        setIsAdmin(false);
-      }
-      setLoading(false);
-    });
-
-    // Handle the redirect result from Google Sign-In
-    // This is useful to catch any errors during the redirect.
-    getRedirectResult(auth)
-      .catch((error) => {
-        console.error("Google sign-in redirect error:", error);
-        setError(error.message);
-      });
-
-    return () => unsubscribe();
-  }, []);
+    // In a real app, onAuthStateChanged would go here.
+    // For now, we'll just manage the state locally.
+    if (user) {
+      setIsAdmin(user.email === MOCK_ADMIN_USER.email);
+    } else {
+      setIsAdmin(false);
+    }
+  }, [user]);
 
   const signUp = async (email: string, password: string, displayName: string) => {
     setLoading(true);
     setError(null);
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      // After creating the user, update their profile with the display name.
-      await updateProfile(userCredential.user, { displayName });
-      // The onAuthStateChanged listener will handle the rest (setting user, creating doc).
-    } catch (error: any) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
+    console.log("Simulating sign up for:", { email, displayName });
+    // Simulate a successful sign up
+    const newUser: MockUser = { id: `user-${Date.now()}`, email, displayName };
+    setUser(newUser);
+    setLoading(false);
   };
 
   const signIn = async (email: string, password: string) => {
     setLoading(true);
     setError(null);
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-       // onAuthStateChanged handles setting user state.
-    } catch (error: any) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
+    console.log("Simulating sign in for:", email);
+    // Simulate signing in the admin user for convenience
+    if (email === MOCK_ADMIN_USER.email) {
+        setUser(MOCK_ADMIN_USER);
+    } else {
+        setUser({ id: `user-${Date.now()}`, email, displayName: "Mock User" });
     }
+    setLoading(false);
   };
   
   const signInWithGoogle = async () => {
     setLoading(true);
     setError(null);
-    const provider = new GoogleAuthProvider();
-    try {
-      // Start the redirect process.
-      await signInWithRedirect(auth, provider);
-      // After redirect, onAuthStateChanged and getRedirectResult will handle the user.
-    } catch (error: any) {
-       setError(error.message);
-       setLoading(false); // Only set loading false if there's an immediate error
-    }
+    console.log("Simulating sign in with Google...");
+    // Simulate a successful Google sign-in
+    setUser({ id: 'google-user-id', email: 'google.user@example.com', displayName: 'Google User' });
+    setLoading(false);
   }
 
   const signOut = async () => {
     setLoading(true);
     setError(null);
-    try {
-      await firebaseSignOut(auth);
-      // onAuthStateChanged will handle clearing user state.
-    } catch (error: any) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
+    console.log("Simulating sign out...");
+    setUser(null);
+    setLoading(false);
   };
 
   const value = {
@@ -147,7 +98,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     signInWithGoogle
   };
 
-  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = (): AuthContextType => {
