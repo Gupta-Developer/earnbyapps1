@@ -6,12 +6,14 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
-import { ChevronRight, Instagram, Youtube } from "lucide-react";
+import { ChevronRight, Instagram, Youtube, Copy, UserPlus } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { Task } from "@/lib/types";
-import { MOCK_TASKS } from "@/lib/mock-data";
+import { MOCK_TASKS, MOCK_USERS } from "@/lib/mock-data";
+import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
 
 const WhatsAppIcon = () => (
     <svg 
@@ -71,12 +73,29 @@ export default function HomePage() {
   const [filter, setFilter] = useState<FilterType>("all");
   const [tasks, setTasks] = useState<Task[]>([]);
   const plugin = useRef(Autoplay({ delay: 5000, stopOnInteraction: true }));
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [userPhoneNumber, setUserPhoneNumber] = useState<string | null>(null);
 
   useEffect(() => {
-    // In a real app, you'd fetch this from an API.
-    // For now, we use mock data.
     setTasks(MOCK_TASKS);
-  }, []);
+    if (user) {
+        // In a real app, you would fetch more detailed user data
+        const currentUserData = MOCK_USERS[user.id];
+        setUserPhoneNumber(currentUserData?.phone || null);
+    }
+  }, [user]);
+
+  const handleCopyCode = () => {
+    if (userPhoneNumber) {
+        navigator.clipboard.writeText(userPhoneNumber);
+        toast({
+          title: "Copied!",
+          description: "Your referral code has been copied.",
+        });
+    }
+  };
+
 
   const filteredTasks = tasks.filter((task) => {
     if (filter === "high-paying") {
@@ -121,6 +140,40 @@ export default function HomePage() {
         </CarouselContent>
       </Carousel>
       
+       <Card className="shadow-md rounded-lg bg-secondary/50">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <UserPlus />
+            Refer & Earn
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {user && userPhoneNumber ? (
+            <>
+              <p className="text-muted-foreground text-sm mb-3">
+                Share your referral code with friends. When they sign up, you both get a bonus!
+              </p>
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-background border border-dashed">
+                <span className="font-mono text-lg text-accent flex-grow tracking-widest">{userPhoneNumber}</span>
+                <Button variant="ghost" size="sm" onClick={handleCopyCode}>
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy
+                </Button>
+              </div>
+            </>
+          ) : (
+            <div className="text-center text-muted-foreground">
+              <p className="mb-4">Log in to get your referral code and start earning!</p>
+              <Button asChild>
+                <Link href="/profile">
+                  Login or Sign Up
+                </Link>
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <div className="flex justify-center">
         <Tabs value={filter} onValueChange={(value) => setFilter(value as FilterType)} className="w-auto">
           <TabsList>

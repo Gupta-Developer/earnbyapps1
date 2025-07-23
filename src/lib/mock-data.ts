@@ -152,7 +152,16 @@ export const MOCK_USERS: Record<string, User> = {
         fullName: 'John Doe',
         email: 'john.doe@example.com',
         phone: '987-654-3210',
-        upiId: 'johndoe@upi'
+        upiId: 'johndoe@upi',
+        referredBy: 'admin-user-id'
+    },
+    'google-user-id': {
+        id: 'google-user-id',
+        fullName: 'Google User',
+        email: 'google.user@example.com',
+        phone: '111-222-3333',
+        upiId: 'google@upi',
+        referredBy: 'user-123'
     }
 }
 

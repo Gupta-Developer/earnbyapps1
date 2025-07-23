@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, UserCircle2, KeyRound, LogOut, Pencil, Phone, Landmark } from "lucide-react";
+import { Mail, UserCircle2, KeyRound, LogOut, Pencil, Phone, Landmark, UserPlus } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/use-auth";
@@ -48,6 +48,7 @@ const signUpSchema = z.object({
   fullName: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Invalid email address." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+  referralCode: z.string().optional(),
 });
 
 const profileSchema = z.object({
@@ -69,7 +70,7 @@ export default function ProfilePage() {
 
   const signUpForm = useForm<z.infer<typeof signUpSchema>>({
     resolver: zodResolver(signUpSchema),
-     defaultValues: { fullName: "", email: "", password: "" },
+     defaultValues: { fullName: "", email: "", password: "", referralCode: "" },
   });
 
   const profileForm = useForm<z.infer<typeof profileSchema>>({
@@ -109,8 +110,8 @@ export default function ProfilePage() {
   };
 
   const handleSignUp = async (data: z.infer<typeof signUpSchema>) => {
-    const { fullName, email, password } = data;
-    await signUp(email, password, fullName);
+    const { fullName, email, password, referralCode } = data;
+    await signUp(email, password, fullName, referralCode);
     toast({ title: "Account created and logged in!" });
   };
   
@@ -268,6 +269,21 @@ export default function ProfilePage() {
                                             </FormItem>
                                         )}
                                     />
+                                    <FormField
+                                        control={signUpForm.control}
+                                        name="referralCode"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormControl>
+                                                     <div className="relative">
+                                                        <UserPlus className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                                        <Input placeholder="Referral Code (Optional)" className="pl-10 h-11" {...field} />
+                                                    </div>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
                                     <Button type="submit" size="lg" className="w-full shadow-md" disabled={signUpForm.formState.isSubmitting}>
                                         {signUpForm.formState.isSubmitting ? "Creating Account..." : "Create Account"}
                                     </Button>
@@ -385,14 +401,14 @@ export default function ProfilePage() {
                             <Phone className="h-6 w-6 text-muted-foreground" />
                             <div>
                                 <p className="text-sm text-muted-foreground">Phone Number</p>
-                                <p className="font-semibold">{profileForm.getValues().phone || 'Not set'}</p>
+                                <p className="font-semibold">{profileForm.getValues().phone ? '••••••••••' : 'Not set'}</p>
                             </div>
                         </div>
                          <div className="flex items-center gap-4">
                             <Landmark className="h-6 w-6 text-muted-foreground" />
                             <div>
                                 <p className="text-sm text-muted-foreground">UPI ID</p>
-                                <p className="font-semibold">{profileForm.getValues().upiId || 'Not set'}</p>
+                                <p className="font-semibold">{profileForm.getValues().upiId ? '••••••••••' : 'Not set'}</p>
                             </div>
                         </div>
                     </CardContent>

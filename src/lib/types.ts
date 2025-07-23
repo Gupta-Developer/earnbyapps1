@@ -27,6 +27,7 @@ export type User = {
     email?: string;
     phone?: string;
     upiId?: string;
+    referredBy?: string; // UID of the user who referred them
 };
 
 export type Transaction = {
