@@ -3,7 +3,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Mail, MessageSquare } from "lucide-react";
+import { ArrowLeft, Mail } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function ContactPage() {
@@ -38,13 +38,18 @@ export default function ContactPage() {
                  <a href="https://wa.me/918319250462" target="_blank" rel="noopener noreferrer" className="block">
                     <div className="flex items-center gap-4 p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors">
                         <svg
-                            role="img"
-                            viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-6 w-6 text-primary"
-                            fill="currentColor"
+                          viewBox="0 0 24 24"
+                          className="h-6 w-6 text-[#25D366]"
+                          fill="currentColor"
+                          xmlns="http://www.w3.org/2000/svg"
                         >
-                           <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.79.46 3.48 1.32 4.95L2 22l5.25-1.38c1.41.79 3.02 1.21 4.79 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-5.46-4.45-9.91-9.92-9.91zM17.43 15.25c-.24-.12-1.42-.7-1.64-.78-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06s-1.03-.38-1.95-1.2-1.48-1.58-1.72-1.84c-.24-.26-.01-.39.11-.5.11-.1.24-.26.36-.4.12-.14.16-.24.24-.4s.04-.3-.02-.42c-.06-.12-.54-1.29-.74-1.77s-.4-.41-.54-.41-.28-.01-.42-.01h-.12c-.14,0-.38.06-.58.3s-.78.76-.78 1.84.8 2.13.92 2.29.78 2.43 2.82 3.53c.46.26.83.41 1.12.52.5.18.95.16 1.3.1.39-.06 1.42-.58 1.62-1.14.2-.56.2-.94.14-1.14s-.22-.3-.46-.42z"></path>
+                          <path
+                            d="M19.05 4.94A10.02 10.02 0 0 0 12 2C6.48 2 2 6.48 2 12c0 1.77.46 3.44 1.32 4.95L2 22l5.05-1.32A9.95 9.95 0 0 0 12 22c5.52 0 10-4.48 10-10 0-2.76-1.12-5.26-2.95-7.06zM12 20.5c-1.63 0-3.17-.5-4.45-1.36l-.32-.19-3.3 1.05 1.07-3.23-.22-.34A8.5 8.5 0 0 1 3.5 12c0-4.69 3.81-8.5 8.5-8.5s8.5 3.81 8.5 8.5-3.81 8.5-8.5 8.5z"
+                          />
+                          <path
+                            d="M16.47 14.35c-.22-.11-1.3-.64-1.5-.72-.2-.07-.35-.11-.5.11-.15.22-.57.72-.7.86-.13.15-.25.17-.45.06-.2-.12-.85-.31-1.61-1-.6-.54-1-1.2-1.12-1.4-.12-.2-.02-.3.09-.4.1-.09.22-.25.33-.37.11-.12.15-.22.22-.37.07-.15.04-.27-.02-.37-.06-.1-.5-1.2-1.3-1.64s-1.45-.48-1.93-.48-1.64.48-1.64 1.45.62 3.4 1.87 4.54 2.87 2.15 4.93 2.15 2.18-.91 2.5-1.83.17-1.7-.05-1.93z"
+                            fill="currentColor"
+                          />
                         </svg>
                         <div>
                             <p className="font-semibold">WhatsApp Support</p>
