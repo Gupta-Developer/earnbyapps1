@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
-import { ChevronRight, Instagram, Youtube } from "lucide-react";
+import { ChevronRight, Instagram, Youtube, Gift } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
@@ -153,6 +153,22 @@ export default function HomePage() {
             </Card>
           </Link>
         ))}
+         <Link href="/share" className="block">
+            <Card className="shadow-md rounded-lg overflow-hidden transition-transform hover:scale-[1.02] active:scale-[0.98]">
+              <CardContent className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                    <div className="w-[50px] h-[50px] rounded-lg bg-primary/10 flex items-center justify-center">
+                        <Gift className="w-7 h-7 text-primary" />
+                    </div>
+                  <div>
+                    <h2 className="font-bold text-lg">EarnByApps</h2>
+                    <p className="text-accent font-semibold">Earn ₹5</p>
+                  </div>
+                </div>
+                <ChevronRight className="h-6 w-6 text-muted-foreground" />
+              </CardContent>
+            </Card>
+          </Link>
       </div>
       
       <Card className="shadow-md rounded-lg">
