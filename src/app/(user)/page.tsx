@@ -49,17 +49,17 @@ const socialLinks = [
 const carouselItems = [
   {
     id: 1,
-    imageUrl: 'https://placehold.co/600x300.png',
+    imageUrl: 'https://placehold.co/600x200.png',
     hint: 'money gift',
   },
   {
     id: 2,
-    imageUrl: 'https://placehold.co/600x300.png',
+    imageUrl: 'https://placehold.co/600x200.png',
     hint: 'people sharing',
   },
   {
     id: 3,
-    imageUrl: 'https://placehold.co/600x300.png',
+    imageUrl: 'https://placehold.co/600x200.png',
     hint: 'money stack',
   },
 ];
@@ -70,7 +70,7 @@ type FilterType = "all" | "high-paying" | "instant";
 export default function HomePage() {
   const [filter, setFilter] = useState<FilterType>("all");
   const [tasks, setTasks] = useState<Task[]>([]);
-  const plugin = useRef(Autoplay({ delay: 5000, stopOnInteraction: true }));
+  const plugin = useRef(Autoplay({ delay: 2000, stopOnInteraction: true }));
 
   useEffect(() => {
     setTasks(MOCK_TASKS);
@@ -108,8 +108,8 @@ export default function HomePage() {
                     src={item.imageUrl}
                     alt="Promotional offer"
                     width={600}
-                    height={300}
-                    className="w-full h-auto aspect-[2/1] object-cover"
+                    height={200}
+                    className="w-full h-auto aspect-[3/1] object-cover"
                     data-ai-hint={item.hint}
                   />
                 </CardContent>
