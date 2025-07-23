@@ -28,6 +28,7 @@ export type User = {
     phone?: string;
     upiId?: string;
     referredBy?: string; // UID of the user who referred them
+    referralCode?: string; // The user's own referral code
 };
 
 export type Transaction = {
