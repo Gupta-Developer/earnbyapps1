@@ -256,141 +256,68 @@ export default function AdminPage() {
             Review and update the status of user-submitted tasks.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          {/* Mobile View */}
-          <div className="md:hidden space-y-4">
-            {transactions.length > 0 ? (
-              transactions.map((transaction) => {
-                const user = getUserById(transaction.userId);
-                const task = getTaskById(transaction.taskId);
-                if (!user || !task) return null;
-                return (
-                  <Card key={transaction.id} className="shadow-md rounded-lg">
-                    <CardHeader>
-                      <CardTitle>{task.name}</CardTitle>
-                      <CardDescription>User: {user.fullName}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">
-                          Contact
-                        </p>
-                        <p>{user.phone || "N/A"} / {user.upiId || "N/A"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">
-                          Status
-                        </p>
-                        <Select
-                          value={transaction.status}
-                          onValueChange={(value: TaskStatus) =>
-                            handleStatusChange(transaction.id as string, value)
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Under Verification">
-                              Under Verification
-                            </SelectItem>
-                            <SelectItem value="Approved">Approved</SelectItem>
-                            <SelectItem value="Rejected">Rejected</SelectItem>
-                            <SelectItem value="Paid">Paid</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </CardContent>
-                    <CardFooter>
-                      <Badge variant={getBadgeVariant(transaction.status)}>
-                        {transaction.status}
-                      </Badge>
-                    </CardFooter>
-                  </Card>
-                );
-              })
-            ) : (
-              <Card>
-                <CardContent className="h-24 flex items-center justify-center text-muted-foreground">
-                  No submissions to display.
-                </CardContent>
-              </Card>
-            )}
-          </div>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>User & Task</TableHead>
+                  <TableHead className="w-[180px]">Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {transactions.length > 0 ? (
+                  transactions.map((transaction) => {
+                    const user = getUserById(transaction.userId);
+                    const task = getTaskById(transaction.taskId);
+                    if (!user || !task) return null;
 
-          {/* Desktop View */}
-          <div className="hidden md:block">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
+                    return (
+                      <TableRow key={transaction.id}>
+                        <TableCell>
+                           <div className="font-medium">{user.fullName}</div>
+                           <div className="text-sm text-muted-foreground">{task.name}</div>
+                           <div className="text-xs text-muted-foreground/80 mt-1">{user.upiId || 'No UPI ID'}</div>
+                        </TableCell>
+                        <TableCell>
+                          <Select
+                            value={transaction.status}
+                            onValueChange={(value: TaskStatus) =>
+                              handleStatusChange(
+                                transaction.id as string,
+                                value
+                              )
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Set status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Under Verification">
+                                Under Verification
+                              </SelectItem>
+                              <SelectItem value="Approved">
+                                Approved
+                              </SelectItem>
+                              <SelectItem value="Rejected">
+                                Rejected
+                              </SelectItem>
+                              <SelectItem value="Paid">Paid</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                ) : (
                   <TableRow>
-                    <TableHead>User</TableHead>
-                    <TableHead>Contact</TableHead>
-                    <TableHead>Task</TableHead>
-                    <TableHead className="w-[200px]">Status</TableHead>
+                    <TableCell colSpan={2} className="h-24 text-center">
+                      No submissions to display.
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {transactions.length > 0 ? (
-                    transactions.map((transaction) => {
-                      const user = getUserById(transaction.userId);
-                      const task = getTaskById(transaction.taskId);
-                      if (!user || !task) return null;
-
-                      return (
-                        <TableRow key={transaction.id}>
-                          <TableCell className="font-medium">
-                            {user.fullName}
-                          </TableCell>
-                          <TableCell>
-                            <div className="text-sm">
-                              {user.phone || "N/A"}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              {user.upiId || "N/A"}
-                            </div>
-                          </TableCell>
-                          <TableCell>{task.name}</TableCell>
-                          <TableCell>
-                            <Select
-                              value={transaction.status}
-                              onValueChange={(value: TaskStatus) =>
-                                handleStatusChange(
-                                  transaction.id as string,
-                                  value
-                                )
-                              }
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Set status" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="Under Verification">
-                                  Under Verification
-                                </SelectItem>
-                                <SelectItem value="Approved">
-                                  Approved
-                                </SelectItem>
-                                <SelectItem value="Rejected">
-                                  Rejected
-                                </SelectItem>
-                                <SelectItem value="Paid">Paid</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={4} className="h-24 text-center">
-                        No transactions to display.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                )}
+              </TableBody>
+            </Table>
           </div>
         </CardContent>
         <CardFooter className="flex justify-end pt-4">
