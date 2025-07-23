@@ -65,11 +65,7 @@ export default function HomePage() {
 
   return (
     <div className="p-4 space-y-4">
-      <header className="py-2">
-        <p className="text-center text-muted-foreground">Complete tasks and earn rewards!</p>
-      </header>
-
-      <div className="flex justify-center">
+      <div className="flex justify-center pt-4">
         <Tabs value={filter} onValueChange={(value) => setFilter(value as FilterType)} className="w-auto">
           <TabsList>
             <TabsTrigger value="all">All Apps</TabsTrigger>
