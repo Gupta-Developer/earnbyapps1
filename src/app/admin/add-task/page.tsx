@@ -27,7 +27,6 @@ export default function AddTaskPage() {
   const [task, setTask] = useState({
     name: "",
     reward: 0,
-    icon: "",
     hint: "",
     description: "",
     steps: "",

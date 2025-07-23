@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useToast } from "@/hooks/use-toast";
 import { PlusCircle, ShieldAlert } from "lucide-react";
 import { Transaction, TaskStatus, User, Task } from "@/lib/types";
-import { collection, getDocs, doc, updateDoc, writeBatch } from "firebase/firestore";
+import { collection, getDocs, doc, writeBatch } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
@@ -21,40 +21,48 @@ export default function AdminPage() {
   const { toast } = useToast();
   const { isAdmin, loading } = useAuth();
 
+  const fetchData = async () => {
+    try {
+        // Fetch all users
+        const usersSnapshot = await getDocs(collection(db, "users"));
+        const usersData: Record<string, User> = {};
+        usersSnapshot.forEach((doc) => {
+            usersData[doc.id] = { id: doc.id, ...doc.data() } as User;
+        });
+        setUsers(usersData);
+
+        // Fetch all tasks
+        const tasksSnapshot = await getDocs(collection(db, "tasks"));
+        const tasksData: Record<string, Task> = {};
+        tasksSnapshot.forEach((doc) => {
+            tasksData[doc.id] = { id: doc.id, ...doc.data() } as Task;
+        });
+        setTasks(tasksData);
+
+        // Fetch all transactions
+        const transactionsSnapshot = await getDocs(collection(db, "transactions"));
+        const transactionsData = transactionsSnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                // Convert Firestore Timestamps to JS Dates
+                date: data.date ? (data.date as any).toDate() : new Date(),
+            } as Transaction;
+        });
+        
+        setTransactions(transactionsData);
+    } catch (error) {
+        console.error("Error fetching data:", error);
+        toast({
+            title: "Error Fetching Data",
+            description: "Could not load required data from Firestore.",
+            variant: "destructive"
+        });
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      // Fetch all users
-      const usersSnapshot = await getDocs(collection(db, "users"));
-      const usersData: Record<string, User> = {};
-      usersSnapshot.forEach((doc) => {
-        usersData[doc.id] = { id: doc.id, ...doc.data() } as User;
-      });
-      setUsers(usersData);
-
-      // Fetch all tasks
-      const tasksSnapshot = await getDocs(collection(db, "tasks"));
-      const tasksData: Record<string, Task> = {};
-      tasksSnapshot.forEach((doc) => {
-          tasksData[doc.id] = { id: doc.id, ...doc.data() } as Task;
-      });
-      setTasks(tasksData);
-
-      // Fetch all transactions
-      const transactionsSnapshot = await getDocs(collection(db, "transactions"));
-      const transactionsData = transactionsSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-      } as Transaction));
-      
-      // Convert Firestore Timestamps to JS Dates
-      const formattedTransactions = transactionsData.map(t => ({
-          ...t,
-          date: t.date ? (t.date as any).toDate() : new Date(),
-      }));
-
-      setTransactions(formattedTransactions);
-    };
-
     if (isAdmin) {
         fetchData();
     }
@@ -99,7 +107,7 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-        <div className="flex items-center justify-center h-full">
+        <div className="flex items-center justify-center h-screen">
             <p>Loading...</p>
         </div>
     )
@@ -148,7 +156,7 @@ export default function AdminPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {transactions.map((transaction) => {
+                                {transactions.length > 0 ? transactions.map((transaction) => {
                                     const user = getUserById(transaction.userId);
                                     const task = getTaskById(transaction.taskId);
                                     if (!user || !task) return null;
@@ -157,8 +165,8 @@ export default function AdminPage() {
                                         <TableRow key={transaction.id}>
                                             <TableCell className="font-medium">{user.fullName}</TableCell>
                                             <TableCell>
-                                                <div className="text-sm">{user.phone}</div>
-                                                <div className="text-xs text-muted-foreground">{user.upiId}</div>
+                                                <div className="text-sm">{user.phone || "N/A"}</div>
+                                                <div className="text-xs text-muted-foreground">{user.upiId || "N/A"}</div>
                                             </TableCell>
                                             <TableCell>{task.name}</TableCell>
                                             <TableCell>
@@ -179,7 +187,13 @@ export default function AdminPage() {
                                             </TableCell>
                                         </TableRow>
                                     )
-                                })}
+                                }) : (
+                                    <TableRow>
+                                        <TableCell colSpan={4} className="h-24 text-center">
+                                            No transactions to display.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
                             </TableBody>
                         </Table>
                     </div>
@@ -187,9 +201,10 @@ export default function AdminPage() {
             </Card>
             
             <div className="flex justify-end">
-                <Button onClick={handleSaveChanges} size="lg" className="shadow-md">Save Changes</Button>
+                <Button onClick={handleSaveChanges} size="lg" className="shadow-md" disabled={transactions.length === 0}>Save Changes</Button>
             </div>
         </div>
     </div>
   );
 }
+
