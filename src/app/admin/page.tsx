@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { PlusCircle, ShieldAlert } from "lucide-react";
+import { PlusCircle, ShieldAlert, Pencil } from "lucide-react";
 import { Transaction, TaskStatus, User, Task } from "@/lib/types";
 import { MOCK_TRANSACTIONS, MOCK_USERS, MOCK_TASKS } from "@/lib/mock-data";
 import Link from "next/link";
@@ -104,7 +104,7 @@ export default function AdminPage() {
         <header className="flex justify-between items-center">
             <div>
                 <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-                <p className="text-muted-foreground text-sm">Manage user tasks and statuses.</p>
+                <p className="text-muted-foreground text-sm">Manage tasks and user submissions.</p>
             </div>
              <Button asChild size="sm">
                 <Link href="/admin/add-task">
@@ -114,59 +114,102 @@ export default function AdminPage() {
             </Button>
         </header>
 
-        {/* Mobile View */}
-        <div className="md:hidden space-y-4">
-             {transactions.length > 0 ? transactions.map((transaction) => {
-                const user = getUserById(transaction.userId);
-                const task = getTaskById(transaction.taskId);
-                if (!user || !task) return null;
-                return (
-                    <Card key={transaction.id} className="shadow-md rounded-lg">
-                        <CardHeader>
-                            <CardTitle>{task.name}</CardTitle>
-                            <CardDescription>User: {user.fullName}</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Contact</p>
-                                <p>{user.phone || "N/A"} / {user.upiId || "N/A"}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium text-muted-foreground">Status</p>
-                                 <Select
-                                    value={transaction.status}
-                                    onValueChange={(value: TaskStatus) => handleStatusChange(transaction.id as string, value)}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="Under Verification">Under Verification</SelectItem>
-                                        <SelectItem value="Approved">Approved</SelectItem>
-                                        <SelectItem value="Rejected">Rejected</SelectItem>
-                                        <SelectItem value="Paid">Paid</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </CardContent>
-                         <CardFooter>
-                           <Badge variant={getBadgeVariant(transaction.status)}>{transaction.status}</Badge>
-                        </CardFooter>
-                    </Card>
-                )
-             }) : (
-                 <Card>
-                    <CardContent className="h-24 flex items-center justify-center text-muted-foreground">
-                        No transactions to display.
-                    </CardContent>
-                 </Card>
-             )}
-        </div>
+        <Card className="shadow-lg rounded-lg">
+            <CardHeader>
+                <CardTitle>Manage Tasks</CardTitle>
+                <CardDescription>View and manage all available tasks.</CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Task Name</TableHead>
+                                <TableHead>Reward</TableHead>
+                                <TableHead>Tags</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {Object.values(tasks).map((task) => (
+                                <TableRow key={task.id}>
+                                    <TableCell className="font-medium">{task.name}</TableCell>
+                                    <TableCell>₹{task.reward}</TableCell>
+                                    <TableCell className="flex items-center gap-2">
+                                        {task.isHighPaying && <Badge variant="secondary">High Paying</Badge>}
+                                        {task.isInstant && <Badge variant="outline">Instant</Badge>}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <Button variant="ghost" size="icon">
+                                            <Pencil className="h-4 w-4" />
+                                            <span className="sr-only">Edit Task</span>
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
+            </CardContent>
+        </Card>
 
-        {/* Desktop View */}
-        <div className="hidden md:block">
-            <Card className="shadow-lg rounded-lg">
-                <CardContent className="p-0">
+        <Card className="shadow-lg rounded-lg">
+            <CardHeader>
+                <CardTitle>User Submissions</CardTitle>
+                <CardDescription>Review and update the status of user-submitted tasks.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                {/* Mobile View */}
+                <div className="md:hidden space-y-4">
+                     {transactions.length > 0 ? transactions.map((transaction) => {
+                        const user = getUserById(transaction.userId);
+                        const task = getTaskById(transaction.taskId);
+                        if (!user || !task) return null;
+                        return (
+                            <Card key={transaction.id} className="shadow-md rounded-lg">
+                                <CardHeader>
+                                    <CardTitle>{task.name}</CardTitle>
+                                    <CardDescription>User: {user.fullName}</CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                     <div>
+                                        <p className="text-sm font-medium text-muted-foreground">Contact</p>
+                                        <p>{user.phone || "N/A"} / {user.upiId || "N/A"}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-muted-foreground">Status</p>
+                                         <Select
+                                            value={transaction.status}
+                                            onValueChange={(value: TaskStatus) => handleStatusChange(transaction.id as string, value)}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="Under Verification">Under Verification</SelectItem>
+                                                <SelectItem value="Approved">Approved</SelectItem>
+                                                <SelectItem value="Rejected">Rejected</SelectItem>
+                                                <SelectItem value="Paid">Paid</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </CardContent>
+                                 <CardFooter>
+                                   <Badge variant={getBadgeVariant(transaction.status)}>{transaction.status}</Badge>
+                                </CardFooter>
+                            </Card>
+                        )
+                     }) : (
+                         <Card>
+                            <CardContent className="h-24 flex items-center justify-center text-muted-foreground">
+                                No submissions to display.
+                            </CardContent>
+                         </Card>
+                     )}
+                </div>
+
+                {/* Desktop View */}
+                <div className="hidden md:block">
                     <div className="overflow-x-auto">
                         <Table>
                             <TableHeader>
@@ -219,13 +262,12 @@ export default function AdminPage() {
                             </TableBody>
                         </Table>
                     </div>
-                </CardContent>
-            </Card>
-        </div>
-        
-        <div className="flex justify-end pt-4">
-            <Button onClick={handleSaveChanges} size="lg" className="shadow-md" disabled={transactions.length === 0}>Save All Changes</Button>
-        </div>
+                </div>
+            </CardContent>
+            <CardFooter className="flex justify-end pt-4">
+                <Button onClick={handleSaveChanges} size="lg" className="shadow-md" disabled={transactions.length === 0}>Save All Changes</Button>
+            </CardFooter>
+        </Card>
     </div>
   );
 }
