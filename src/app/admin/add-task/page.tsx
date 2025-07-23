@@ -12,8 +12,9 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, ShieldAlert } from "lucide-react";
 import { collection, addDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { db, storage } from "@/lib/firebase";
 import { useAuth } from "@/hooks/use-auth";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 
 export default function AddTaskPage() {
@@ -21,6 +22,7 @@ export default function AddTaskPage() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { isAdmin, loading } = useAuth();
+  const [iconFile, setIconFile] = useState<File | null>(null);
 
   const [task, setTask] = useState({
     name: "",
@@ -41,23 +43,38 @@ export default function AddTaskPage() {
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setIconFile(e.target.files[0]);
+    }
+  };
+
   const handleSwitchChange = (checked: boolean) => {
     setTask(prev => ({ ...prev, isInstant: checked }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!task.name || task.reward <= 0 || !task.description || !task.steps) {
+    if (!task.name || task.reward <= 0 || !task.description || !task.steps || !iconFile) {
         toast({
             title: "Missing Fields",
-            description: "Please fill out all required fields.",
+            description: "Please fill out all required fields, including the icon.",
             variant: "destructive"
         });
         return;
     }
     setIsSubmitting(true);
     try {
-        await addDoc(collection(db, "tasks"), task);
+        let iconUrl = "";
+        if (iconFile) {
+            const storageRef = ref(storage, `task-icons/${Date.now()}_${iconFile.name}`);
+            const snapshot = await uploadBytes(storageRef, iconFile);
+            iconUrl = await getDownloadURL(snapshot.ref);
+        }
+
+        const taskData = { ...task, icon: iconUrl };
+        await addDoc(collection(db, "tasks"), taskData);
+
         toast({
             title: "Task Added!",
             description: `${task.name} has been added successfully.`,
@@ -117,8 +134,9 @@ export default function AddTaskPage() {
                             <Input id="reward" name="reward" type="number" placeholder="e.g. 120" value={task.reward} onChange={handleChange} required />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="icon">Icon URL</Label>
-                            <Input id="icon" name="icon" placeholder="https://placehold.co/100x100.png" value={task.icon} onChange={handleChange} />
+                            <Label htmlFor="icon">Task Icon</Label>
+                            <Input id="icon" name="icon" type="file" accept="image/*" onChange={handleFileChange} required />
+                            {iconFile && <p className="text-sm text-muted-foreground">Selected: {iconFile.name}</p>}
                         </div>
                          <div className="space-y-2">
                             <Label htmlFor="hint">Icon AI Hint</Label>
