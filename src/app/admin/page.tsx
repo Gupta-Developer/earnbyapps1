@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -45,6 +45,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
 
 const getBadgeVariant = (
   status: string
@@ -70,6 +71,7 @@ export default function AdminPage() {
   const { toast } = useToast();
   const { isAdmin, loading } = useAuth();
   const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchData = async () => {
     // In a real app, you'd fetch this from an API.
@@ -129,9 +131,20 @@ export default function AdminPage() {
       description: "The task and its submissions have been removed.",
     });
   };
-
+  
   const getUserById = (id: string) => users[id];
   const getTaskById = (id: string) => tasks[id];
+  
+  const filteredTransactions = useMemo(() => {
+    if (!searchQuery) {
+        return transactions;
+    }
+    return transactions.filter(transaction => {
+        const user = getUserById(transaction.userId);
+        return user?.phone?.includes(searchQuery);
+    });
+  }, [searchQuery, transactions, users]);
+
 
   if (loading) {
     return (
@@ -253,8 +266,16 @@ export default function AdminPage() {
         <CardHeader>
           <CardTitle>User Submissions</CardTitle>
           <CardDescription>
-            Review and update the status of user-submitted tasks.
+            Review and update the status of user-submitted tasks. You can search by phone number.
           </CardDescription>
+          <div className="pt-2">
+             <Input 
+                placeholder="Search by phone number..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="max-w-sm"
+            />
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -266,8 +287,8 @@ export default function AdminPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {transactions.length > 0 ? (
-                  transactions.map((transaction) => {
+                {filteredTransactions.length > 0 ? (
+                  filteredTransactions.map((transaction) => {
                     const user = getUserById(transaction.userId);
                     const task = getTaskById(transaction.taskId);
                     if (!user || !task) return null;
