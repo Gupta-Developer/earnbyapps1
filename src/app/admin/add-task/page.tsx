@@ -72,16 +72,18 @@ export default function AddTaskPage() {
             iconUrl = await getDownloadURL(snapshot.ref);
         }
 
-        await addDoc(collection(db, "tasks"), {
+        const taskData = {
           name: task.name,
-          reward: task.reward,
+          reward: Number(task.reward),
           hint: task.hint,
           description: task.description,
           steps: task.steps,
           isInstant: task.isInstant,
           isHighPaying: task.isHighPaying,
           icon: iconUrl,
-        });
+        };
+
+        await addDoc(collection(db, "tasks"), taskData);
 
         toast({
             title: "Task Added!",
@@ -93,7 +95,7 @@ export default function AddTaskPage() {
         console.error("Error adding task: ", error);
         toast({
             title: "Error",
-            description: "Could not add the task.",
+            description: "Could not add the task. Check console for details.",
             variant: "destructive"
         });
     } finally {
