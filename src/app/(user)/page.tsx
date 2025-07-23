@@ -70,7 +70,7 @@ type FilterType = "all" | "high-paying" | "instant";
 export default function HomePage() {
   const [filter, setFilter] = useState<FilterType>("all");
   const [tasks, setTasks] = useState<Task[]>([]);
-  const plugin = useRef(Autoplay({ delay: 2000, stopOnInteraction: true }));
+  const plugin = useRef(Autoplay({ delay: 5000, stopOnInteraction: true }));
 
   useEffect(() => {
     setTasks(MOCK_TASKS);
