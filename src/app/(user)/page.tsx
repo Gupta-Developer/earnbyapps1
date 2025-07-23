@@ -1,15 +1,12 @@
 
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { ChevronRight, Instagram, Youtube, Gift } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
-import Autoplay from "embla-carousel-autoplay";
 import { Task } from "@/lib/types";
 import { MOCK_TASKS } from "@/lib/mock-data";
 
@@ -46,31 +43,11 @@ const socialLinks = [
     },
 ]
 
-const carouselItems = [
-  {
-    id: 1,
-    imageUrl: 'https://placehold.co/600x200.png',
-    hint: 'money gift',
-  },
-  {
-    id: 2,
-    imageUrl: 'https://placehold.co/600x200.png',
-    hint: 'people sharing',
-  },
-  {
-    id: 3,
-    imageUrl: 'https://placehold.co/600x200.png',
-    hint: 'money stack',
-  },
-];
-
-
 type FilterType = "all" | "high-paying" | "instant";
 
 export default function HomePage() {
   const [filter, setFilter] = useState<FilterType>("all");
   const [tasks, setTasks] = useState<Task[]>([]);
-  const plugin = useRef(Autoplay({ delay: 5000, stopOnInteraction: true }));
 
   useEffect(() => {
     setTasks(MOCK_TASKS);
@@ -91,33 +68,6 @@ export default function HomePage() {
       <header className="py-2">
         <p className="text-center text-muted-foreground">Complete tasks and earn rewards!</p>
       </header>
-
-      <Carousel 
-        className="w-full" 
-        opts={{ loop: true }}
-        plugins={[plugin.current]}
-        onMouseEnter={plugin.current.stop}
-        onMouseLeave={plugin.current.reset}
-      >
-        <CarouselContent>
-          {carouselItems.map((item) => (
-            <CarouselItem key={item.id}>
-              <Card className="rounded-lg overflow-hidden shadow-md">
-                <CardContent className="p-0">
-                  <Image
-                    src={item.imageUrl}
-                    alt="Promotional offer"
-                    width={600}
-                    height={200}
-                    className="w-full h-auto aspect-[3/1] object-cover"
-                    data-ai-hint={item.hint}
-                  />
-                </CardContent>
-              </Card>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-      </Carousel>
 
       <div className="flex justify-center">
         <Tabs value={filter} onValueChange={(value) => setFilter(value as FilterType)} className="w-auto">
