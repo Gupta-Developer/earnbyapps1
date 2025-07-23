@@ -13,7 +13,8 @@ import {
   getRedirectResult,
   type User 
 } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 interface AuthContextType {
   user: User | null;
@@ -32,6 +33,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const handleUserCreation = async (user: User) => {
+    const userRef = doc(db, "users", user.uid);
+    const userDoc = await getDoc(userRef);
+    if (!userDoc.exists()) {
+      await setDoc(userRef, {
+        fullName: user.displayName,
+        email: user.email,
+        phone: "",
+        upiId: "",
+      });
+    }
+  }
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
@@ -44,6 +58,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (result) {
           // User has successfully signed in.
           setUser(result.user);
+          handleUserCreation(result.user);
         }
       })
       .catch((error) => {
@@ -66,6 +81,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (userCredential.user) {
         await updateProfile(userCredential.user, { displayName });
         setUser(userCredential.user);
+        await handleUserCreation(userCredential.user);
       }
     } catch (error: any) {
       setError(error.message);

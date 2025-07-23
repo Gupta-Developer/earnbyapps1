@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -7,47 +8,83 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { ShieldAlert } from "lucide-react";
-import { tasks, transactions as allTransactions, users } from "@/lib/data";
-import { TaskStatus, Transaction } from "@/lib/types";
+import { tasks } from "@/lib/mock-data";
+import { Transaction, TaskStatus, User } from "@/lib/types";
+import { collection, getDocs, doc, updateDoc, writeBatch } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 // In a real app, this would be based on user authentication and roles.
 const isAdmin = true;
 
 export default function AdminPage() {
-  const [transactions, setTransactions] = useState<Transaction[]>(allTransactions);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [users, setUsers] = useState<Record<string, User>>({});
   const { toast } = useToast();
 
   useEffect(() => {
-    // This is a trick to force re-render when the underlying data changes.
-    // In a real app, you would use a state management library.
-    const interval = setInterval(() => {
-       if (transactions.length !== allTransactions.length) {
-         setTransactions([...allTransactions]);
-       }
-    }, 500);
-    return () => clearInterval(interval);
-  }, [transactions]);
+    const fetchData = async () => {
+      // Fetch all users
+      const usersSnapshot = await getDocs(collection(db, "users"));
+      const usersData: Record<string, User> = {};
+      usersSnapshot.forEach((doc) => {
+        usersData[doc.id] = { id: doc.id, ...doc.data() } as User;
+      });
+      setUsers(usersData);
+
+      // Fetch all transactions
+      const transactionsSnapshot = await getDocs(collection(db, "transactions"));
+      const transactionsData = transactionsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+      } as Transaction));
+      
+      // Convert Firestore Timestamps to JS Dates
+      const formattedTransactions = transactionsData.map(t => ({
+          ...t,
+          date: t.date ? (t.date as any).toDate() : new Date(),
+      }));
+
+      setTransactions(formattedTransactions);
+    };
+
+    fetchData();
+  }, []);
 
 
-  const handleStatusChange = (transactionId: number, newStatus: TaskStatus) => {
-    const transaction = allTransactions.find(t => t.id === transactionId);
-    if(transaction) {
-        transaction.status = newStatus;
-        setTransactions([...allTransactions]);
+  const handleStatusChange = (transactionId: string, newStatus: TaskStatus) => {
+    setTransactions(prev => 
+      prev.map(t => t.id === transactionId ? { ...t, status: newStatus } : t)
+    );
+  };
+
+  const handleSaveChanges = async () => {
+    const batch = writeBatch(db);
+    transactions.forEach(transaction => {
+      const { id, ...data } = transaction;
+      if (id) {
+          const transactionRef = doc(db, "transactions", id);
+          batch.update(transactionRef, { status: data.status });
+      }
+    });
+
+    try {
+        await batch.commit();
+        toast({
+            title: "Changes Saved",
+            description: "All task statuses have been updated.",
+            className: "bg-accent text-accent-foreground border-accent"
+        });
+    } catch (e) {
+        console.error("Error saving changes: ", e);
+        toast({
+            title: "Error",
+            description: "Could not save changes.",
+            variant: "destructive"
+        })
     }
   };
 
-  const handleSaveChanges = () => {
-    // In a real app, this would send updates to the backend.
-    // Here, the changes are already in the in-memory 'allTransactions' array.
-    toast({
-      title: "Changes Saved",
-      description: "All task statuses have been updated.",
-      className: "bg-accent text-accent-foreground border-accent"
-    });
-  };
-
-  const getUserById = (id: number) => users.find(u => u.id === id);
+  const getUserById = (id: string) => users[id];
   const getTaskById = (id: number) => tasks.find(t => t.id === id);
 
 
@@ -102,7 +139,7 @@ export default function AdminPage() {
                                             <TableCell>
                                             <Select
                                                 value={transaction.status}
-                                                onValueChange={(value: TaskStatus) => handleStatusChange(transaction.id, value)}
+                                                onValueChange={(value: TaskStatus) => handleStatusChange(transaction.id as string, value)}
                                             >
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Set status" />

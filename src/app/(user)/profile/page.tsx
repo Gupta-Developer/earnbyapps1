@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, UserCircle2, KeyRound, LogOut } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
@@ -15,7 +14,8 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { users } from "@/lib/data";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 const GoogleIcon = () => (
     <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2">
@@ -78,17 +78,27 @@ export default function ProfilePage() {
   });
 
   useEffect(() => {
-    if (user) {
-      // In a real app, you would fetch this from a database.
-      // For now, we find the user in our mock data by their display name.
-      const currentUserData = users.find(u => u.fullName === user.displayName);
-
-      profileForm.reset({
-        fullName: user.displayName || "",
-        phone: currentUserData?.phone || "",
-        upiId: currentUserData?.upiId || "",
-      });
-    }
+    const fetchUserData = async () => {
+      if (user) {
+        const userRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          profileForm.reset({
+            fullName: userData.fullName || user.displayName || "",
+            phone: userData.phone || "",
+            upiId: userData.upiId || "",
+          });
+        } else {
+           profileForm.reset({
+            fullName: user.displayName || "",
+            phone: "",
+            upiId: "",
+          });
+        }
+      }
+    };
+    fetchUserData();
   }, [user, profileForm]);
 
   const handleSignIn = async (data: z.infer<typeof signInSchema>) => {
@@ -103,22 +113,29 @@ export default function ProfilePage() {
     toast({ title: "Account created and logged in!" });
   };
   
-  const handleProfileSubmit = (data: z.infer<typeof profileSchema>) => {
-    console.log("Profile data to save:", data);
-    // Here you would typically save the data to your backend.
-    // For now, we find and update the mock data in memory.
-    const currentUserData = users.find(u => u.fullName === user?.displayName);
-    if (currentUserData) {
-        currentUserData.fullName = data.fullName;
-        currentUserData.phone = data.phone || "";
-        currentUserData.upiId = data.upiId || "";
+  const handleProfileSubmit = async (data: z.infer<typeof profileSchema>) => {
+    if (!user) {
+        toast({ title: "Error", description: "You must be logged in to save.", variant: "destructive" });
+        return;
     }
 
-    toast({ 
-        title: "Profile Saved!",
-        description: "Your information has been updated.",
-        className: "bg-accent text-accent-foreground border-accent"
-    });
+    try {
+        const userRef = doc(db, "users", user.uid);
+        await setDoc(userRef, { 
+            fullName: data.fullName,
+            phone: data.phone,
+            upiId: data.upiId,
+         }, { merge: true }); // merge: true prevents overwriting other fields like email
+
+        toast({ 
+            title: "Profile Saved!",
+            description: "Your information has been updated.",
+            className: "bg-accent text-accent-foreground border-accent"
+        });
+    } catch (e) {
+        console.error("Error updating profile: ", e);
+        toast({ title: "Error", description: "Could not save your profile.", variant: "destructive" });
+    }
   };
 
   if (loading) {
@@ -335,7 +352,9 @@ export default function ProfilePage() {
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit" className="w-full shadow-md">Save Changes</Button>
+                        <Button type="submit" className="w-full shadow-md" disabled={profileForm.formState.isSubmitting}>
+                          {profileForm.formState.isSubmitting ? "Saving..." : "Save Changes"}
+                        </Button>
                     </form>
                 </Form>
             </CardContent>

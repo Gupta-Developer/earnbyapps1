@@ -7,15 +7,20 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { CheckCircle, Copy } from 'lucide-react';
-import { tasks, transactions } from '@/lib/data';
+import { tasks } from '@/lib/mock-data';
 import { Transaction } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { useAuth } from '@/hooks/use-auth';
+import { db } from '@/lib/firebase';
+import { collection, addDoc, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
+
 
 export default function TaskDetailPage() {
   const router = useRouter();
   const params = useParams();
   const { toast } = useToast();
+  const { user } = useAuth();
   const taskId = params.id;
 
   const task = tasks.find(t => t.id.toString() === taskId);
@@ -40,11 +45,18 @@ export default function TaskDetailPage() {
     });
   };
 
-  const handleStartTask = () => {
-    // In a real app, you'd get the current user from auth state.
-    const currentUserId = 1; 
-    const existingTask = transactions.find(t => t.taskId === task.id && t.userId === currentUserId);
-    if(existingTask) {
+  const handleStartTask = async () => {
+    if (!user) {
+        toast({ title: "Please sign in", description: "You need to be logged in to start a task.", variant: "destructive" });
+        router.push('/profile');
+        return;
+    }
+    
+    const transactionsRef = collection(db, "transactions");
+    const q = query(transactionsRef, where("userId", "==", user.uid), where("taskId", "==", task.id));
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
        toast({
         title: "Task Already Started",
         description: `You have already started the "${task.name}" task.`,
@@ -53,23 +65,27 @@ export default function TaskDetailPage() {
       return;
     }
 
-    const newTransaction: Transaction = {
-      id: transactions.length + 1,
-      userId: currentUserId,
-      taskId: task.id,
-      app: task.name,
-      amount: task.reward,
-      status: 'Under Verification',
-      date: new Date(),
-    };
-    transactions.push(newTransaction);
-    
-    toast({
-      title: "Task Started!",
-      description: `"${task.name}" is now under verification in your wallet.`,
-    });
-    
-    router.push('/wallet');
+    try {
+        await addDoc(transactionsRef, {
+            userId: user.uid,
+            taskId: task.id,
+            app: task.name,
+            amount: task.reward,
+            status: 'Under Verification',
+            date: serverTimestamp(),
+        });
+
+        toast({
+        title: "Task Started!",
+        description: `"${task.name}" is now under verification in your wallet.`,
+        });
+        
+        router.push('/wallet');
+
+    } catch (e) {
+        console.error("Error starting task: ", e);
+         toast({ title: "Error", description: "Could not start the task.", variant: "destructive" });
+    }
   };
 
   const faqs = [

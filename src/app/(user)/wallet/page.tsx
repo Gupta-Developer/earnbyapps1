@@ -6,10 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from 'date-fns';
-import { transactions as allTransactions, users } from "@/lib/data";
 import { Transaction } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useAuth } from "@/hooks/use-auth";
+import { db } from "@/lib/firebase";
+import { collection, query, where, onSnapshot, orderBy } from "firebase/firestore";
 
 const getBadgeVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
     switch (status) {
@@ -58,26 +60,35 @@ const statusFaqs = [
 ]
 
 export default function WalletPage() {
-  // Rerender component when transactions change
-  const [transactions, setTransactions] = useState<Transaction[]>(allTransactions);
+  const { user } = useAuth();
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   useEffect(() => {
-    // This is a trick to force re-render when the underlying data changes.
-    // In a real app, you would use a state management library.
-    const interval = setInterval(() => {
-       if (transactions.length !== allTransactions.length) {
-         setTransactions([...allTransactions]);
-       }
-    }, 500);
-    return () => clearInterval(interval);
-  }, [transactions]);
+    if (!user) {
+        setTransactions([]);
+        return;
+    };
 
+    const transactionsRef = collection(db, "transactions");
+    const q = query(
+        transactionsRef, 
+        where("userId", "==", user.uid),
+        orderBy("date", "desc")
+    );
 
-  // Assuming user is the first user for demo purposes
-  const currentUserId = 1;
-  const userTransactions = transactions.filter(t => t.userId === currentUserId);
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const userTransactions = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            date: doc.data().date.toDate(), // Convert Firestore Timestamp to JS Date
+        } as Transaction));
+        setTransactions(userTransactions);
+    });
 
-  const totalEarnings = userTransactions
+    return () => unsubscribe();
+  }, [user]);
+
+  const totalEarnings = transactions
     .filter(t => t.status === 'Paid')
     .reduce((sum, t) => sum + t.amount, 0);
 
@@ -104,7 +115,7 @@ export default function WalletPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {userTransactions.length > 0 ? userTransactions.map((item) => (
+              {transactions.length > 0 ? transactions.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell>
                     <div className="font-medium">{item.app}</div>
@@ -132,7 +143,7 @@ export default function WalletPage() {
               )) : (
                 <TableRow>
                   <TableCell colSpan={3} className="text-center text-muted-foreground h-24">
-                    No transactions yet.
+                    No transactions yet. Start a task to see it here!
                   </TableCell>
                 </TableRow>
               )}

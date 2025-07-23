@@ -1,3 +1,4 @@
+
 export type TaskStatus = "Under Verification" | "Approved" | "Rejected" | "Paid";
 
 export type Task = {
@@ -12,15 +13,16 @@ export type Task = {
 };
 
 export type User = {
-    id: number;
-    fullName: string;
-    phone: string;
-    upiId: string;
+    id: string; // Should be UID from Firebase
+    fullName?: string;
+    email?: string;
+    phone?: string;
+    upiId?: string;
 };
 
 export type Transaction = {
-  id: number;
-  userId: number;
+  id?: string; // Document ID from Firestore
+  userId: string;
   taskId: number;
   app: string;
   amount: number;
