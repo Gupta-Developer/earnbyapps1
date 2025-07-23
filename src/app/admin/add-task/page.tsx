@@ -21,6 +21,8 @@ export default function AddTaskPage() {
   const { isAdmin, loading } = useAuth();
   const [iconFile, setIconFile] = useState<File | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [faqs, setFaqs] = useState("");
+
 
   const [task, setTask] = useState({
     name: "",
@@ -28,6 +30,7 @@ export default function AddTaskPage() {
     hint: "",
     description: "",
     steps: "",
+    youtubeLink: "",
     isInstant: false,
     isHighPaying: false,
   });
@@ -58,6 +61,20 @@ export default function AddTaskPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    let parsedFaqs = [];
+    try {
+        if (faqs) {
+            parsedFaqs = JSON.parse(faqs);
+        }
+    } catch (error) {
+        toast({
+            title: "Invalid FAQ JSON",
+            description: "Please check the format of your FAQs.",
+            variant: "destructive"
+        });
+        return;
+    }
+
     if (!task.name || task.reward <= 0 || !task.description || !task.steps || !iconFile) {
         toast({
             title: "Missing Fields",
@@ -70,7 +87,7 @@ export default function AddTaskPage() {
     
     // In a real app, this is where you would upload the files and then
     // send the task data (including the returned file URLs) to your API.
-    console.log("Submitting task:", { ...task, icon: iconFile.name, image: imageFile?.name });
+    console.log("Submitting task:", { ...task, faqs: parsedFaqs, icon: iconFile.name, image: imageFile?.name });
 
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -147,6 +164,14 @@ export default function AddTaskPage() {
                     <div className="space-y-2">
                         <Label htmlFor="steps">Steps to Complete (one per line)</Label>
                         <Textarea id="steps" name="steps" placeholder="1. Download the app.&#10;2. Register an account.&#10;3. Complete one level." value={task.steps} onChange={handleChange} required className="min-h-[120px]" />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="youtubeLink">YouTube Video Link</Label>
+                        <Input id="youtubeLink" name="youtubeLink" placeholder="e.g. https://www.youtube.com/embed/your_video_id" value={task.youtubeLink} onChange={handleChange} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="faqs">FAQs (JSON format)</Label>
+                        <Textarea id="faqs" name="faqs" placeholder='[{"question": "Q1?", "answer": "A1."}, {"question": "Q2?", "answer": "A2."}]' value={faqs} onChange={(e) => setFaqs(e.target.value)} className="min-h-[120px]" />
                     </div>
                     <div className="flex items-center space-x-2">
                         <Switch id="isHighPaying" checked={task.isHighPaying} onCheckedChange={handleSwitchChange('isHighPaying')} />

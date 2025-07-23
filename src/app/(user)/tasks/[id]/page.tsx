@@ -73,29 +73,6 @@ export default function TaskDetailPage() {
     router.push('/wallet');
   };
 
-  const faqs = [
-      {
-          question: "What if I don't complete all the steps?",
-          answer: "You must complete all the steps exactly as listed to be eligible for the reward. Partial or incomplete submissions will not be rewarded."
-      },
-      {
-          question: "How long does verification take?",
-          answer: "Verification typically takes between 24 to 48 hours. Once our team confirms your completion, the status will update in your wallet and the reward will be credited."
-      },
-      {
-          question: "Do I need to use the referral code?",
-          answer: "Yes, using the special referral code is mandatory if provided. It's how we track your task completion and link it to your account for payment."
-      },
-      {
-          question: "Can I do the same task twice?",
-          answer: "No, each task is designed to be completed only once per user. This ensures fair opportunities for everyone in the community to earn."
-      },
-      {
-          question: "What if I face an issue with the app?",
-          answer: "If you encounter any technical problems with the partner app (e.g., download issues, crashes), please contact their support. For issues related to our platform or your payment, please contact our support team."
-      }
-  ]
-
   const stepsArray = typeof task.steps === 'string' ? task.steps.split('\n').filter(s => s.trim() !== '') : [];
 
   return (
@@ -169,38 +146,42 @@ export default function TaskDetailPage() {
           </div>
         </Card>
 
-        <Card className="shadow-md rounded-lg w-full overflow-hidden">
-            <CardContent className="p-0">
-                <div className="aspect-video">
-                    <iframe 
-                        width="100%" 
-                        height="100%" 
-                        src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
-                        title="YouTube video player" 
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                        allowFullScreen
-                        className="border-0"
-                        >
-                    </iframe>
-                </div>
-            </CardContent>
-        </Card>
+        {task.youtubeLink && (
+            <Card className="shadow-md rounded-lg w-full overflow-hidden">
+                <CardContent className="p-0">
+                    <div className="aspect-video">
+                        <iframe 
+                            width="100%" 
+                            height="100%" 
+                            src={task.youtubeLink} 
+                            title="YouTube video player" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowFullScreen
+                            className="border-0"
+                            >
+                        </iframe>
+                    </div>
+                </CardContent>
+            </Card>
+        )}
 
-         <div className="space-y-4">
-            <h2 className="text-xl font-bold px-1">Frequently Asked Questions</h2>
-            <Accordion type="single" collapsible className="w-full space-y-2">
-                {faqs.map((faq, index) => (
-                      <AccordionItem value={`item-${index}`} key={index} className="bg-secondary/50 rounded-lg px-4 border-b-0">
-                        <AccordionTrigger className="text-left hover:no-underline">
-                            {faq.question}
-                        </AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground pt-0 pb-4">
-                            {faq.answer}
-                        </AccordionContent>
-                    </AccordionItem>
-                ))}
-            </Accordion>
-        </div>
+        {task.faqs && task.faqs.length > 0 && (
+            <div className="space-y-4">
+                <h2 className="text-xl font-bold px-1">Frequently Asked Questions</h2>
+                <Accordion type="single" collapsible className="w-full space-y-2">
+                    {task.faqs.map((faq, index) => (
+                        <AccordionItem value={`item-${index}`} key={index} className="bg-secondary/50 rounded-lg px-4 border-b-0">
+                            <AccordionTrigger className="text-left hover:no-underline">
+                                {faq.question}
+                            </AccordionTrigger>
+                            <AccordionContent className="text-muted-foreground pt-0 pb-4">
+                                {faq.answer}
+                            </AccordionContent>
+                        </AccordionItem>
+                    ))}
+                </Accordion>
+            </div>
+        )}
       </main>
 
     </div>

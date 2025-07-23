@@ -1,6 +1,11 @@
 
 export type TaskStatus = "Under Verification" | "Approved" | "Rejected" | "Paid";
 
+export type Faq = {
+  question: string;
+  answer: string;
+};
+
 export type Task = {
   id: string; // Document ID from Firestore
   name: string;
@@ -12,6 +17,8 @@ export type Task = {
   steps: string; // Storing as a single string, separated by newlines
   isInstant: boolean;
   isHighPaying: boolean;
+  youtubeLink?: string;
+  faqs?: Faq[];
 };
 
 export type User = {

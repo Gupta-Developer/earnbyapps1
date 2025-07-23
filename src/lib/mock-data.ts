@@ -1,5 +1,28 @@
 
-import { Task, Transaction, User } from "./types";
+import { Task, Transaction, User, Faq } from "./types";
+
+const MOCK_FAQS: Faq[] = [
+      {
+          question: "What if I don't complete all the steps?",
+          answer: "You must complete all the steps exactly as listed to be eligible for the reward. Partial or incomplete submissions will not be rewarded."
+      },
+      {
+          question: "How long does verification take?",
+          answer: "Verification typically takes between 24 to 48 hours. Once our team confirms your completion, the status will update in your wallet and the reward will be credited."
+      },
+      {
+          question: "Do I need to use the referral code?",
+          answer: "Yes, using the special referral code is mandatory if provided. It's how we track your task completion and link it to your account for payment."
+      },
+      {
+          question: "Can I do the same task twice?",
+          answer: "No, each task is designed to be completed only once per user. This ensures fair opportunities for everyone in the community to earn."
+      },
+      {
+          question: "What if I face an issue with the app?",
+          answer: "If you encounter any technical problems with the partner app (e.g., download issues, crashes), please contact their support. For issues related to our platform or your payment, please contact our support team."
+      }
+  ]
 
 export const MOCK_TASKS: Task[] = [
   {
@@ -13,6 +36,8 @@ export const MOCK_TASKS: Task[] = [
     steps: "1. Download the app.\n2. Register an account using the code.\n3. Make your first deposit.",
     isInstant: true,
     isHighPaying: true,
+    youtubeLink: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    faqs: MOCK_FAQS,
   },
   {
     id: "task-2",
@@ -25,6 +50,8 @@ export const MOCK_TASKS: Task[] = [
     steps: "1. Install the app from the link.\n2. Complete the registration process.\n3. Join a contest.",
     isInstant: false,
     isHighPaying: true,
+    youtubeLink: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    faqs: MOCK_FAQS,
   },
   {
     id: "task-3",
@@ -37,6 +64,8 @@ export const MOCK_TASKS: Task[] = [
     steps: "1. Download and install Navi.\n2. Register with your bank account.\n3. Make a transaction of at least ₹1.",
     isInstant: true,
     isHighPaying: false,
+    youtubeLink: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    faqs: MOCK_FAQS,
   },
     {
     id: "task-4",
@@ -49,6 +78,8 @@ export const MOCK_TASKS: Task[] = [
     steps: "1. Create an account on Groww.\n2. Complete the KYC verification.\n3. Add funds to your wallet.",
     isInstant: false,
     isHighPaying: true,
+    youtubeLink: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    faqs: MOCK_FAQS,
   },
   {
     id: "task-5",
@@ -61,6 +92,8 @@ export const MOCK_TASKS: Task[] = [
     steps: "1. Download A23 Games app.\n2. Sign up and verify your number.\n3. Play your first cash game.",
     isInstant: true,
     isHighPaying: false,
+    youtubeLink: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    faqs: MOCK_FAQS,
   },
   {
     id: "task-6",
@@ -73,6 +106,8 @@ export const MOCK_TASKS: Task[] = [
     steps: "1. Install the Upstox app.\n2. Complete the e-KYC process with your PAN and Aadhaar.\n3. Activate your account.",
     isInstant: false,
     isHighPaying: true,
+    youtubeLink: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    faqs: MOCK_FAQS,
   },
   {
     id: "task-7",
@@ -85,6 +120,8 @@ export const MOCK_TASKS: Task[] = [
     steps: "1. Download the app.\n2. Register with your Paytm number.\n3. Participate in any paid contest.",
     isInstant: true,
     isHighPaying: false,
+    youtubeLink: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    faqs: MOCK_FAQS,
   },
   {
     id: "task-8",
@@ -97,6 +134,8 @@ export const MOCK_TASKS: Task[] = [
     steps: "1. Install the PhonePe app.\n2. Link your bank account via UPI.\n3. Make 3 transactions to three different users.",
     isInstant: true,
     isHighPaying: false,
+    youtubeLink: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    faqs: MOCK_FAQS,
   },
 ];
 
