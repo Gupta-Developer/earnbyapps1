@@ -21,6 +21,7 @@ export default function AddTaskPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { isAdmin, loading } = useAuth();
   const [iconFile, setIconFile] = useState<File | null>(null);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [faqs, setFaqs] = useState<Faq[]>([]);
 
 
@@ -66,6 +67,9 @@ export default function AddTaskPage() {
       if (e.target.name === 'icon') {
           setIconFile(e.target.files[0]);
       }
+      if (e.target.name === 'banner') {
+          setBannerFile(e.target.files[0]);
+      }
     }
   };
 
@@ -88,7 +92,7 @@ export default function AddTaskPage() {
     
     // In a real app, this is where you would upload the files and then
     // send the task data (including the returned file URLs) to your API.
-    console.log("Submitting task:", { ...task, faqs, icon: iconFile.name });
+    console.log("Submitting task:", { ...task, faqs, icon: iconFile.name, banner: bannerFile?.name });
 
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -150,6 +154,11 @@ export default function AddTaskPage() {
                         <Label htmlFor="icon">Task Icon</Label>
                         <Input id="icon" name="icon" type="file" accept="image/*" onChange={handleFileChange} required />
                         {iconFile && <p className="text-sm text-muted-foreground mt-2">Selected: {iconFile.name}</p>}
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="banner">Task Banner (Optional)</Label>
+                        <Input id="banner" name="banner" type="file" accept="image/*" onChange={handleFileChange} />
+                        {bannerFile && <p className="text-sm text-muted-foreground mt-2">Selected: {bannerFile.name}</p>}
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="hint">Icon AI Hint</Label>

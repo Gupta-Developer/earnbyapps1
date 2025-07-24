@@ -23,6 +23,7 @@ export default function EditTaskPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { isAdmin, loading } = useAuth();
   const [iconFile, setIconFile] = useState<File | null>(null);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [faqs, setFaqs] = useState<Faq[]>([]);
 
   const [task, setTask] = useState<Partial<Task>>({});
@@ -72,6 +73,9 @@ export default function EditTaskPage() {
       if (e.target.name === 'icon') {
           setIconFile(e.target.files[0]);
       }
+      if (e.target.name === 'banner') {
+          setBannerFile(e.target.files[0]);
+      }
     }
   };
 
@@ -94,7 +98,7 @@ export default function EditTaskPage() {
     
     // In a real app, this is where you would upload the files and then
     // send the task data (including the returned file URLs) to your API.
-    console.log("Updating task:", { ...task, faqs, icon: iconFile ? iconFile.name : task.icon });
+    console.log("Updating task:", { ...task, faqs, icon: iconFile ? iconFile.name : task.icon, banner: bannerFile ? bannerFile.name : task.banner });
 
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -156,6 +160,11 @@ export default function EditTaskPage() {
                         <Label htmlFor="icon">Task Icon</Label>
                         <Input id="icon" name="icon" type="file" accept="image/*" onChange={handleFileChange} />
                         <p className="text-sm text-muted-foreground mt-1">Current icon: {typeof task.icon === 'string' ? task.icon.split('/').pop() : 'None'}. Upload new to replace.</p>
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="banner">Task Banner (Optional)</Label>
+                        <Input id="banner" name="banner" type="file" accept="image/*" onChange={handleFileChange} />
+                        <p className="text-sm text-muted-foreground mt-1">Current banner: {task.banner ? task.banner.split('/').pop() : 'None'}. Upload new to replace.</p>
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="hint">Icon AI Hint</Label>

@@ -12,6 +12,7 @@ export type Task = {
   reward: number;
   icon: string;
   hint: string;
+  banner?: string;
   description: string;
   steps: string; // Storing as a single string, separated by newlines
   link: string;

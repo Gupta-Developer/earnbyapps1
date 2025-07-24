@@ -31,6 +31,7 @@ export const MOCK_TASKS: Task[] = [
     reward: 120,
     icon: "https://placehold.co/100x100.png",
     hint: "cricket player",
+    banner: "https://placehold.co/600x400.png",
     description: "A leading fantasy sports app. Create your team and compete to win real cash prizes daily. Simple, fun, and engaging.",
     steps: "1. Download the app.\n2. Register an account using the code.\n3. Make your first deposit.",
     link: "https://playerzpot.com/",
