@@ -19,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { PlusCircle, ShieldAlert, Pencil, Trash2, DollarSign } from "lucide-react";
+import { PlusCircle, ShieldAlert, Pencil, Trash2, DollarSign, Users } from "lucide-react";
 import { Transaction, Task, User } from "@/lib/types";
 import { MOCK_TRANSACTIONS, MOCK_USERS, MOCK_TASKS } from "@/lib/mock-data";
 import Link from "next/link";
@@ -97,6 +97,13 @@ export default function AdminPage() {
     }, 0);
   }, [transactions, tasks]);
 
+  const totalUserPayout = useMemo(() => {
+    return transactions
+      .filter(t => t.status === 'Paid')
+      .reduce((sum, transaction) => sum + transaction.amount, 0);
+  }, [transactions]);
+
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -137,18 +144,33 @@ export default function AdminPage() {
         </Button>
       </header>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Platform Profit</CardTitle>
-            <DollarSign className="w-4 h-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-            <div className="text-2xl font-bold">₹{totalPlatformProfit.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">
-                Total earnings from all 'Paid' tasks
-            </p>
-        </CardContent>
-      </Card>
+      <div className="grid gap-4 md:grid-cols-2">
+         <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Total User Payout</CardTitle>
+                <Users className="w-4 h-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">₹{totalUserPayout.toFixed(2)}</div>
+                <p className="text-xs text-muted-foreground">
+                    Total amount paid to users for completed tasks
+                </p>
+            </CardContent>
+         </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Total Platform Profit</CardTitle>
+                <DollarSign className="w-4 h-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">₹{totalPlatformProfit.toFixed(2)}</div>
+                <p className="text-xs text-muted-foreground">
+                    Total earnings from all 'Paid' tasks
+                </p>
+            </CardContent>
+          </Card>
+      </div>
+
 
       <Card className="shadow-lg rounded-lg">
         <CardHeader>
