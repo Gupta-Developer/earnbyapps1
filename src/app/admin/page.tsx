@@ -27,7 +27,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { PlusCircle, ShieldAlert, Pencil, Trash2 } from "lucide-react";
+import { PlusCircle, ShieldAlert, Pencil, Trash2, DollarSign } from "lucide-react";
 import { Transaction, TaskStatus, User, Task } from "@/lib/types";
 import { MOCK_TRANSACTIONS, MOCK_USERS, MOCK_TASKS } from "@/lib/mock-data";
 import Link from "next/link";
@@ -153,6 +153,19 @@ export default function AdminPage() {
     });
   }, [searchQuery, transactions, users]);
 
+  const totalPlatformProfit = useMemo(() => {
+    return transactions
+      .filter(t => t.status === 'Paid')
+      .reduce((sum, transaction) => {
+        const task = getTaskById(transaction.taskId);
+        if (task && task.totalReward) {
+            const profit = task.totalReward - task.reward;
+            return sum + profit;
+        }
+        return sum;
+    }, 0);
+  }, [transactions, tasks]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -193,6 +206,19 @@ export default function AdminPage() {
         </Button>
       </header>
 
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Total Platform Profit</CardTitle>
+            <DollarSign className="w-4 h-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+            <div className="text-2xl font-bold">₹{totalPlatformProfit.toFixed(2)}</div>
+            <p className="text-xs text-muted-foreground">
+                Total earnings from all 'Paid' tasks
+            </p>
+        </CardContent>
+      </Card>
+
       <Card className="shadow-lg rounded-lg">
         <CardHeader>
           <CardTitle>Manage Tasks</CardTitle>
@@ -208,6 +234,7 @@ export default function AdminPage() {
                   <TableHead>Task Name</TableHead>
                   <TableHead>User Payout</TableHead>
                   <TableHead>Total Reward</TableHead>
+                  <TableHead>Platform Profit</TableHead>
                   <TableHead>Tags</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -218,6 +245,7 @@ export default function AdminPage() {
                     <TableCell className="font-medium">{task.name}</TableCell>
                     <TableCell>₹{task.reward}</TableCell>
                     <TableCell>₹{task.totalReward || "N/A"}</TableCell>
+                    <TableCell>₹{(task.totalReward || 0) - task.reward}</TableCell>
                     <TableCell className="flex items-center gap-2">
                       {task.isHighPaying && (
                         <Badge variant="secondary">High Paying</Badge>
