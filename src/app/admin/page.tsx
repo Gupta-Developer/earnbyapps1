@@ -206,7 +206,8 @@ export default function AdminPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Task Name</TableHead>
-                  <TableHead>Reward</TableHead>
+                  <TableHead>User Payout</TableHead>
+                  <TableHead>Total Reward</TableHead>
                   <TableHead>Tags</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -216,6 +217,7 @@ export default function AdminPage() {
                   <TableRow key={task.id}>
                     <TableCell className="font-medium">{task.name}</TableCell>
                     <TableCell>₹{task.reward}</TableCell>
+                    <TableCell>₹{task.totalReward || "N/A"}</TableCell>
                     <TableCell className="flex items-center gap-2">
                       {task.isHighPaying && (
                         <Badge variant="secondary">High Paying</Badge>

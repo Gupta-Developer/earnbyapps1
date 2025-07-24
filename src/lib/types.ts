@@ -9,7 +9,8 @@ export type Faq = {
 export type Task = {
   id: string; // Document ID from Firestore
   name: string;
-  reward: number;
+  reward: number; // Payout to the user
+  totalReward?: number; // Total amount from the advertiser
   icon: string;
   hint: string;
   banner?: string;

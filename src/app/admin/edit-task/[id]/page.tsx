@@ -148,9 +148,15 @@ export default function EditTaskPage() {
                         <Label htmlFor="name">Task Name</Label>
                         <Input id="name" name="name" placeholder="e.g. PlayerzPot" value={task.name || ''} onChange={handleChange} required />
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="reward">Reward Amount (₹)</Label>
-                        <Input id="reward" name="reward" type="number" placeholder="e.g. 120" value={task.reward || 0} onChange={handleChange} required />
+                     <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="reward">User Payout (₹)</Label>
+                            <Input id="reward" name="reward" type="number" placeholder="e.g. 120" value={task.reward || 0} onChange={handleChange} required />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="totalReward">Total Reward (₹)</Label>
+                            <Input id="totalReward" name="totalReward" type="number" placeholder="e.g. 150" value={task.totalReward || 0} onChange={handleChange} />
+                        </div>
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="link">Task Link</Label>
