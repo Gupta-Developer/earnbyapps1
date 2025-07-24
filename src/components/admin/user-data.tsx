@@ -108,14 +108,14 @@ export default function UserData({ users, transactions, onStatusChange }: UserDa
                         groupedAndFilteredUsers.map(({ user, transactions }) => (
                             <AccordionItem value={user.id} key={user.id} className="border-b">
                                 <AccordionTrigger className="px-6 py-4 hover:bg-muted/50 text-left">
-                                    <div className="flex-1 grid grid-cols-2 gap-x-4 gap-y-1">
-                                        <div>
-                                            <p className="font-semibold">{user.fullName || 'N/A'}</p>
-                                            <p className="text-sm text-muted-foreground">{user.email}</p>
+                                    <div className="flex-1 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                                        <div className="truncate">
+                                            <p className="font-semibold text-base text-foreground truncate">{user.fullName || 'N/A'}</p>
+                                            <p className="text-muted-foreground truncate">{user.email}</p>
                                         </div>
-                                         <div>
-                                            <p className="font-semibold">{user.phone || 'No Phone'}</p>
-                                            <p className="text-sm text-muted-foreground">{user.upiId || 'No UPI ID'}</p>
+                                         <div className="truncate">
+                                            <p className="font-semibold text-foreground truncate">{user.phone || 'No Phone'}</p>
+                                            <p className="text-muted-foreground truncate">{user.upiId || 'No UPI ID'}</p>
                                         </div>
                                     </div>
                                     <Badge variant="outline" className="ml-4 shrink-0">{transactions.length} task(s)</Badge>
