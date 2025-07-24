@@ -26,7 +26,7 @@ export default function EditTaskPage() {
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [faqs, setFaqs] = useState<Faq[]>([]);
 
-  const [task, setTask] = useState<Partial<Task>>({});
+  const [task, setTask] = useState<Partial<Task> | null>(null);
   
   useEffect(() => {
     const taskId = params.id as string;
@@ -47,9 +47,9 @@ export default function EditTaskPage() {
     const { name, value, type } = e.target;
 
     if (type === 'number') {
-      setTask(prev => ({ ...prev, [name]: value === '' ? 0 : parseFloat(value) }));
+      setTask(prev => prev ? ({ ...prev, [name]: value === '' ? 0 : parseFloat(value) }) : null);
     } else {
-      setTask(prev => ({ ...prev, [name]: value }));
+      setTask(prev => prev ? ({ ...prev, [name]: value }) : null);
     }
   };
   
@@ -80,13 +80,13 @@ export default function EditTaskPage() {
   };
 
   const handleSwitchChange = (field: 'isInstant' | 'isHighPaying') => (checked: boolean) => {
-    setTask(prev => ({ ...prev, [field]: checked }));
+    setTask(prev => prev ? ({ ...prev, [field]: checked }) : null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!task?.name || (task?.reward ?? 0) <= 0 || !task?.description || !task?.steps || !task.link) {
+    if (!task || !task?.name || (task?.reward ?? 0) <= 0 || !task?.description || !task?.steps || !task.link) {
         toast({
             title: "Missing Fields",
             description: "Please fill out all required fields.",
@@ -113,7 +113,7 @@ export default function EditTaskPage() {
     setIsSubmitting(false);
   };
 
-  if (loading || !task?.id) {
+  if (loading || !task) {
     return (
         <div className="flex items-center justify-center h-full">
             <p>Loading...</p>
