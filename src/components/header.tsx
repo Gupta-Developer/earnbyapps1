@@ -16,13 +16,14 @@ const AppLogo = () => (
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             className="text-primary"
-            strokeWidth="2"
-            stroke="currentColor"
         >
-            <path d="M6 3h12" />
-            <path d="M6 8h12" />
-            <path d="M6 13h12" />
-            <path d="m19 8-11 13" />
+            <path 
+                d="M6 8H18M6 13H18M10 3L10 21M6 3H12C14.2091 3 16 4.79086 16 7C16 9.20914 14.2091 11 12 11H6"
+                stroke="currentColor" 
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
         </svg>
         <span className="text-xl font-bold text-foreground">EarnByApps</span>
     </Link>
