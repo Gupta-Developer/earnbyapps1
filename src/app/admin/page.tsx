@@ -46,6 +46,11 @@ export default function AdminPage() {
   const { toast } = useToast();
   const { isAdmin, loading } = useAuth();
   const router = useRouter();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const fetchData = async () => {
     setUsers(MOCK_USERS);
@@ -225,10 +230,12 @@ export default function AdminPage() {
         </CardContent>
       </Card>
       
-      <UserSubmissions 
-        initialTransactions={transactions}
-        users={users}
-      />
+      {isClient && (
+        <UserSubmissions 
+          initialTransactions={transactions}
+          users={users}
+        />
+      )}
     </div>
   );
 }
