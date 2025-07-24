@@ -48,20 +48,17 @@ export default function AdminPage() {
   const { toast } = useToast();
   const { isAdmin, loading } = useAuth();
   const router = useRouter();
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   const fetchData = async () => {
-    setUsers(MOCK_USERS);
+    // We create a deep copy to avoid modifying the original mock data import directly
+    // which can cause issues with hot-reloading in Next.js
+    setUsers(JSON.parse(JSON.stringify(MOCK_USERS)));
     const tasksRecord = MOCK_TASKS.reduce((acc, task) => {
       acc[task.id] = task;
       return acc;
     }, {} as Record<string, Task>);
-    setTasks(tasksRecord);
-    setTransactions(MOCK_TRANSACTIONS);
+    setTasks(JSON.parse(JSON.stringify(tasksRecord)));
+    setTransactions(JSON.parse(JSON.stringify(MOCK_TRANSACTIONS)));
   };
 
   useEffect(() => {
@@ -71,12 +68,21 @@ export default function AdminPage() {
   }, [isAdmin]);
 
   const handleDeleteTask = (taskId: string) => {
-    const newTasks = { ...tasks };
-    delete newTasks[taskId];
-    setTasks(newTasks);
+    // In a real app, this would be an API call
+    const taskIndex = MOCK_TASKS.findIndex(t => t.id === taskId);
+    if (taskIndex > -1) {
+        MOCK_TASKS.splice(taskIndex, 1);
+    }
+    
+    // Also remove transactions associated with this task
+    let i = MOCK_TRANSACTIONS.length;
+    while(i--) {
+        if(MOCK_TRANSACTIONS[i].taskId === taskId) {
+            MOCK_TRANSACTIONS.splice(i, 1);
+        }
+    }
 
-    const newTransactions = transactions.filter((t) => t.taskId !== taskId);
-    setTransactions(newTransactions);
+    fetchData(); // Refetch data to update state
 
     toast({
       title: "Task Deleted",
@@ -85,9 +91,18 @@ export default function AdminPage() {
   };
   
   const handleUpdateTransactionStatus = (transactionId: string, status: TaskStatus) => {
+    // In a real app, this would be an API call.
+    // For our mock data, we'll find and update the transaction in the original array.
+    const transactionIndex = MOCK_TRANSACTIONS.findIndex(t => t.id === transactionId);
+    if (transactionIndex > -1) {
+        MOCK_TRANSACTIONS[transactionIndex].status = status;
+    }
+
+    // Now, we update the local state to reflect this change immediately in the UI.
     setTransactions(prev =>
       prev.map(t => (t.id === transactionId ? { ...t, status } : t))
     );
+    
      toast({
       title: "Status Updated",
       description: `Transaction status has been changed to ${status}.`,
@@ -97,26 +112,26 @@ export default function AdminPage() {
   const getTaskById = (id: string) => tasks[id];
   
   const totalPlatformProfit = useMemo(() => {
-    return transactions
+    return MOCK_TRANSACTIONS
       .filter(t => t.status === 'Paid')
       .reduce((sum, transaction) => {
-        const task = getTaskById(transaction.taskId);
+        const task = MOCK_TASKS.find(t => t.id === transaction.taskId);
         if (task && task.totalReward) {
             const profit = task.totalReward - task.reward;
             return sum + profit;
         }
         return sum;
     }, 0);
-  }, [transactions, tasks]);
+  }, [transactions]); // Re-calculate when local transactions state changes for UI reactivity
 
   const totalUserPayout = useMemo(() => {
-    return transactions
+    return MOCK_TRANSACTIONS
       .filter(t => t.status === 'Paid')
       .reduce((sum, transaction) => sum + transaction.amount, 0);
-  }, [transactions]);
+  }, [transactions]); // Re-calculate when local transactions state changes for UI reactivity
   
-  const totalTasks = Object.keys(tasks).length;
-  const totalUsers = Object.keys(users).length;
+  const totalTasks = useMemo(() => MOCK_TASKS.length, [tasks]);
+  const totalUsers = useMemo(() => Object.keys(MOCK_USERS).length, [users]);
 
 
   if (loading) {
@@ -167,6 +182,7 @@ export default function AdminPage() {
             </CardHeader>
             <CardContent>
                 <div className="text-2xl font-bold">₹{totalUserPayout.toFixed(2)}</div>
+                <p className="text-xs text-muted-foreground">Total earnings paid to users</p>
             </CardContent>
          </Card>
           <Card>
@@ -176,6 +192,7 @@ export default function AdminPage() {
             </CardHeader>
             <CardContent>
                 <div className="text-2xl font-bold">₹{totalPlatformProfit.toFixed(2)}</div>
+                 <p className="text-xs text-muted-foreground">Total earnings from all 'Paid' tasks</p>
             </CardContent>
           </Card>
           <Card>
@@ -185,6 +202,7 @@ export default function AdminPage() {
             </CardHeader>
             <CardContent>
                 <div className="text-2xl font-bold">{totalUsers}</div>
+                 <p className="text-xs text-muted-foreground">Total registered users</p>
             </CardContent>
          </Card>
          <Card>
@@ -194,6 +212,7 @@ export default function AdminPage() {
             </CardHeader>
             <CardContent>
                 <div className="text-2xl font-bold">{totalTasks}</div>
+                <p className="text-xs text-muted-foreground">Total available tasks</p>
             </CardContent>
          </Card>
       </div>
@@ -279,13 +298,11 @@ export default function AdminPage() {
         </CardContent>
       </Card>
       
-      {isClient && (
-          <UserData
-            users={users}
-            transactions={transactions}
-            onStatusChange={handleUpdateTransactionStatus}
-          />
-      )}
+        <UserData
+          users={users}
+          transactions={transactions}
+          onStatusChange={handleUpdateTransactionStatus}
+        />
     </div>
   );
 }
