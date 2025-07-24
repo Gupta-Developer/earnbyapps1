@@ -38,6 +38,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import UserData from "@/components/admin/user-data";
+import UserSubmissions from "@/components/admin/user-submissions";
 
 export default function AdminPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -79,6 +80,16 @@ export default function AdminPage() {
     toast({
       title: "Task Deleted",
       description: "The task and its submissions have been removed.",
+    });
+  };
+  
+  const handleUpdateTransactionStatus = (transactionId: string, status: "Under Verification" | "Approved" | "Rejected" | "Paid") => {
+    setTransactions(prev =>
+      prev.map(t => (t.id === transactionId ? { ...t, status } : t))
+    );
+     toast({
+      title: "Status Updated",
+      description: `Transaction status has been changed to ${status}.`,
     });
   };
   
@@ -133,7 +144,7 @@ export default function AdminPage() {
         <div>
           <h1 className="text-2xl font-bold">Admin Dashboard</h1>
           <p className="text-muted-foreground text-sm">
-            Manage tasks and user submissions.
+            Manage tasks, users, and submissions.
           </p>
         </div>
         <Button asChild size="sm">
@@ -253,9 +264,16 @@ export default function AdminPage() {
       </Card>
       
       {isClient && (
-        <UserData
-          users={users}
-        />
+        <>
+          <UserData
+            users={users}
+          />
+          <UserSubmissions 
+            transactions={transactions}
+            users={users}
+            onStatusChange={handleUpdateTransactionStatus}
+          />
+        </>
       )}
     </div>
   );
