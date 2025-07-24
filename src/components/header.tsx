@@ -5,26 +5,11 @@ import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "./ui/button";
-import { Shield } from "lucide-react";
+import { IndianRupee, Shield } from "lucide-react";
 
 const AppLogo = () => (
     <Link href="/" className="flex items-center gap-2" aria-label="EarnByApps Home">
-        <svg
-            width="32"
-            height="32"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="text-primary"
-        >
-            <path 
-                d="M6 8H18M6 13H18M10 3L10 21M6 3H12C14.2091 3 16 4.79086 16 7C16 9.20914 14.2091 11 12 11H6"
-                stroke="currentColor" 
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-            />
-        </svg>
+        <IndianRupee className="h-8 w-8 text-primary" />
         <span className="text-xl font-bold text-foreground">EarnByApps</span>
     </Link>
 );
