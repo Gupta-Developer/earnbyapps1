@@ -68,21 +68,22 @@ export default function UserData({ users, transactions, onStatusChange }: UserDa
             }
         });
 
-        if (!searchQuery) {
-            return Array.from(userMap.values());
+        let filteredUsers = Array.from(userMap.values());
+
+        if (searchQuery) {
+            const lowercasedQuery = searchQuery.toLowerCase();
+            filteredUsers = filteredUsers.filter(({ user, transactions }) => {
+                const nameMatch = user.fullName?.toLowerCase().includes(lowercasedQuery);
+                const emailMatch = user.email?.toLowerCase().includes(lowercasedQuery);
+                const phoneMatch = user.phone?.toLowerCase().includes(lowercasedQuery);
+                const upiMatch = user.upiId?.toLowerCase().includes(lowercasedQuery);
+                const taskMatch = transactions.some(t => t.title.toLowerCase().includes(lowercasedQuery));
+
+                return nameMatch || emailMatch || phoneMatch || upiMatch || taskMatch;
+            });
         }
-
-        const lowercasedQuery = searchQuery.toLowerCase();
-
-        return Array.from(userMap.values()).filter(({ user, transactions }) => {
-            const nameMatch = user.fullName?.toLowerCase().includes(lowercasedQuery);
-            const emailMatch = user.email?.toLowerCase().includes(lowercasedQuery);
-            const phoneMatch = user.phone?.toLowerCase().includes(lowercasedQuery);
-            const upiMatch = user.upiId?.toLowerCase().includes(lowercasedQuery);
-            const taskMatch = transactions.some(t => t.title.toLowerCase().includes(lowercasedQuery));
-
-            return nameMatch || emailMatch || phoneMatch || upiMatch || taskMatch;
-        });
+        
+        return filteredUsers;
 
     }, [searchQuery, transactions, users]);
     
@@ -112,11 +113,11 @@ export default function UserData({ users, transactions, onStatusChange }: UserDa
                                 <AccordionTrigger className="px-6 py-4 hover:bg-muted/50 text-left">
                                     <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 text-sm w-full">
                                         <div>
-                                            <p className="font-semibold text-base text-foreground">{user.fullName || 'N/A'}</p>
+                                            <p className="font-semibold text-base text-foreground break-all">{user.fullName || 'N/A'}</p>
                                             <p className="text-muted-foreground break-all">{user.email}</p>
                                         </div>
                                          <div className="md:text-right">
-                                            <p className="font-semibold text-foreground">{user.phone || 'No Phone'}</p>
+                                            <p className="font-semibold text-foreground break-all">{user.phone || 'No Phone'}</p>
                                             <p className="text-muted-foreground break-all">{user.upiId || 'No UPI ID'}</p>
                                         </div>
                                     </div>

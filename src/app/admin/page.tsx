@@ -114,6 +114,9 @@ export default function AdminPage() {
       .filter(t => t.status === 'Paid')
       .reduce((sum, transaction) => sum + transaction.amount, 0);
   }, [transactions]);
+  
+  const totalTasks = Object.keys(tasks).length;
+  const totalUsers = Object.keys(users).length;
 
 
   if (loading) {
@@ -156,7 +159,7 @@ export default function AdminPage() {
         </Button>
       </header>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
          <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Total User Payout</CardTitle>
@@ -164,9 +167,6 @@ export default function AdminPage() {
             </CardHeader>
             <CardContent>
                 <div className="text-2xl font-bold">₹{totalUserPayout.toFixed(2)}</div>
-                <p className="text-xs text-muted-foreground">
-                    Total amount paid to users for completed tasks
-                </p>
             </CardContent>
          </Card>
           <Card>
@@ -176,11 +176,26 @@ export default function AdminPage() {
             </CardHeader>
             <CardContent>
                 <div className="text-2xl font-bold">₹{totalPlatformProfit.toFixed(2)}</div>
-                <p className="text-xs text-muted-foreground">
-                    Total earnings from all 'Paid' tasks
-                </p>
             </CardContent>
           </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+                <Users className="w-4 h-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">{totalUsers}</div>
+            </CardContent>
+         </Card>
+         <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
+                <ListChecks className="w-4 h-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">{totalTasks}</div>
+            </CardContent>
+         </Card>
       </div>
 
 
@@ -188,7 +203,7 @@ export default function AdminPage() {
         <CardHeader>
           <CardTitle>Manage Tasks</CardTitle>
           <CardDescription>
-            {Object.keys(tasks).length} tasks available. View, edit, or delete them below.
+            {totalTasks} tasks available. View, edit, or delete them below.
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0">
