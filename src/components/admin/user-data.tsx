@@ -85,13 +85,15 @@ export default function UserData({ users, transactions, onStatusChange }: UserDa
         });
 
     }, [searchQuery, transactions, users]);
+    
+    const totalUsers = Object.keys(users).length;
 
     return (
         <Card className="shadow-lg rounded-lg">
             <CardHeader>
                 <CardTitle>User Data</CardTitle>
                 <CardDescription>
-                    View and manage user tasks and their statuses.
+                    {totalUsers} users registered. View and manage user tasks and their statuses.
                 </CardDescription>
                 <div className="pt-2">
                     <Input 
