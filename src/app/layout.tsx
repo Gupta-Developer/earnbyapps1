@@ -19,6 +19,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'EarnByApps',
   description: 'Earn rewards by completing tasks.',
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({
@@ -28,6 +29,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta name="theme-color" content="#3B82F6" />
+      </head>
       <body className={`${inter.variable} font-body antialiased`}>
         <ThemeProvider
           attribute="class"
