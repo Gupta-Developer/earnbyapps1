@@ -11,8 +11,8 @@ import { CheckCircle, Copy } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useAuth } from '@/hooks/use-auth';
-import { Task } from '@/lib/types';
-import { MOCK_TASKS } from '@/lib/mock-data';
+import { Task, Transaction } from '@/lib/types';
+import { MOCK_TASKS, MOCK_TRANSACTIONS } from '@/lib/mock-data';
 
 
 export default function TaskDetailPage() {
@@ -57,16 +57,28 @@ export default function TaskDetailPage() {
   };
 
   const handleStartTask = async () => {
+    if (!user) return;
     // This is where you would normally interact with a database.
-    console.log(`Starting task ${task.id} for user ${user!.id}`);
+    console.log(`Starting task ${task.id} for user ${user.id}`);
+    
+    // Create a new transaction and add it to our mock data
+    const newTransaction: Transaction = {
+        id: `txn-${Date.now()}`,
+        userId: user.id,
+        taskId: task.id,
+        title: task.name,
+        amount: task.reward,
+        status: 'Under Verification',
+        date: new Date(),
+    };
+    MOCK_TRANSACTIONS.unshift(newTransaction); // Add to the beginning of the array
 
     toast({
-    title: "Task Started!",
-    description: `"${task.name}" is now under verification in your wallet.`,
+        title: "Task Started!",
+        description: `"${task.name}" is now under verification in your wallet.`,
     });
     
     // We don't redirect to the wallet anymore, since the user is sent to an external link.
-    // router.push('/wallet');
   };
 
   const stepsArray = typeof task.steps === 'string' ? task.steps.split('\n').filter(s => s.trim() !== '') : [];
