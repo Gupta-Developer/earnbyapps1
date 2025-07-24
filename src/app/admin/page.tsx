@@ -50,8 +50,6 @@ export default function AdminPage() {
   const router = useRouter();
 
   const fetchData = async () => {
-    // We create a deep copy to avoid modifying the original mock data import directly
-    // which can cause issues with hot-reloading in Next.js
     setUsers(JSON.parse(JSON.stringify(MOCK_USERS)));
     const tasksRecord = MOCK_TASKS.reduce((acc, task) => {
       acc[task.id] = task;
@@ -68,13 +66,11 @@ export default function AdminPage() {
   }, [isAdmin]);
 
   const handleDeleteTask = (taskId: string) => {
-    // In a real app, this would be an API call
     const taskIndex = MOCK_TASKS.findIndex(t => t.id === taskId);
     if (taskIndex > -1) {
         MOCK_TASKS.splice(taskIndex, 1);
     }
     
-    // Also remove transactions associated with this task
     let i = MOCK_TRANSACTIONS.length;
     while(i--) {
         if(MOCK_TRANSACTIONS[i].taskId === taskId) {
@@ -82,7 +78,7 @@ export default function AdminPage() {
         }
     }
 
-    fetchData(); // Refetch data to update state
+    fetchData(); 
 
     toast({
       title: "Task Deleted",
@@ -169,6 +165,101 @@ export default function AdminPage() {
         </Button>
       </header>
 
+      <Tabs defaultValue="tasks" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="tasks">Manage Tasks</TabsTrigger>
+              <TabsTrigger value="users">User Data</TabsTrigger>
+          </TabsList>
+          <TabsContent value="tasks">
+              <Card className="shadow-lg rounded-lg">
+                  <CardHeader>
+                  <CardTitle>Manage Tasks</CardTitle>
+                  <CardDescription>
+                      {totalTasks} tasks available. View, edit, or delete them below.
+                  </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                  <div className="overflow-x-auto">
+                      <Table>
+                      <TableHeader>
+                          <TableRow>
+                          <TableHead>Task Name</TableHead>
+                          <TableHead>User Payout</TableHead>
+                          <TableHead>Total Reward</TableHead>
+                          <TableHead>Platform Profit</TableHead>
+                          <TableHead>Tags</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                          </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                          {Object.values(tasks).map((task) => (
+                          <TableRow key={task.id}>
+                              <TableCell className="font-medium">{task.name}</TableCell>
+                              <TableCell>₹{task.reward}</TableCell>
+                              <TableCell>₹{task.totalReward || "N/A"}</TableCell>
+                              <TableCell>₹{(task.totalReward || 0) - task.reward}</TableCell>
+                              <TableCell className="flex items-center gap-2">
+                              {task.isHighPaying && (
+                                  <Badge variant="secondary">High Paying</Badge>
+                              )}
+                              {task.isInstant && (
+                                  <Badge variant="outline">Instant</Badge>
+                              )}
+                              </TableCell>
+                              <TableCell className="text-right space-x-2">
+                              <Button variant="ghost" size="icon" asChild>
+                                  <Link href={`/admin/edit-task/${task.id}`}>
+                                  <Pencil className="h-4 w-4" />
+                                  <span className="sr-only">Edit Task</span>
+                                  </Link>
+                              </Button>
+                              <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="icon">
+                                      <Trash2 className="h-4 w-4 text-destructive" />
+                                      <span className="sr-only">Delete Task</span>
+                                  </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                      <AlertDialogTitle>
+                                      Are you sure?
+                                      </AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                      This action cannot be undone. This will
+                                      permanently delete the task and all associated
+                                      user submissions.
+                                      </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction
+                                      onClick={() => handleDeleteTask(task.id)}
+                                      className="bg-destructive hover:bg-destructive/90"
+                                      >
+                                      Delete
+                                      </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                  </AlertDialogContent>
+                              </AlertDialog>
+                              </TableCell>
+                          </TableRow>
+                          ))}
+                      </TableBody>
+                      </Table>
+                  </div>
+                  </CardContent>
+              </Card>
+          </TabsContent>
+          <TabsContent value="users">
+              <UserData
+              users={users}
+              transactions={transactions}
+              onStatusChange={handleUpdateTransactionStatus}
+              />
+          </TabsContent>
+      </Tabs>
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
          <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -212,102 +303,6 @@ export default function AdminPage() {
          </Card>
       </div>
 
-        <Tabs defaultValue="tasks" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="tasks">Manage Tasks</TabsTrigger>
-                <TabsTrigger value="users">User Data</TabsTrigger>
-            </TabsList>
-            <TabsContent value="tasks">
-                <Card className="shadow-lg rounded-lg">
-                    <CardHeader>
-                    <CardTitle>Manage Tasks</CardTitle>
-                    <CardDescription>
-                        {totalTasks} tasks available. View, edit, or delete them below.
-                    </CardDescription>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                    <div className="overflow-x-auto">
-                        <Table>
-                        <TableHeader>
-                            <TableRow>
-                            <TableHead>Task Name</TableHead>
-                            <TableHead>User Payout</TableHead>
-                            <TableHead>Total Reward</TableHead>
-                            <TableHead>Platform Profit</TableHead>
-                            <TableHead>Tags</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {Object.values(tasks).map((task) => (
-                            <TableRow key={task.id}>
-                                <TableCell className="font-medium">{task.name}</TableCell>
-                                <TableCell>₹{task.reward}</TableCell>
-                                <TableCell>₹{task.totalReward || "N/A"}</TableCell>
-                                <TableCell>₹{(task.totalReward || 0) - task.reward}</TableCell>
-                                <TableCell className="flex items-center gap-2">
-                                {task.isHighPaying && (
-                                    <Badge variant="secondary">High Paying</Badge>
-                                )}
-                                {task.isInstant && (
-                                    <Badge variant="outline">Instant</Badge>
-                                )}
-                                </TableCell>
-                                <TableCell className="text-right space-x-2">
-                                <Button variant="ghost" size="icon" asChild>
-                                    <Link href={`/admin/edit-task/${task.id}`}>
-                                    <Pencil className="h-4 w-4" />
-                                    <span className="sr-only">Edit Task</span>
-                                    </Link>
-                                </Button>
-                                <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" size="icon">
-                                        <Trash2 className="h-4 w-4 text-destructive" />
-                                        <span className="sr-only">Delete Task</span>
-                                    </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                        <AlertDialogTitle>
-                                        Are you sure?
-                                        </AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                        This action cannot be undone. This will
-                                        permanently delete the task and all associated
-                                        user submissions.
-                                        </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction
-                                        onClick={() => handleDeleteTask(task.id)}
-                                        className="bg-destructive hover:bg-destructive/90"
-                                        >
-                                        Delete
-                                        </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                                </TableCell>
-                            </TableRow>
-                            ))}
-                        </TableBody>
-                        </Table>
-                    </div>
-                    </CardContent>
-                </Card>
-            </TabsContent>
-            <TabsContent value="users">
-                <UserData
-                users={users}
-                transactions={transactions}
-                onStatusChange={handleUpdateTransactionStatus}
-                />
-            </TabsContent>
-        </Tabs>
     </div>
   );
 }
-
-    
