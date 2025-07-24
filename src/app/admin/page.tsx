@@ -9,15 +9,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -28,7 +20,7 @@ import {
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { PlusCircle, ShieldAlert, Pencil, Trash2, DollarSign } from "lucide-react";
-import { Transaction, TaskStatus, User, Task } from "@/lib/types";
+import { Transaction, Task, User } from "@/lib/types";
 import { MOCK_TRANSACTIONS, MOCK_USERS, MOCK_TASKS } from "@/lib/mock-data";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
@@ -45,24 +37,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Input } from "@/components/ui/input";
-
-const getBadgeVariant = (
-  status: string
-): "default" | "secondary" | "destructive" | "outline" => {
-  switch (status) {
-    case "Paid":
-      return "default";
-    case "Approved":
-      return "secondary";
-    case "Under Verification":
-      return "outline";
-    case "Rejected":
-      return "destructive";
-    default:
-      return "destructive";
-  }
-};
+import UserSubmissions from "@/components/admin/user-submissions";
 
 export default function AdminPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -71,20 +46,14 @@ export default function AdminPage() {
   const { toast } = useToast();
   const { isAdmin, loading } = useAuth();
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchData = async () => {
-    // In a real app, you'd fetch this from an API.
-    // For now, we use mock data.
     setUsers(MOCK_USERS);
-
-    // Convert array to Record for easy lookup
     const tasksRecord = MOCK_TASKS.reduce((acc, task) => {
       acc[task.id] = task;
       return acc;
     }, {} as Record<string, Task>);
     setTasks(tasksRecord);
-
     setTransactions(MOCK_TRANSACTIONS);
   };
 
@@ -94,31 +63,7 @@ export default function AdminPage() {
     }
   }, [isAdmin]);
 
-  const handleStatusChange = (
-    transactionId: string,
-    newStatus: TaskStatus
-  ) => {
-    setTransactions((prev) =>
-      prev.map((t) =>
-        t.id === transactionId ? { ...t, status: newStatus } : t
-      )
-    );
-  };
-
-  const handleSaveChanges = async () => {
-    // This is where you would normally send the updated statuses to your API.
-    console.log("Saving changes for transactions:", transactions);
-
-    toast({
-      title: "Changes Saved (Simulated)",
-      description: "All task statuses have been updated.",
-      className: "bg-accent text-accent-foreground border-accent",
-    });
-  };
-
   const handleDeleteTask = (taskId: string) => {
-    // In a real app, this would be an API call.
-    // For now, we'll just filter the state.
     const newTasks = { ...tasks };
     delete newTasks[taskId];
     setTasks(newTasks);
@@ -132,27 +77,8 @@ export default function AdminPage() {
     });
   };
   
-  const getUserById = (id: string) => users[id];
   const getTaskById = (id: string) => tasks[id];
   
-  const filteredTransactions = useMemo(() => {
-    if (!searchQuery) {
-      return transactions;
-    }
-    const lowercasedQuery = searchQuery.toLowerCase();
-    
-    return transactions.filter(transaction => {
-      const user = getUserById(transaction.userId);
-      if (!user) return false;
-
-      const nameMatch = user.fullName?.toLowerCase().includes(lowercasedQuery);
-      const emailMatch = user.email?.toLowerCase().includes(lowercasedQuery);
-      const phoneMatch = user.phone?.replace(/\D/g, '').includes(lowercasedQuery.replace(/\D/g, ''));
-      
-      return nameMatch || emailMatch || phoneMatch;
-    });
-  }, [searchQuery, transactions, users]);
-
   const totalPlatformProfit = useMemo(() => {
     return transactions
       .filter(t => t.status === 'Paid')
@@ -299,99 +225,10 @@ export default function AdminPage() {
         </CardContent>
       </Card>
       
-      <Card className="shadow-lg rounded-lg">
-        <CardHeader>
-          <CardTitle>User Submissions</CardTitle>
-          <CardDescription>
-            Review and update the status of user-submitted tasks and referrals. You can search by name, email, or phone.
-          </CardDescription>
-          <div className="pt-2">
-             <Input 
-                placeholder="Search by name, email, or phone..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="max-w-sm"
-            />
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>User & Task/Referral</TableHead>
-                  <TableHead className="w-[180px]">Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredTransactions.length > 0 ? (
-                  filteredTransactions.map((transaction) => {
-                    const user = getUserById(transaction.userId);
-                    if (!user) return null;
-
-                    return (
-                      <TableRow key={transaction.id}>
-                        <TableCell>
-                           <div className="font-medium">{user.fullName}</div>
-                           <div className="text-sm text-muted-foreground">{transaction.title}</div>
-                           <div className="text-xs text-muted-foreground/80 mt-1">
-                             {user.phone || 'No Phone'} &bull; {user.upiId || 'No UPI ID'}
-                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <Select
-                            value={transaction.status}
-                            onValueChange={(value: TaskStatus) =>
-                              handleStatusChange(
-                                transaction.id as string,
-                                value
-                              )
-                            }
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Set status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Under Verification">
-                                Under Verification
-                              </SelectItem>
-                              <SelectItem value="Approved">
-                                Approved
-                              </SelectItem>
-                              <SelectItem value="Rejected">
-                                Rejected
-                              </SelectItem>
-                              <SelectItem value="Paid">Paid</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={2} className="h-24 text-center">
-                      No submissions to display.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-        <CardFooter className="flex justify-end pt-4">
-          <Button
-            onClick={handleSaveChanges}
-            size="lg"
-            className="shadow-md"
-            disabled={transactions.length === 0}
-          >
-            Save All Changes
-          </Button>
-        </CardFooter>
-      </Card>
+      <UserSubmissions 
+        initialTransactions={transactions}
+        users={users}
+      />
     </div>
   );
 }
-
-    
