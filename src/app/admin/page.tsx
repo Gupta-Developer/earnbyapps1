@@ -37,7 +37,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import UserSubmissions from "@/components/admin/user-submissions";
+import UserData from "@/components/admin/user-data";
 
 export default function AdminPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -253,8 +253,7 @@ export default function AdminPage() {
       </Card>
       
       {isClient && (
-        <UserSubmissions 
-          initialTransactions={transactions}
+        <UserData
           users={users}
         />
       )}
