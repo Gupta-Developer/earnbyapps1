@@ -17,42 +17,62 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { User } from "@/lib/types";
+import { User, Transaction, TaskStatus } from "@/lib/types";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface UserDataProps {
     users: Record<string, User>;
+    transactions: Transaction[];
+    onStatusChange: (transactionId: string, status: TaskStatus) => void;
 }
 
-export default function UserData({ users }: UserDataProps) {
+const getBadgeVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
+    switch (status) {
+        case 'Paid':
+            return 'default'; // Uses accent color via custom css
+        case 'Approved':
+            return 'secondary';
+        case 'Under Verification':
+            return 'outline';
+        case 'Rejected':
+            return 'destructive';
+        default:
+            return 'destructive';
+    }
+}
+
+
+export default function UserData({ users, transactions, onStatusChange }: UserDataProps) {
     const [searchQuery, setSearchQuery] = useState("");
 
-    const filteredUsers = useMemo(() => {
-        const userArray = Object.values(users);
+    const filteredSubmissions = useMemo(() => {
         if (!searchQuery) {
-            return userArray;
+          return transactions;
         }
         const lowercasedQuery = searchQuery.toLowerCase();
-        
-        return userArray.filter(user => {
-            const nameMatch = user.fullName?.toLowerCase().includes(lowercasedQuery);
-            const emailMatch = user.email?.toLowerCase().includes(lowercasedQuery);
-            const phoneMatch = user.phone?.replace(/\D/g, '').includes(lowercasedQuery.replace(/\D/g, ''));
-            
-            return nameMatch || emailMatch || phoneMatch;
+    
+        return transactions.filter(transaction => {
+          const user = users[transaction.userId];
+          const nameMatch = user?.fullName?.toLowerCase().includes(lowercasedQuery);
+          const emailMatch = user?.email?.toLowerCase().includes(lowercasedQuery);
+          const taskMatch = transaction.title.toLowerCase().includes(lowercasedQuery);
+    
+          return nameMatch || emailMatch || taskMatch;
         });
-    }, [searchQuery, users]);
+      }, [searchQuery, transactions, users]);
 
     return (
         <Card className="shadow-lg rounded-lg">
             <CardHeader>
                 <CardTitle>User Data</CardTitle>
                 <CardDescription>
-                    View and search for registered users.
+                    View and manage user tasks and their statuses.
                 </CardDescription>
                 <div className="pt-2">
                     <Input 
-                        placeholder="Search by name, email, or phone..."
+                        placeholder="Search by name, email, or task..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="max-w-sm"
@@ -64,26 +84,50 @@ export default function UserData({ users }: UserDataProps) {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Full Name</TableHead>
-                                <TableHead>Email</TableHead>
-                                <TableHead>Phone</TableHead>
-                                <TableHead>UPI ID</TableHead>
+                                <TableHead>User</TableHead>
+                                <TableHead>Contact</TableHead>
+                                <TableHead>Task</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead className="text-right">Update Status</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filteredUsers.length > 0 ? (
-                                filteredUsers.map((user) => (
-                                    <TableRow key={user.id}>
-                                        <TableCell className="font-medium">{user.fullName || 'N/A'}</TableCell>
-                                        <TableCell>{user.email || 'N/A'}</TableCell>
-                                        <TableCell>{user.phone || 'N/A'}</TableCell>
-                                        <TableCell>{user.upiId || 'N/A'}</TableCell>
+                            {filteredSubmissions.length > 0 ? (
+                                filteredSubmissions.map((item) => (
+                                    <TableRow key={item.id}>
+                                        <TableCell className="font-medium">{users[item.userId]?.fullName || 'N/A'}</TableCell>
+                                        <TableCell>
+                                            <div>{users[item.userId]?.email || 'N/A'}</div>
+                                            <div className="text-xs text-muted-foreground">{users[item.userId]?.phone || 'N/A'}</div>
+                                        </TableCell>
+                                        <TableCell>{item.title}</TableCell>
+                                        <TableCell>
+                                            <Badge variant={getBadgeVariant(item.status)} className={item.status === 'Paid' ? 'bg-accent text-accent-foreground' : ''}>
+                                                {item.status}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <Select
+                                                value={item.status}
+                                                onValueChange={(value) => onStatusChange(item.id!, value as TaskStatus)}
+                                                >
+                                                <SelectTrigger className="w-[180px]">
+                                                    <SelectValue placeholder="Update Status" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="Under Verification">Under Verification</SelectItem>
+                                                    <SelectItem value="Approved">Approved</SelectItem>
+                                                    <SelectItem value="Paid">Paid</SelectItem>
+                                                    <SelectItem value="Rejected">Rejected</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </TableCell>
                                     </TableRow>
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={4} className="h-24 text-center">
-                                        No users found.
+                                    <TableCell colSpan={5} className="h-24 text-center">
+                                        No submissions found for the current filter.
                                     </TableCell>
                                 </TableRow>
                             )}

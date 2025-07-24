@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { PlusCircle, ShieldAlert, Pencil, Trash2, DollarSign, Users } from "lucide-react";
-import { Transaction, Task, User } from "@/lib/types";
+import { Transaction, Task, User, TaskStatus } from "@/lib/types";
 import { MOCK_TRANSACTIONS, MOCK_USERS, MOCK_TASKS } from "@/lib/mock-data";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
@@ -38,7 +38,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import UserData from "@/components/admin/user-data";
-import UserSubmissions from "@/components/admin/user-submissions";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 
 export default function AdminPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -83,7 +84,7 @@ export default function AdminPage() {
     });
   };
   
-  const handleUpdateTransactionStatus = (transactionId: string, status: "Under Verification" | "Approved" | "Rejected" | "Paid") => {
+  const handleUpdateTransactionStatus = (transactionId: string, status: TaskStatus) => {
     setTransactions(prev =>
       prev.map(t => (t.id === transactionId ? { ...t, status } : t))
     );
@@ -264,16 +265,11 @@ export default function AdminPage() {
       </Card>
       
       {isClient && (
-        <>
           <UserData
             users={users}
-          />
-          <UserSubmissions 
             transactions={transactions}
-            users={users}
             onStatusChange={handleUpdateTransactionStatus}
           />
-        </>
       )}
     </div>
   );
