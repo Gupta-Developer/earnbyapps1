@@ -19,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { PlusCircle, ShieldAlert, Pencil, Trash2, DollarSign, Users } from "lucide-react";
+import { PlusCircle, ShieldAlert, Pencil, Trash2, DollarSign, Users, ListChecks } from "lucide-react";
 import { Transaction, Task, User, TaskStatus } from "@/lib/types";
 import { MOCK_TRANSACTIONS, MOCK_USERS, MOCK_TASKS } from "@/lib/mock-data";
 import Link from "next/link";
@@ -156,11 +156,35 @@ export default function AdminPage() {
         </Button>
       </header>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+         <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+                <Users className="w-4 h-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">{Object.keys(users).length}</div>
+                <p className="text-xs text-muted-foreground">
+                    Total registered users on the platform
+                </p>
+            </CardContent>
+         </Card>
+         <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
+                <ListChecks className="w-4 h-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">{Object.keys(tasks).length}</div>
+                <p className="text-xs text-muted-foreground">
+                    Total tasks available for users to complete
+                </p>
+            </CardContent>
+         </Card>
          <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Total User Payout</CardTitle>
-                <Users className="w-4 h-4 text-muted-foreground" />
+                <DollarSign className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
                 <div className="text-2xl font-bold">₹{totalUserPayout.toFixed(2)}</div>
