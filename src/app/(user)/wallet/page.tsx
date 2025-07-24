@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useAuth } from "@/hooks/use-auth";
 import { MOCK_TRANSACTIONS } from "@/lib/mock-data";
+import ActivityTicker from "@/components/activity-ticker";
 
 const getBadgeVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
     switch (status) {
@@ -79,80 +80,83 @@ export default function WalletPage() {
     .reduce((sum, t) => sum + t.amount, 0);
 
   return (
-    <div className="p-4 space-y-6">
-      <Card className="text-center shadow-lg rounded-lg">
-        <CardHeader>
-          <CardTitle className="text-muted-foreground">Total Earnings</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-4xl font-bold text-accent">₹{totalEarnings.toFixed(2)}</p>
-        </CardContent>
-      </Card>
-      
-      <div>
-        <h2 className="text-lg font-semibold mb-2 px-1">Earnings History</h2>
-        <Card className="shadow-md rounded-lg">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Details</TableHead>
-                <TableHead className="text-center">Status</TableHead>
-                <TableHead>Support</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {transactions.length > 0 ? transactions.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell>
-                    <div className="font-medium">{item.title}</div>
-                    <div className="text-sm text-accent">₹{item.amount}</div>
-                    <div className="text-xs text-muted-foreground">{format(item.date, 'dd MMM, yyyy')}</div>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <Badge variant={getBadgeVariant(item.status)} className={item.status === 'Paid' ? 'bg-accent text-accent-foreground' : ''}>
-                      {item.status}
-                    </Badge>
-                  </TableCell>
-                   <TableCell>
-                     <Button
-                        variant="link"
-                        className="p-0 h-auto text-xs text-muted-foreground gap-1"
-                        asChild
-                      >
-                        <a href={`https://wa.me/918319250462?text=Hi, I have a question about my transaction: ${item.title}`} target="_blank" rel="noopener noreferrer">
-                          <WhatsAppIcon />
-                          Contact
-                        </a>
-                      </Button>
-                  </TableCell>
-                </TableRow>
-              )) : (
-                <TableRow>
-                  <TableCell colSpan={3} className="text-center text-muted-foreground h-24">
-                    No transactions yet. Start a task to see it here!
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+    <>
+      <ActivityTicker />
+      <div className="p-4 space-y-6 mt-12">
+        <Card className="text-center shadow-lg rounded-lg">
+          <CardHeader>
+            <CardTitle className="text-muted-foreground">Total Earnings</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-4xl font-bold text-accent">₹{totalEarnings.toFixed(2)}</p>
+          </CardContent>
         </Card>
-      </div>
-       <div className="space-y-4">
-            <h2 className="text-xl font-bold px-1">Understanding Statuses</h2>
-            <Accordion type="single" collapsible className="w-full space-y-2">
-                {statusFaqs.map((faq, index) => (
-                    <AccordionItem value={`item-${index}`} key={index} className="bg-secondary/50 rounded-lg px-4 border-b-0">
-                        <AccordionTrigger className="text-left hover:no-underline">
-                            {faq.question}
-                        </AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground pt-0 pb-4">
-                            {faq.answer}
-                        </AccordionContent>
-                    </AccordionItem>
-                ))}
-            </Accordion>
+        
+        <div>
+          <h2 className="text-lg font-semibold mb-2 px-1">Earnings History</h2>
+          <Card className="shadow-md rounded-lg">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Details</TableHead>
+                  <TableHead className="text-center">Status</TableHead>
+                  <TableHead>Support</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {transactions.length > 0 ? transactions.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell>
+                      <div className="font-medium">{item.title}</div>
+                      <div className="text-sm text-accent">₹{item.amount}</div>
+                      <div className="text-xs text-muted-foreground">{format(item.date, 'dd MMM, yyyy')}</div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant={getBadgeVariant(item.status)} className={item.status === 'Paid' ? 'bg-accent text-accent-foreground' : ''}>
+                        {item.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                          variant="link"
+                          className="p-0 h-auto text-xs text-muted-foreground gap-1"
+                          asChild
+                        >
+                          <a href={`https://wa.me/918319250462?text=Hi, I have a question about my transaction: ${item.title}`} target="_blank" rel="noopener noreferrer">
+                            <WhatsAppIcon />
+                            Contact
+                          </a>
+                        </Button>
+                    </TableCell>
+                  </TableRow>
+                )) : (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center text-muted-foreground h-24">
+                      No transactions yet. Start a task to see it here!
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </Card>
         </div>
-    </div>
+        <div className="space-y-4">
+              <h2 className="text-xl font-bold px-1">Understanding Statuses</h2>
+              <Accordion type="single" collapsible className="w-full space-y-2">
+                  {statusFaqs.map((faq, index) => (
+                      <AccordionItem value={`item-${index}`} key={index} className="bg-secondary/50 rounded-lg px-4 border-b-0">
+                          <AccordionTrigger className="text-left hover:no-underline">
+                              {faq.question}
+                          </AccordionTrigger>
+                          <AccordionContent className="text-muted-foreground pt-0 pb-4">
+                              {faq.answer}
+                          </AccordionContent>
+                      </AccordionItem>
+                  ))}
+              </Accordion>
+          </div>
+      </div>
+    </>
   );
 }
 

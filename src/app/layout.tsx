@@ -8,7 +8,6 @@ import { AuthProvider } from '@/hooks/use-auth';
 import Header from '@/components/header';
 import BottomNav from '@/components/bottom-nav';
 import Footer from '@/components/footer';
-import ActivityTicker from '@/components/activity-ticker';
 
 const inter = Inter({
   subsets: ['latin', 'latin-ext'],
@@ -43,8 +42,7 @@ export default function RootLayout({
              <div className="flex justify-center bg-background">
                 <div className="w-full max-w-[480px] min-h-screen bg-card shadow-lg relative flex flex-col">
                   <Header />
-                  <ActivityTicker />
-                  <main className="flex-grow pt-24 pb-20">{children}</main>
+                  <main className="flex-grow pt-16 pb-20">{children}</main>
                   <Footer />
                   <BottomNav />
                 </div>
