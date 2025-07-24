@@ -137,16 +137,19 @@ export default function AdminPage() {
   
   const filteredTransactions = useMemo(() => {
     if (!searchQuery) {
-        return transactions;
+      return transactions;
     }
-    const normalizedSearch = searchQuery.replace(/\D/g, '');
-    if (!normalizedSearch) {
-        return transactions;
-    }
+    const lowercasedQuery = searchQuery.toLowerCase();
+    
     return transactions.filter(transaction => {
-        const user = getUserById(transaction.userId);
-        const userPhone = user?.phone?.replace(/\D/g, '');
-        return userPhone?.includes(normalizedSearch);
+      const user = getUserById(transaction.userId);
+      if (!user) return false;
+
+      const nameMatch = user.fullName?.toLowerCase().includes(lowercasedQuery);
+      const emailMatch = user.email?.toLowerCase().includes(lowercasedQuery);
+      const phoneMatch = user.phone?.replace(/\D/g, '').includes(lowercasedQuery.replace(/\D/g, ''));
+      
+      return nameMatch || emailMatch || phoneMatch;
     });
   }, [searchQuery, transactions, users]);
 
@@ -270,11 +273,11 @@ export default function AdminPage() {
         <CardHeader>
           <CardTitle>User Submissions</CardTitle>
           <CardDescription>
-            Review and update the status of user-submitted tasks and referrals. You can search by phone number.
+            Review and update the status of user-submitted tasks and referrals. You can search by name, email, or phone.
           </CardDescription>
           <div className="pt-2">
              <Input 
-                placeholder="Search by phone number..."
+                placeholder="Search by name, email, or phone..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="max-w-sm"
