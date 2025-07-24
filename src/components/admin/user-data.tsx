@@ -61,6 +61,12 @@ export default function UserData({ users, transactions, onStatusChange }: UserDa
                 userMap.get(user.id)!.transactions.push(transaction);
             }
         });
+        
+        Object.values(users).forEach(user => {
+            if (!userMap.has(user.id)) {
+                 userMap.set(user.id, { user, transactions: [] });
+            }
+        });
 
         if (!searchQuery) {
             return Array.from(userMap.values());
@@ -72,9 +78,10 @@ export default function UserData({ users, transactions, onStatusChange }: UserDa
             const nameMatch = user.fullName?.toLowerCase().includes(lowercasedQuery);
             const emailMatch = user.email?.toLowerCase().includes(lowercasedQuery);
             const phoneMatch = user.phone?.toLowerCase().includes(lowercasedQuery);
+            const upiMatch = user.upiId?.toLowerCase().includes(lowercasedQuery);
             const taskMatch = transactions.some(t => t.title.toLowerCase().includes(lowercasedQuery));
 
-            return nameMatch || emailMatch || phoneMatch || taskMatch;
+            return nameMatch || emailMatch || phoneMatch || upiMatch || taskMatch;
         });
 
     }, [searchQuery, transactions, users]);
@@ -88,10 +95,10 @@ export default function UserData({ users, transactions, onStatusChange }: UserDa
                 </CardDescription>
                 <div className="pt-2">
                     <Input 
-                        placeholder="Search by user name, email, phone, or task..."
+                        placeholder="Search by user name, email, phone, UPI or task..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="max-w-sm"
+                        className="max-w-md"
                     />
                 </div>
             </CardHeader>
@@ -100,60 +107,72 @@ export default function UserData({ users, transactions, onStatusChange }: UserDa
                      {groupedAndFilteredUsers.length > 0 ? (
                         groupedAndFilteredUsers.map(({ user, transactions }) => (
                             <AccordionItem value={user.id} key={user.id} className="border-b">
-                                <AccordionTrigger className="px-6 py-4 hover:bg-muted/50">
-                                    <div className="flex-1 text-left">
-                                        <p className="font-semibold">{user.fullName || 'N/A'}</p>
-                                        <p className="text-sm text-muted-foreground">{user.email}</p>
+                                <AccordionTrigger className="px-6 py-4 hover:bg-muted/50 text-left">
+                                    <div className="flex-1 grid grid-cols-2 gap-x-4 gap-y-1">
+                                        <div>
+                                            <p className="font-semibold">{user.fullName || 'N/A'}</p>
+                                            <p className="text-sm text-muted-foreground">{user.email}</p>
+                                        </div>
+                                         <div>
+                                            <p className="font-semibold">{user.phone || 'No Phone'}</p>
+                                            <p className="text-sm text-muted-foreground">{user.upiId || 'No UPI ID'}</p>
+                                        </div>
                                     </div>
-                                    <Badge variant="outline" className="ml-4">{transactions.length} task(s)</Badge>
+                                    <Badge variant="outline" className="ml-4 shrink-0">{transactions.length} task(s)</Badge>
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="bg-muted/30 p-4">
                                          <div className="overflow-x-auto">
-                                            <Table>
-                                                <TableHeader>
-                                                    <TableRow>
-                                                        <TableHead>Task</TableHead>
-                                                        <TableHead>Date</TableHead>
-                                                        <TableHead>Status</TableHead>
-                                                        <TableHead className="text-right">Update Status</TableHead>
-                                                    </TableRow>
-                                                </TableHeader>
-                                                <TableBody>
-                                                    {transactions.map(item => (
-                                                        <TableRow key={item.id}>
-                                                            <TableCell>
-                                                                <div className="font-medium">{item.title}</div>
-                                                                <div className="text-sm text-accent">₹{item.amount}</div>
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                {format(item.date, 'dd MMM, yyyy')}
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <Badge variant={getBadgeVariant(item.status)} className={item.status === 'Paid' ? 'bg-accent text-accent-foreground' : ''}>
-                                                                    {item.status}
-                                                                </Badge>
-                                                            </TableCell>
-                                                             <TableCell className="text-right">
-                                                                <Select
-                                                                    value={item.status}
-                                                                    onValueChange={(value) => onStatusChange(item.id!, value as TaskStatus)}
-                                                                    >
-                                                                    <SelectTrigger className="w-[180px] ml-auto">
-                                                                        <SelectValue placeholder="Update Status" />
-                                                                    </SelectTrigger>
-                                                                    <SelectContent>
-                                                                        <SelectItem value="Under Verification">Under Verification</SelectItem>
-                                                                        <SelectItem value="Approved">Approved</SelectItem>
-                                                                        <SelectItem value="Paid">Paid</SelectItem>
-                                                                        <SelectItem value="Rejected">Rejected</SelectItem>
-                                                                    </SelectContent>
-                                                                </Select>
-                                                            </TableCell>
+                                            {transactions.length > 0 ? (
+                                                <Table>
+                                                    <TableHeader>
+                                                        <TableRow>
+                                                            <TableHead>Task</TableHead>
+                                                            <TableHead>Date</TableHead>
+                                                            <TableHead>Status</TableHead>
+                                                            <TableHead className="text-right">Update Status</TableHead>
                                                         </TableRow>
-                                                    ))}
-                                                </TableBody>
-                                            </Table>
+                                                    </TableHeader>
+                                                    <TableBody>
+                                                        {transactions.map(item => (
+                                                            <TableRow key={item.id}>
+                                                                <TableCell>
+                                                                    <div className="font-medium">{item.title}</div>
+                                                                    <div className="text-sm text-accent">₹{item.amount}</div>
+                                                                </TableCell>
+                                                                <TableCell>
+                                                                    {format(item.date, 'dd MMM, yyyy')}
+                                                                </TableCell>
+                                                                <TableCell>
+                                                                    <Badge variant={getBadgeVariant(item.status)} className={item.status === 'Paid' ? 'bg-accent text-accent-foreground' : ''}>
+                                                                        {item.status}
+                                                                    </Badge>
+                                                                </TableCell>
+                                                                <TableCell className="text-right">
+                                                                    <Select
+                                                                        value={item.status}
+                                                                        onValueChange={(value) => onStatusChange(item.id!, value as TaskStatus)}
+                                                                        >
+                                                                        <SelectTrigger className="w-[180px] ml-auto">
+                                                                            <SelectValue placeholder="Update Status" />
+                                                                        </SelectTrigger>
+                                                                        <SelectContent>
+                                                                            <SelectItem value="Under Verification">Under Verification</SelectItem>
+                                                                            <SelectItem value="Approved">Approved</SelectItem>
+                                                                            <SelectItem value="Paid">Paid</SelectItem>
+                                                                            <SelectItem value="Rejected">Rejected</SelectItem>
+                                                                        </SelectContent>
+                                                                    </Select>
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        ))}
+                                                    </TableBody>
+                                                </Table>
+                                            ) : (
+                                                <div className="text-center text-muted-foreground p-4 text-sm">
+                                                    This user has not initiated any tasks yet.
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </AccordionContent>
