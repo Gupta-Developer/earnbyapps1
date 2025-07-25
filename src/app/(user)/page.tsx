@@ -92,7 +92,7 @@ export default function HomePage() {
       </div>
 
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {filteredTasks.map((task) => (
           <Link href={`/tasks/${task.id}`} key={task.id} className="block">
             <Card className="shadow-md rounded-lg overflow-hidden transition-transform hover:scale-[1.02] active:scale-[0.98] h-full">
@@ -138,7 +138,7 @@ export default function HomePage() {
           <CardHeader>
               <CardTitle>Join Our Community</CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <CardContent className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
               {socialLinks.map((social) => (
                   <a href={social.href} key={social.name} target="_blank" rel="noopener noreferrer" className="block">
                       <div className={`p-4 flex items-center gap-4 rounded-lg ${social.className} transition-transform hover:scale-[1.02] active:scale-[0.98]`}>
