@@ -135,7 +135,7 @@ export default function HomePage() {
           <CardHeader>
               <CardTitle>Join Our Community</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {socialLinks.map((social) => (
                   <a href={social.href} key={social.name} target="_blank" rel="noopener noreferrer" className="block">
                       <div className={`p-4 flex items-center gap-4 rounded-lg ${social.className} transition-transform hover:scale-[1.02] active:scale-[0.98]`}>
