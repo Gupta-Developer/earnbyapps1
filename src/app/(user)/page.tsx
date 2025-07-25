@@ -89,7 +89,7 @@ export default function HomePage() {
       </div>
 
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {filteredTasks.map((task) => (
           <Link href={`/tasks/${task.id}`} key={task.id} className="block">
             <Card className="shadow-md rounded-lg overflow-hidden transition-transform hover:scale-[1.02] active:scale-[0.98] h-full">
