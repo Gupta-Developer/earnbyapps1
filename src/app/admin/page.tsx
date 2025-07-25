@@ -165,6 +165,49 @@ export default function AdminPage() {
         </Button>
       </header>
 
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+         <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Total User Payout</CardTitle>
+                <DollarSign className="w-4 h-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">₹{totalUserPayout.toFixed(2)}</div>
+                <p className="text-xs text-muted-foreground">Total earnings paid to users</p>
+            </CardContent>
+         </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Total Platform Profit</CardTitle>
+                <DollarSign className="w-4 h-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">₹{totalPlatformProfit.toFixed(2)}</div>
+                 <p className="text-xs text-muted-foreground">Total earnings from all 'Paid' tasks</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+                <Users className="w-4 h-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">{totalUsers}</div>
+                 <p className="text-xs text-muted-foreground">Total registered users</p>
+            </CardContent>
+         </Card>
+         <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
+                <ListChecks className="w-4 h-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">{totalTasks}</div>
+                <p className="text-xs text-muted-foreground">Total available tasks</p>
+            </CardContent>
+         </Card>
+      </div>
+
       <Tabs defaultValue="tasks" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="tasks">Manage Tasks</TabsTrigger>
@@ -259,52 +302,7 @@ export default function AdminPage() {
               />
           </TabsContent>
       </Tabs>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-         <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Total User Payout</CardTitle>
-                <DollarSign className="w-4 h-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">₹{totalUserPayout.toFixed(2)}</div>
-                <p className="text-xs text-muted-foreground">Total earnings paid to users</p>
-            </CardContent>
-         </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Total Platform Profit</CardTitle>
-                <DollarSign className="w-4 h-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">₹{totalPlatformProfit.toFixed(2)}</div>
-                 <p className="text-xs text-muted-foreground">Total earnings from all 'Paid' tasks</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-                <Users className="w-4 h-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">{totalUsers}</div>
-                 <p className="text-xs text-muted-foreground">Total registered users</p>
-            </CardContent>
-         </Card>
-         <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
-                <ListChecks className="w-4 h-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">{totalTasks}</div>
-                <p className="text-xs text-muted-foreground">Total available tasks</p>
-            </CardContent>
-         </Card>
-      </div>
-
     </div>
   );
 }
     
-
