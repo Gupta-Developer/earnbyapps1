@@ -42,9 +42,7 @@ export default function RootLayout({
              <div className="flex flex-col min-h-screen bg-background">
                 <Header />
                 <main className="flex-grow container mx-auto px-4 w-full max-w-5xl">
-                  <div className="w-full">
                     {children}
-                  </div>
                 </main>
                 <Footer />
                 <BottomNav />

@@ -28,7 +28,7 @@ export default function ContactPage() {
         </Button>
         <h1 className="text-xl font-bold text-foreground truncate">Contact Us</h1>
       </header>
-       <main className="flex-grow p-4">
+       <main className="flex-grow py-4">
         <Card className="shadow-md rounded-lg w-full">
             <CardHeader>
                 <CardTitle>Get In Touch</CardTitle>

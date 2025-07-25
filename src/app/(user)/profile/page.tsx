@@ -157,7 +157,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="py-4 space-y-6">
       {!user ? (
         <div className="flex flex-col items-center justify-center pt-8 gap-6 text-center">
             <UserCircle2 className="w-20 h-20 text-muted-foreground/50" />

@@ -36,7 +36,7 @@ export default function SharePage() {
 
   return (
     <div className="flex flex-col h-full">
-      <main className="flex-grow p-4 space-y-4">
+      <main className="flex-grow py-4 space-y-4">
         <Card className="shadow-md rounded-lg w-full overflow-hidden">
           <div className="p-6 space-y-6">
             <div className="space-y-4">

@@ -82,7 +82,7 @@ export default function WalletPage() {
   return (
     <>
       <ActivityTicker />
-      <div className="p-4 space-y-6 mt-12">
+      <div className="py-4 space-y-6 mt-12">
         <Card className="text-center shadow-lg rounded-lg">
           <CardHeader>
             <CardTitle className="text-muted-foreground">Total Earnings</CardTitle>

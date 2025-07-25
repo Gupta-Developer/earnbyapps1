@@ -85,7 +85,7 @@ export default function TaskDetailPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <main className="flex-grow p-4 space-y-4">
+      <main className="flex-grow py-4 space-y-4">
         <Card className="shadow-md rounded-lg w-full overflow-hidden">
           {task.banner && (
             <div className="relative w-full h-40">
