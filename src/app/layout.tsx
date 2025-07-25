@@ -16,7 +16,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'EarnByApps',
+  title: 'TaskBucks',
   description: 'Earn rewards by completing tasks.',
   manifest: '/manifest.json',
 };
@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta name="theme-color" content="#3B82F6" />
+        <meta name="theme-color" content="#3F51B5" />
       </head>
       <body className={`${inter.variable} font-body antialiased`}>
         <ThemeProvider
