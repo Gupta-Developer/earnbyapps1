@@ -16,7 +16,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'TaskBucks',
+  title: 'EarnByApps',
   description: 'Earn rewards by completing tasks.',
   manifest: '/manifest.json',
 };
@@ -39,13 +39,15 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-             <div className="flex justify-center bg-background">
-                <div className="w-full max-w-[480px] min-h-screen bg-card shadow-lg relative flex flex-col">
-                  <Header />
-                  <main className="flex-grow pt-16 pb-20">{children}</main>
-                  <Footer />
-                  <BottomNav />
-                </div>
+             <div className="flex flex-col min-h-screen bg-background">
+                <Header />
+                <main className="flex-grow container mx-auto px-4 w-full max-w-5xl">
+                  <div className="w-full max-w-2xl mx-auto">
+                    {children}
+                  </div>
+                </main>
+                <Footer />
+                <BottomNav />
               </div>
           </AuthProvider>
           <Toaster />

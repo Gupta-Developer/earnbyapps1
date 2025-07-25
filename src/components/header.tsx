@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "./ui/button";
-import { IndianRupee, Shield } from "lucide-react";
+import { IndianRupee, Shield, Home, Wallet2, User } from "lucide-react";
 
 const AppLogo = () => (
     <Link href="/" className="flex items-center gap-2" aria-label="EarnByApps Home">
@@ -14,15 +14,32 @@ const AppLogo = () => (
     </Link>
 );
 
+const navItems = [
+  { href: "/", label: "Home", icon: Home },
+  { href: "/wallet", label: "Wallet", icon: Wallet2 },
+  { href: "/profile", label: "Profile", icon: User },
+];
+
 
 export default function Header() {
   const { isAdmin } = useAuth();
 
   return (
-    <header className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] z-20 bg-card/80 backdrop-blur-sm border-b">
-      <div className="flex items-center justify-between h-16 px-4">
+    <header className="sticky top-0 z-20 bg-card/80 backdrop-blur-sm border-b">
+      <div className="flex items-center justify-between h-16 px-4 max-w-5xl mx-auto">
         <AppLogo />
         <div className="flex items-center gap-2">
+            <nav className="hidden md:flex items-center gap-4">
+                 {navItems.map((item) => (
+                    <Link
+                        key={item.href}
+                        href={item.href}
+                        className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                    >
+                        {item.label}
+                    </Link>
+                ))}
+            </nav>
           {isAdmin && (
             <Button variant="ghost" size="icon" asChild>
               <Link href="/admin">

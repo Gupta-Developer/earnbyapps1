@@ -12,7 +12,7 @@ const footerLinks = [
 
 export default function Footer() {
   return (
-    <footer className="w-full max-w-[480px] bg-card border-t py-4 px-6 mb-16">
+    <footer className="w-full bg-card border-t py-4 px-6 md:mb-0">
       <div className="flex justify-center items-center gap-4 text-sm text-muted-foreground">
         {footerLinks.map((link, index) => (
           <React.Fragment key={link.label}>
