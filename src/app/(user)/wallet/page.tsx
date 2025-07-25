@@ -80,9 +80,9 @@ export default function WalletPage() {
     .reduce((sum, t) => sum + t.amount, 0);
 
   return (
-    <>
+    <div className="py-4 space-y-6">
       <ActivityTicker />
-      <div className="py-4 space-y-6 mt-12">
+      <div className="pt-10 space-y-6">
         <Card className="text-center shadow-lg rounded-lg">
           <CardHeader>
             <CardTitle className="text-muted-foreground">Total Earnings</CardTitle>
@@ -156,7 +156,7 @@ export default function WalletPage() {
               </Accordion>
           </div>
       </div>
-    </>
+    </div>
   );
 }
 

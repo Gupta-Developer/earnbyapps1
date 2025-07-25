@@ -34,7 +34,7 @@ export default function ActivityTicker() {
   }
 
   return (
-    <div className="fixed top-16 left-0 w-full z-10 bg-secondary/80 backdrop-blur-sm border-b overflow-hidden">
+    <div className="fixed top-16 left-0 w-full z-20 bg-secondary/80 backdrop-blur-sm border-b overflow-hidden">
         <div className="relative flex whitespace-nowrap py-2">
              <div className="flex animate-marquee">
                 {activities.map((activity, index) => (

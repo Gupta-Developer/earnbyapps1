@@ -76,10 +76,10 @@ export default function HomePage() {
   });
 
   return (
-    <div className="space-y-4">
+    <div className="py-4 space-y-4">
       <ActivityTicker />
-      <div className="mt-12 space-y-4">
-       <div className="sticky top-28 bg-card z-10 py-2 md:top-0">
+      <div className="pt-10 space-y-4">
+       <div className="sticky top-16 bg-card z-10 py-2">
          <div className="flex justify-center">
             <Tabs value={filter} onValueChange={handleTabChange} className="w-auto">
               <TabsList>
