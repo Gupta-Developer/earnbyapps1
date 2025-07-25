@@ -12,6 +12,7 @@ import { MOCK_TASKS } from "@/lib/mock-data";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
+import ActivityTicker from "@/components/activity-ticker";
 
 const WhatsAppIcon = () => (
     <svg 
@@ -88,6 +89,8 @@ export default function HomePage() {
 
   return (
     <div className="space-y-4">
+      <ActivityTicker />
+      <div className="mt-12 space-y-4">
        <Card className="shadow-md rounded-lg overflow-hidden -mx-4 md:mx-0">
          <Carousel 
             plugins={[plugin.current]}
@@ -115,7 +118,7 @@ export default function HomePage() {
          </Carousel>
        </Card>
 
-       <div className="sticky top-16 bg-card z-10 py-2 md:top-0">
+       <div className="sticky top-28 bg-card z-10 py-2 md:top-0">
          <div className="flex justify-center">
             <Tabs value={filter} onValueChange={handleTabChange} className="w-auto">
               <TabsList>
@@ -186,7 +189,7 @@ export default function HomePage() {
               ))}
           </CardContent>
       </Card>
-
+      </div>
     </div>
   );
 }
