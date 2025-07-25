@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
@@ -10,8 +10,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Task } from "@/lib/types";
 import { MOCK_TASKS } from "@/lib/mock-data";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import Autoplay from "embla-carousel-autoplay";
 import ActivityTicker from "@/components/activity-ticker";
 
 const WhatsAppIcon = () => (
@@ -58,10 +56,6 @@ export default function HomePage() {
   
   const filter = searchParams.get('tab') as FilterType || 'all';
 
-  const plugin = useRef(
-    Autoplay({ delay: 3000, stopOnInteraction: true })
-  );
-
   useEffect(() => {
     setTasks(MOCK_TASKS);
   }, []);
@@ -81,43 +75,10 @@ export default function HomePage() {
     return true;
   });
 
-  const carouselItems = [
-    { id: 1, image: 'https://placehold.co/1200x400.png', alt: 'Promotion 1', hint: 'special offer' },
-    { id: 2, image: 'https://placehold.co/1200x400.png', alt: 'Promotion 2', hint: 'new tasks' },
-    { id: 3, image: 'https://placehold.co/1200x400.png', alt: 'Promotion 3', hint: 'big rewards' },
-  ];
-
   return (
     <div className="space-y-4">
       <ActivityTicker />
       <div className="mt-12 space-y-4">
-       <Card className="shadow-md rounded-lg overflow-hidden -mx-4 md:mx-0">
-         <Carousel 
-            plugins={[plugin.current]}
-            className="w-full"
-            onMouseEnter={plugin.current.stop}
-            onMouseLeave={plugin.current.reset}
-         >
-            <CarouselContent>
-                {carouselItems.map((item) => (
-                    <CarouselItem key={item.id}>
-                        <div className="relative h-40 md:h-56">
-                             <Image 
-                                src={item.image} 
-                                alt={item.alt}
-                                layout="fill"
-                                objectFit="cover"
-                                data-ai-hint={item.hint}
-                            />
-                        </div>
-                    </CarouselItem>
-                ))}
-            </CarouselContent>
-            <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2" />
-            <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2" />
-         </Carousel>
-       </Card>
-
        <div className="sticky top-28 bg-card z-10 py-2 md:top-0">
          <div className="flex justify-center">
             <Tabs value={filter} onValueChange={handleTabChange} className="w-auto">
