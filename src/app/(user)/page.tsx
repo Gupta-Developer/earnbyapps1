@@ -6,10 +6,8 @@ import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { ChevronRight, Instagram, Youtube, Gift } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Task } from "@/lib/types";
 import { MOCK_TASKS } from "@/lib/mock-data";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import ActivityTicker from "@/components/activity-ticker";
 
 const WhatsAppIcon = () => (
@@ -45,55 +43,20 @@ const socialLinks = [
     },
 ]
 
-type FilterType = "all" | "high-paying" | "instant";
-
 export default function HomePage() {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  
   const [tasks, setTasks] = useState<Task[]>([]);
-  
-  const filter = searchParams.get('tab') as FilterType || 'all';
 
   useEffect(() => {
     setTasks(MOCK_TASKS);
   }, []);
-  
-  const handleTabChange = (value: string) => {
-    router.replace(`${pathname}?tab=${value}`, { scroll: false });
-  };
-
-
-  const filteredTasks = tasks.filter((task) => {
-    if (filter === "high-paying") {
-      return task.isHighPaying;
-    }
-    if (filter === "instant") {
-        return task.isInstant;
-    }
-    return true;
-  });
 
   return (
     <div className="py-4 space-y-4">
       <ActivityTicker />
       <div className="pt-10 space-y-4">
-       <div className="sticky top-16 bg-card z-10 py-2">
-         <div className="flex justify-center">
-            <Tabs value={filter} onValueChange={handleTabChange} className="w-auto">
-              <TabsList>
-                <TabsTrigger value="all">All Apps</TabsTrigger>
-                <TabsTrigger value="high-paying">High Paying</TabsTrigger>
-                <TabsTrigger value="instant">Instant Paying</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-      </div>
-
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {filteredTasks.map((task) => (
+        {tasks.map((task) => (
           <Link href={`/tasks/${task.id}`} key={task.id} className="block">
             <Card className="shadow-md rounded-lg overflow-hidden transition-transform hover:scale-[1.02] active:scale-[0.98] h-full">
               <CardContent className="p-4 flex items-center justify-between">
