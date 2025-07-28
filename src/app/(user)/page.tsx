@@ -46,7 +46,7 @@ const socialLinks = [
 
 export default function HomePage() {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState("instant");
 
   useEffect(() => {
     setTasks(MOCK_TASKS);
@@ -69,7 +69,7 @@ export default function HomePage() {
 
       <Tabs defaultValue={filter} onValueChange={setFilter} className="w-full">
         <div className="flex justify-center">
-            <TabsList>
+            <TabsList className="bg-card">
                 <TabsTrigger value="all">All Apps</TabsTrigger>
                 <TabsTrigger value="high-paying">High Paying</TabsTrigger>
                 <TabsTrigger value="instant">Instant Paying</TabsTrigger>
