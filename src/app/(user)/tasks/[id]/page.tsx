@@ -2,7 +2,7 @@
 "use client";
 
 import { useParams, useRouter, usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -36,6 +36,16 @@ export default function TaskDetailPage() {
         console.error("No such task!");
     }
   }, [taskId]);
+  
+  const existingTransaction = useMemo(() => {
+    if (!user || !taskId) return null;
+    return MOCK_TRANSACTIONS.find(t => t.userId === user.id && t.taskId === taskId);
+  }, [user, taskId]);
+
+  const isTaskLocked = useMemo(() => {
+    return existingTransaction?.status === 'Paid' || existingTransaction?.status === 'Approved';
+  }, [existingTransaction]);
+
 
   if (!task) {
     return (
@@ -57,31 +67,46 @@ export default function TaskDetailPage() {
   };
 
   const handleStartTask = async () => {
-    if (!user) return;
+    if (!user || isTaskLocked) return;
     // This is where you would normally interact with a database.
     console.log(`Starting task ${task.id} for user ${user.id}`);
     
-    // Create a new transaction and add it to our mock data
-    const newTransaction: Transaction = {
-        id: `txn-${Date.now()}`,
-        userId: user.id,
-        taskId: task.id,
-        title: task.name,
-        amount: task.reward,
-        status: 'Under Verification',
-        date: new Date(),
-    };
-    MOCK_TRANSACTIONS.unshift(newTransaction); // Add to the beginning of the array
+    // Create a new transaction only if one doesn't already exist
+    if (!existingTransaction) {
+        const newTransaction: Transaction = {
+            id: `txn-${Date.now()}`,
+            userId: user.id,
+            taskId: task.id,
+            title: task.name,
+            amount: task.reward,
+            status: 'Under Verification',
+            date: new Date(),
+        };
+        MOCK_TRANSACTIONS.unshift(newTransaction); // Add to the beginning of the array
 
-    toast({
-        title: "Task Started!",
-        description: `"${task.name}" is now under verification in your wallet.`,
-    });
+        toast({
+            title: "Task Started!",
+            description: `"${task.name}" is now under verification in your wallet.`,
+        });
+    }
     
     // We don't redirect to the wallet anymore, since the user is sent to an external link.
   };
 
   const stepsArray = typeof task.steps === 'string' ? task.steps.split('\n').filter(s => s.trim() !== '') : [];
+
+  const getButtonContent = () => {
+      if (!user) {
+          return "Login to Start Task";
+      }
+      if (isTaskLocked) {
+          return `Task ${existingTransaction?.status}`;
+      }
+      if (existingTransaction) {
+           return `View Task Status`;
+      }
+      return `Start Task & Earn ₹${task.reward}`;
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -152,14 +177,24 @@ export default function TaskDetailPage() {
             <Separator />
 
             {user ? (
-                <Button asChild size="lg" className="w-full shadow-lg" onClick={handleStartTask}>
-                    <a href={task.link} target="_blank" rel="noopener noreferrer">
-                        Start Task &amp; Earn ₹{task.reward}
-                    </a>
+                <Button 
+                  asChild={!isTaskLocked && !existingTransaction} 
+                  size="lg" 
+                  className="w-full shadow-lg" 
+                  onClick={handleStartTask}
+                  disabled={isTaskLocked}
+                >
+                    {isTaskLocked || existingTransaction ? (
+                        <span>{getButtonContent()}</span>
+                    ) : (
+                         <a href={task.link} target="_blank" rel="noopener noreferrer">
+                            {getButtonContent()}
+                        </a>
+                    )}
                 </Button>
             ) : (
                 <Button size="lg" className="w-full shadow-lg" onClick={() => router.push(`/profile?redirect_to=${pathname}`)}>
-                    Login to Start Task
+                    {getButtonContent()}
                 </Button>
             )}
           </div>
