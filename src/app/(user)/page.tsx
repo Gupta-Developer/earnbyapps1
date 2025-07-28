@@ -59,7 +59,7 @@ export default function HomePage() {
         {tasks.map((task) => (
           <Link href={`/tasks/${task.id}`} key={task.id} className="block">
             <Card className="shadow-md rounded-lg overflow-hidden transition-transform hover:scale-[1.02] active:scale-[0.98] h-full">
-              <CardContent className="p-4 flex items-center justify-between">
+              <CardContent className="p-4 flex items-center justify-between h-full">
                 <div className="flex items-center gap-4">
                   <Image 
                     src={task.icon} 
@@ -81,9 +81,9 @@ export default function HomePage() {
         ))}
          <Link href="/share" className="block">
             <Card className="shadow-md rounded-lg overflow-hidden transition-transform hover:scale-[1.02] active:scale-[0.98] h-full">
-              <CardContent className="p-4 flex items-center justify-between">
+              <CardContent className="p-4 flex items-center justify-between h-full">
                 <div className="flex items-center gap-4">
-                    <div className="w-[50px] h-[50px] rounded-lg bg-primary/10 flex items-center justify-center">
+                    <div className="w-[50px] h-[50px] rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                         <Gift className="w-7 h-7 text-primary" />
                     </div>
                   <div>
