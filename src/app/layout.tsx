@@ -17,7 +17,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: 'EarnByApps',
-  description: 'Earn rewards by completing tasks.',
+  description: 'Complete tasks and earn rewards! earn by trying new apps',
   manifest: '/manifest.json',
 };
 
