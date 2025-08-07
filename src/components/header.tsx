@@ -21,10 +21,23 @@ const navItems = [
   { href: "/profile", label: "Profile", icon: User },
 ];
 
+function AuthContent() {
+    const { isAdmin } = useAuth();
+    return (
+        <>
+        {isAdmin && (
+            <Button variant="ghost" size="icon" asChild>
+                <Link href="/admin">
+                <Shield className="h-5 w-5" />
+                <span className="sr-only">Admin</span>
+                </Link>
+            </Button>
+        )}
+        </>
+    )
+}
 
 export default function Header() {
-  const { isAdmin } = useAuth();
-
   return (
     <header className="sticky top-0 z-20 bg-card/80 backdrop-blur-sm border-b">
       <div className="flex items-center justify-between h-16 px-4 max-w-5xl mx-auto">
@@ -41,14 +54,7 @@ export default function Header() {
                     </Link>
                 ))}
             </nav>
-          {isAdmin && (
-            <Button variant="ghost" size="icon" asChild>
-              <Link href="/admin">
-                <Shield className="h-5 w-5" />
-                <span className="sr-only">Admin</span>
-              </Link>
-            </Button>
-          )}
+            <AuthContent />
           <ThemeToggle />
         </div>
       </div>
