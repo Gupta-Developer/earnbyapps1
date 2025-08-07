@@ -1,4 +1,6 @@
 
+"use client";
+
 import type { Metadata } from 'next';
 import { Toaster } from "@/components/ui/toaster"
 import './globals.css';

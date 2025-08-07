@@ -30,6 +30,14 @@ const MOCK_ADMIN_USER: MockUser = {
   displayName: 'Admin User',
 };
 
+export function useAuth(): AuthContextType {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Default to being logged in as the admin user for easier development
   const [user, setUser] = useState<MockUser | null>(MOCK_ADMIN_USER);
@@ -100,12 +108,4 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
 };
