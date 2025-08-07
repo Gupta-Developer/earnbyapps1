@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "./ui/button";
-import { IndianRupee, Shield, Home, Wallet2, User } from "lucide-react";
+import { IndianRupee, Shield, Home, Wallet2, User, LayoutGrid } from "lucide-react";
 
 const AppLogo = () => (
     <Link href="/" className="flex items-center gap-2" aria-label="EarnByApps Home">
@@ -16,6 +16,7 @@ const AppLogo = () => (
 
 const navItems = [
   { href: "/", label: "Home", icon: Home },
+  { href: "/offerwall", label: "Offerwall", icon: LayoutGrid },
   { href: "/wallet", label: "Wallet", icon: Wallet2 },
   { href: "/profile", label: "Profile", icon: User },
 ];
