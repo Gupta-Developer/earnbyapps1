@@ -52,7 +52,7 @@ const chartConfig = {
 
 export default function ActiveUsersChart() {
   return (
-    <Card className="lg:col-span-7">
+    <Card>
       <CardHeader>
         <CardTitle>Active Users</CardTitle>
         <CardDescription>
@@ -149,3 +149,5 @@ export default function ActiveUsersChart() {
     </Card>
   )
 }
+
+    

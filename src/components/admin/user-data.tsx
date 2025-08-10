@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -23,12 +23,10 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { format } from "date-fns";
+import { MOCK_USERS, MOCK_TRANSACTIONS } from "@/lib/mock-data";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 
-interface UserDataProps {
-    users: Record<string, User>;
-    transactions: Transaction[];
-    onStatusChange: (transactionId: string, status: TaskStatus) => void;
-}
 
 const getBadgeClasses = (status: string): string => {
     switch (status) {
@@ -45,8 +43,39 @@ const getBadgeClasses = (status: string): string => {
     }
 }
 
-export default function UserData({ users, transactions, onStatusChange }: UserDataProps) {
+export default function UserData() {
     const [searchQuery, setSearchQuery] = useState("");
+    const [users, setUsers] = useState<Record<string, User>>({});
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const { toast } = useToast();
+    const { isAdmin } = useAuth();
+    
+    const fetchData = async () => {
+        setUsers(JSON.parse(JSON.stringify(MOCK_USERS)));
+        setTransactions(JSON.parse(JSON.stringify(MOCK_TRANSACTIONS)));
+    };
+
+    useEffect(() => {
+        if (isAdmin) {
+            fetchData();
+        }
+    }, [isAdmin]);
+    
+    const handleUpdateTransactionStatus = (transactionId: string, status: TaskStatus) => {
+        const transactionIndex = MOCK_TRANSACTIONS.findIndex(t => t.id === transactionId);
+        if (transactionIndex > -1) {
+            MOCK_TRANSACTIONS[transactionIndex].status = status;
+        }
+        
+        setTransactions(prev =>
+        prev.map(t => (t.id === transactionId ? { ...t, status } : t))
+        );
+        
+        toast({
+        title: "Status Updated",
+        description: `Transaction status has been changed to ${status}.`,
+        });
+    };
 
     const groupedAndFilteredUsers = useMemo(() => {
         const userMap = new Map<string, { user: User; transactions: Transaction[] }>();

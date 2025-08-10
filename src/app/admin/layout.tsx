@@ -4,15 +4,13 @@
 import type { ReactNode } from "react";
 import { AuthProvider } from "@/hooks/use-auth";
 import { Sidebar, SidebarProvider, SidebarInset, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
-import { LayoutDashboard, Users, ListChecks } from "lucide-react";
+import { LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const navItems = [
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/admin/users", label: "Users", icon: Users },
-    { href: "/admin/tasks", label: "Tasks", icon: ListChecks },
 ]
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
@@ -47,3 +45,5 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     </AuthProvider>
   );
 }
+
+    
