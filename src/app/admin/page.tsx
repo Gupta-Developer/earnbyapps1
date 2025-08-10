@@ -37,7 +37,6 @@ import { MOCK_TRANSACTIONS, MOCK_USERS, MOCK_TASKS } from "@/lib/mock-data";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
-import ActiveUsersChart from "@/components/admin/active-users-chart";
 import UserData from "@/components/admin/user-data";
 import { Separator } from "@/components/ui/separator";
 
@@ -191,8 +190,6 @@ export default function AdminPage() {
       </div>
       
        <div className="flex flex-col gap-6">
-         <ActiveUsersChart />
-         
          <Card>
           <CardHeader>
             <CardTitle>Manage Tasks</CardTitle>
@@ -328,3 +325,5 @@ export default function AdminPage() {
     </div>
   );
 }
+
+    
