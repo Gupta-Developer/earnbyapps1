@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
@@ -10,6 +10,15 @@ import { Task } from "@/lib/types";
 import { MOCK_TASKS } from "@/lib/mock-data";
 import ActivityTicker from "@/components/activity-ticker";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
+
 
 const WhatsAppIcon = () => (
     <svg 
@@ -47,6 +56,9 @@ const socialLinks = [
 export default function HomePage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [filter, setFilter] = useState("instant");
+  const plugin = useRef(
+      Autoplay({ delay: 2000, stopOnInteraction: true })
+    );
 
   useEffect(() => {
     setTasks(MOCK_TASKS);
@@ -66,6 +78,42 @@ export default function HomePage() {
     <div className="py-4 space-y-4">
       <ActivityTicker />
       <div className="pt-10 space-y-4">
+
+      <Carousel
+        plugins={[plugin.current]}
+        className="w-full"
+        onMouseEnter={plugin.current.stop}
+        onMouseLeave={plugin.current.reset}
+      >
+        <CarouselContent>
+          {MOCK_TASKS.map((task, index) => (
+            <CarouselItem key={index}>
+              <Link href={`/tasks/${task.id}`}>
+                <Card className="overflow-hidden">
+                   <div className="relative w-full h-40">
+                      {task.banner ? (
+                        <Image 
+                            src={task.banner} 
+                            alt={`${task.name} banner`} 
+                            layout="fill"
+                            objectFit="cover"
+                            className="rounded-t-lg"
+                            data-ai-hint="promotional banner"
+                        />
+                      ) : (
+                         <div className="w-full h-full bg-secondary flex items-center justify-center">
+                            <p className="text-muted-foreground">No banner available</p>
+                         </div>
+                      )}
+                   </div>
+                </Card>
+              </Link>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious />
+        <CarouselNext />
+      </Carousel>
 
       <Tabs defaultValue={filter} onValueChange={setFilter} className="w-full">
         <div className="flex justify-center">
