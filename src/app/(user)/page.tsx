@@ -76,7 +76,7 @@ export default function HomePage() {
     <div className="pt-4 space-y-4">
       <Carousel
         plugins={[plugin.current]}
-        className="w-full"
+        className="w-full md:hidden"
         onMouseEnter={plugin.current.stop}
         onMouseLeave={plugin.current.reset}
       >
@@ -85,7 +85,7 @@ export default function HomePage() {
             <CarouselItem key={index}>
               <Link href={`/tasks/${task.id}`}>
                 <Card className="overflow-hidden">
-                   <div className="relative w-full h-40">
+                   <div className="relative w-full h-32">
                       {task.banner ? (
                         <Image 
                             src={task.banner} 
