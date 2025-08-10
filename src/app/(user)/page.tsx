@@ -44,7 +44,7 @@ const socialLinks = [
 
 export default function HomePage() {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [filter, setFilter] = useState("instant");
+  const [filter, setFilter] = useState("all");
   const plugin = useRef(
       Autoplay({ delay: 2000, stopOnInteraction: true })
     );
@@ -103,7 +103,7 @@ export default function HomePage() {
 
       <Tabs defaultValue={filter} onValueChange={setFilter} className="w-full">
         <div className="flex justify-center">
-            <TabsList>
+            <TabsList className="bg-muted">
                 <TabsTrigger value="all">All Apps</TabsTrigger>
                 <TabsTrigger value="high-paying">High Paying</TabsTrigger>
                 <TabsTrigger value="instant">Instant Paying</TabsTrigger>
