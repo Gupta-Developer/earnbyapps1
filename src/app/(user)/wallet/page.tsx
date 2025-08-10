@@ -41,18 +41,22 @@ const WhatsAppIcon = () => (
 
 const statusFaqs = [
     {
-        question: "What does 'Under Verification' mean?",
-        answer: "Your task submission or referral is being reviewed by our team. This process usually takes 24-48 hours."
-    },
-    {
-        question: "What does 'Approved' mean?",
-        answer: "Congratulations! Your submission has been successfully verified. The reward amount has been approved and is now scheduled for payout in the next payment cycle."
-    },
-     {
+        status: "Paid",
         question: "What does 'Paid' mean?",
         answer: "The reward for this item has been successfully sent to the UPI ID registered in your profile. You can check your bank account to confirm the transaction."
     },
     {
+        status: "Approved",
+        question: "What does 'Approved' mean?",
+        answer: "Congratulations! Your submission has been successfully verified. The reward amount has been approved and is now scheduled for payout in the next payment cycle."
+    },
+    {
+        status: "Under Verification",
+        question: "What does 'Under Verification' mean?",
+        answer: "Your task submission or referral is being reviewed by our team. This process usually takes 24-48 hours."
+    },
+    {
+        status: "Rejected",
         question: "What does 'Rejected' mean?",
         answer: "Unfortunately, your submission did not meet the required criteria. Please contact our support for more details if needed."
     }
@@ -146,7 +150,12 @@ export default function WalletPage() {
                   {statusFaqs.map((faq, index) => (
                       <AccordionItem value={`item-${index}`} key={index} className="bg-secondary/50 rounded-lg px-4 border-b-0">
                           <AccordionTrigger className="text-left hover:no-underline">
-                              {faq.question}
+                              <div className="flex items-center gap-3">
+                                <Badge variant={getBadgeVariant(faq.status)} className={`${faq.status === 'Paid' ? 'bg-accent text-accent-foreground' : ''} w-32 justify-center`}>
+                                    {faq.status}
+                                </Badge>
+                                <span>{faq.question}</span>
+                              </div>
                           </AccordionTrigger>
                           <AccordionContent className="text-muted-foreground pt-0 pb-4">
                               {faq.answer}
