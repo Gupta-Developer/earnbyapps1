@@ -10,8 +10,8 @@ import { usePathname } from "next/navigation";
 
 const navItems = [
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/admin", label: "Users", icon: Users },
-    { href: "/admin", label: "Tasks", icon: ListChecks },
+    { href: "/admin/users", label: "Users", icon: Users },
+    { href: "/admin/tasks", label: "Tasks", icon: ListChecks },
 ]
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
