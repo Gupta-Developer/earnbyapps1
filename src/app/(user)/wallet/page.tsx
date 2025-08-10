@@ -144,35 +144,32 @@ export default function WalletPage() {
             </Table>
           </Card>
         </div>
-        <Card>
-            <CardHeader>
-                <CardTitle>Understanding Statuses</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <Accordion type="single" collapsible className="w-full space-y-2">
-                    {statusFaqs.map((faq, index) => (
-                        <AccordionItem value={`item-${index}`} key={index} className="bg-secondary/50 rounded-lg px-4 border-b-0">
-                            <AccordionTrigger className="text-left hover:no-underline">
-                                <div className="flex items-center gap-3">
-                                <Badge className={getBadgeClasses(faq.status)}>
-                                    {faq.status}
-                                </Badge>
-                                <span>{faq.question}</span>
-                                </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="text-muted-foreground pt-0 pb-4">
-                                {faq.answer}
-                            </AccordionContent>
-                        </AccordionItem>
-                    ))}
-                </Accordion>
-            </CardContent>
-        </Card>
+        <div>
+            <h2 className="text-lg font-semibold mb-2 px-1">Understanding Statuses</h2>
+            <Accordion type="single" collapsible className="w-full space-y-2">
+                {statusFaqs.map((faq, index) => (
+                    <AccordionItem value={`item-${index}`} key={index} className="bg-secondary/50 rounded-lg px-4 border-b-0">
+                        <AccordionTrigger className="text-left hover:no-underline">
+                            <div className="flex items-center gap-3">
+                            <Badge className={getBadgeClasses(faq.status)}>
+                                {faq.status}
+                            </Badge>
+                            <span>{faq.question}</span>
+                            </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="text-muted-foreground pt-0 pb-4">
+                            {faq.answer}
+                        </AccordionContent>
+                    </AccordionItem>
+                ))}
+            </Accordion>
+        </div>
       </div>
     </div>
   );
 }
 
     
+
 
 
