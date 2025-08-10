@@ -76,7 +76,7 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="px-4 w-full py-4 space-y-6">
+    <div className="p-6 space-y-6">
        <UserData
           users={users}
           transactions={transactions}
