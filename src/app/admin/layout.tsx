@@ -20,12 +20,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
     <AuthProvider>
         <SidebarProvider>
-            <Sidebar>
+            <Sidebar collapsible="none">
                 <SidebarContent>
                     <SidebarMenu>
                          {navItems.map((item) => (
                              <SidebarMenuItem key={item.label}>
-                                <SidebarMenuButton asChild isActive={pathname === item.href} tooltip={item.label}>
+                                <SidebarMenuButton asChild isActive={pathname === item.href}>
                                     <Link href={item.href}>
                                         <item.icon />
                                         <span>{item.label}</span>
