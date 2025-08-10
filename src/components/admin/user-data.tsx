@@ -112,11 +112,11 @@ export default function UserData({ users, transactions, onStatusChange }: UserDa
                             <AccordionItem value={user.id} key={user.id} className="border-b">
                                 <AccordionTrigger className="px-6 py-4 hover:bg-muted/50 text-left hover:no-underline">
                                     <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 text-sm w-full">
-                                        <div>
+                                        <div className="space-y-1">
                                             <p className="font-semibold text-base text-foreground break-all">{user.fullName || 'N/A'}</p>
                                             <p className="text-muted-foreground break-all">{user.email}</p>
                                         </div>
-                                         <div className="md:text-right">
+                                         <div className="space-y-1 md:text-right">
                                             <p className="font-semibold text-foreground break-all">{user.phone || 'No Phone'}</p>
                                             <p className="text-muted-foreground break-all">{user.upiId || 'No UPI ID'}</p>
                                         </div>
