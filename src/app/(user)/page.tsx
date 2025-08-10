@@ -75,7 +75,7 @@ export default function HomePage() {
   }, [tasks, filter]);
 
   return (
-    <div className="py-4 space-y-4">
+    <div className="space-y-4 pb-4">
       <ActivityTicker />
       <div className="pt-4 space-y-4">
 
