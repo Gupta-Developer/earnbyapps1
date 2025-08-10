@@ -1,7 +1,7 @@
 
 "use client"
 
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
+import { Bar, BarChart, CartesianGrid, LabelList, XAxis } from "recharts"
 import {
   Card,
   CardContent,
@@ -80,7 +80,15 @@ export default function ActiveUsersChart() {
                   cursor={false}
                   content={<ChartTooltipContent indicator="dot" />}
                 />
-                <Bar dataKey="users" fill="var(--color-users)" radius={4} />
+                <Bar dataKey="users" fill="var(--color-users)" radius={4}>
+                  <LabelList
+                    dataKey="users"
+                    position="top"
+                    offset={4}
+                    className="fill-foreground"
+                    fontSize={12}
+                  />
+                </Bar>
               </BarChart>
             </ChartContainer>
           </TabsContent>
@@ -98,7 +106,15 @@ export default function ActiveUsersChart() {
                   cursor={false}
                   content={<ChartTooltipContent indicator="dot" />}
                 />
-                <Bar dataKey="users" fill="var(--color-users)" radius={4} />
+                <Bar dataKey="users" fill="var(--color-users)" radius={4}>
+                  <LabelList
+                    dataKey="users"
+                    position="top"
+                    offset={4}
+                    className="fill-foreground"
+                    fontSize={12}
+                  />
+                </Bar>
               </BarChart>
             </ChartContainer>
           </TabsContent>
@@ -116,7 +132,15 @@ export default function ActiveUsersChart() {
                   cursor={false}
                   content={<ChartTooltipContent indicator="dot" />}
                 />
-                <Bar dataKey="users" fill="var(--color-users)" radius={4} />
+                <Bar dataKey="users" fill="var(--color-users)" radius={4}>
+                   <LabelList
+                    dataKey="users"
+                    position="top"
+                    offset={4}
+                    className="fill-foreground"
+                    fontSize={12}
+                  />
+                </Bar>
               </BarChart>
             </ChartContainer>
           </TabsContent>
