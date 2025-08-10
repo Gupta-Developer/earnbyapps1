@@ -134,18 +134,18 @@ export default function UserData() {
                     />
                 </div>
             </CardHeader>
-            <CardContent className="p-0">
+            <CardContent className="p-0 md:p-0">
                 <Accordion type="multiple" className="w-full">
                      {groupedAndFilteredUsers.length > 0 ? (
                         groupedAndFilteredUsers.map(({ user, transactions }) => (
                             <AccordionItem value={user.id} key={user.id} className="border-b">
                                 <AccordionTrigger className="px-6 py-4 hover:bg-muted/50 text-left hover:no-underline">
                                     <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 text-sm w-full">
-                                        <div className="space-y-1">
+                                        <div className="flex flex-col">
                                             <p className="font-semibold text-base text-foreground break-all">{user.fullName || 'N/A'}</p>
                                             <p className="text-muted-foreground break-all">{user.email}</p>
                                         </div>
-                                         <div className="space-y-1 md:text-right">
+                                         <div className="flex flex-col md:text-right">
                                             <p className="font-semibold text-foreground break-all">{user.phone || 'No Phone'}</p>
                                             <p className="text-muted-foreground break-all">{user.upiId || 'No UPI ID'}</p>
                                         </div>
