@@ -190,7 +190,7 @@ export default function AdminPage() {
          </Card>
       </div>
       
-       <div className="grid gap-6 md:grid-cols-1">
+       <div className="flex flex-col gap-6">
          <ActiveUsersChart />
          
          <Card>
