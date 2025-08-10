@@ -39,6 +39,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import ActiveUsersChart from "@/components/admin/active-users-chart";
 import UserData from "@/components/admin/user-data";
+import { Separator } from "@/components/ui/separator";
 
 export default function AdminPage() {
   const { isAdmin, loading } = useAuth();
@@ -57,7 +58,6 @@ export default function AdminPage() {
 
 
   useEffect(() => {
-    // We only need transactions for the stats cards on the dashboard
     if (isAdmin) {
       fetchData();
     }
@@ -147,7 +147,7 @@ export default function AdminPage() {
         </Button>
       </header>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
          <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Total User Payout</CardTitle>
@@ -194,16 +194,70 @@ export default function AdminPage() {
          <ActiveUsersChart />
          
          <Card>
-          <CardHeader className="flex flex-row justify-between items-center">
-            <div>
-                <CardTitle>Manage Tasks</CardTitle>
-                <CardDescription>
-                    {totalTasks} tasks available. View, edit, or delete them below.
-                </CardDescription>
-            </div>
+          <CardHeader>
+            <CardTitle>Manage Tasks</CardTitle>
+            <CardDescription>
+                {totalTasks} tasks available. View, edit, or delete them below.
+            </CardDescription>
           </CardHeader>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
+          <CardContent>
+             {/* Mobile View: Card List */}
+            <div className="md:hidden space-y-4">
+              {Object.values(tasks).map((task) => (
+                <Card key={task.id}>
+                    <CardHeader>
+                      <CardTitle className="text-lg">{task.name}</CardTitle>
+                      <CardDescription>User Payout: ₹{task.reward}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                         <div className="flex items-center gap-2 flex-wrap">
+                          {task.isHighPaying && (
+                            <Badge variant="secondary">High Paying</Badge>
+                          )}
+                          {task.isInstant && (
+                            <Badge variant="outline">Instant</Badge>
+                          )}
+                        </div>
+                        <Separator />
+                        <div className="flex justify-end space-x-2">
+                           <Button variant="ghost" size="sm" asChild>
+                              <Link href={`/admin/edit-task/${task.id}`}>
+                                <Pencil className="h-4 w-4 mr-2" />
+                                Edit
+                              </Link>
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Delete
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This action cannot be undone. This will permanently delete the task and all associated user submissions.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleDeleteTask(task.id)}
+                                    className="bg-destructive hover:bg-destructive/90"
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                        </div>
+                    </CardContent>
+                </Card>
+              ))}
+            </div>
+             {/* Desktop View: Table */}
+            <div className="hidden md:block overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -274,5 +328,3 @@ export default function AdminPage() {
     </div>
   );
 }
-
-    

@@ -26,6 +26,7 @@ import { format } from "date-fns";
 import { MOCK_USERS, MOCK_TRANSACTIONS } from "@/lib/mock-data";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
+import { Separator } from "@/components/ui/separator";
 
 
 const getBadgeClasses = (status: string): string => {
@@ -80,7 +81,6 @@ export default function UserData() {
     const groupedAndFilteredUsers = useMemo(() => {
         const userMap = new Map<string, { user: User; transactions: Transaction[] }>();
 
-        // Group transactions by user
         transactions.forEach(transaction => {
             const user = users[transaction.userId];
             if (user) {
@@ -134,31 +134,72 @@ export default function UserData() {
                     />
                 </div>
             </CardHeader>
-            <CardContent className="p-0 md:p-0">
+            <CardContent className="p-0">
                 <Accordion type="multiple" className="w-full">
                      {groupedAndFilteredUsers.length > 0 ? (
                         groupedAndFilteredUsers.map(({ user, transactions }) => (
                             <AccordionItem value={user.id} key={user.id} className="border-b">
-                                <AccordionTrigger className="px-6 py-4 hover:bg-muted/50 text-left hover:no-underline">
-                                    <div className="flex flex-col md:flex-row md:items-center justify-between flex-1 w-full gap-2">
+                                <AccordionTrigger className="px-4 md:px-6 py-4 hover:bg-muted/50 text-left hover:no-underline">
+                                    <div className="flex flex-col md:flex-row md:items-center justify-between w-full gap-2">
                                         <div className="flex-1 min-w-0">
-                                            <p className="font-semibold text-base text-foreground break-words">{user.fullName || 'N/A'}</p>
-                                            <p className="text-sm text-muted-foreground break-words">{user.email}</p>
-                                            <div className="md:hidden mt-2 text-sm space-y-1">
-                                                <p className="font-medium text-foreground break-words">{user.phone || 'No Phone'}</p>
-                                                <p className="text-muted-foreground break-words">{user.upiId || 'No UPI ID'}</p>
-                                            </div>
+                                            <p className="font-semibold text-base text-foreground truncate">{user.fullName || 'N/A'}</p>
+                                            <p className="text-sm text-muted-foreground truncate">{user.email}</p>
                                         </div>
                                         <div className="hidden md:block flex-1 min-w-0 text-right">
-                                             <p className="font-semibold text-foreground break-words">{user.phone || 'No Phone'}</p>
-                                             <p className="text-sm text-muted-foreground break-words">{user.upiId || 'No UPI ID'}</p>
+                                             <p className="font-semibold text-foreground truncate">{user.phone || 'No Phone'}</p>
+                                             <p className="text-sm text-muted-foreground truncate">{user.upiId || 'No UPI ID'}</p>
                                         </div>
                                     </div>
                                     <Badge variant="outline" className="ml-4 shrink-0">{transactions.length} task(s)</Badge>
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="bg-muted/30 p-4">
-                                         <div className="overflow-x-auto">
+                                        <div className="md:hidden space-y-1 text-sm mb-4">
+                                            <p><span className="font-semibold">Phone:</span> {user.phone || 'N/A'}</p>
+                                            <p><span className="font-semibold">UPI ID:</span> {user.upiId || 'N/A'}</p>
+                                        </div>
+                                        {/* Mobile View: Card List */}
+                                        <div className="md:hidden space-y-4">
+                                             {transactions.length > 0 ? (
+                                                transactions.map(item => (
+                                                    <Card key={item.id} className="w-full">
+                                                        <CardContent className="p-4 space-y-3">
+                                                            <div>
+                                                                <p className="font-semibold">{item.title}</p>
+                                                                <p className="text-sm text-accent">₹{item.amount}</p>
+                                                                <p className="text-xs text-muted-foreground">{format(item.date, 'dd MMM, yyyy')}</p>
+                                                            </div>
+                                                            <Separator />
+                                                             <div className="flex items-center justify-between gap-2">
+                                                                <Badge className={getBadgeClasses(item.status)}>
+                                                                    {item.status}
+                                                                </Badge>
+                                                                <Select
+                                                                    value={item.status}
+                                                                    onValueChange={(value) => handleUpdateTransactionStatus(item.id!, value as TaskStatus)}
+                                                                    >
+                                                                    <SelectTrigger className="w-[160px] h-9 text-xs">
+                                                                        <SelectValue placeholder="Update" />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        <SelectItem value="Under Verification">Under Verification</SelectItem>
+                                                                        <SelectItem value="Approved">Approved</SelectItem>
+                                                                        <SelectItem value="Paid">Paid</SelectItem>
+                                                                        <SelectItem value="Rejected">Rejected</SelectItem>
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            </div>
+                                                        </CardContent>
+                                                    </Card>
+                                                ))
+                                             ) : (
+                                                 <div className="text-center text-muted-foreground py-4 text-sm">
+                                                    This user has not initiated any tasks yet.
+                                                </div>
+                                             )}
+                                        </div>
+                                         {/* Desktop View: Table */}
+                                        <div className="hidden md:block overflow-x-auto">
                                             {transactions.length > 0 ? (
                                                 <Table>
                                                     <TableHeader>
