@@ -77,11 +77,11 @@ export default function HomePage() {
   return (
     <div className="py-4 space-y-4">
       <ActivityTicker />
-      <div className="pt-10 space-y-4">
+      <div className="pt-4 space-y-4">
 
       <Carousel
         plugins={[plugin.current]}
-        className="w-full"
+        className="w-full md:hidden"
         onMouseEnter={plugin.current.stop}
         onMouseLeave={plugin.current.reset}
       >
