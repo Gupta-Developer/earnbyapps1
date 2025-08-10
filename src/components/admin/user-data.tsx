@@ -35,7 +35,7 @@ const getBadgeClasses = (status: string): string => {
             return 'bg-accent text-accent-foreground border-transparent';
         case 'Approved':
             return 'bg-blue-500 text-white border-transparent';
-        case 'Under Verification':
+        case 'Ongoing':
             return 'bg-yellow-500 text-white border-transparent';
         case 'Rejected':
             return 'bg-destructive text-destructive-foreground border-transparent';
@@ -182,7 +182,7 @@ export default function UserData() {
                                                                         <SelectValue placeholder="Update" />
                                                                     </SelectTrigger>
                                                                     <SelectContent>
-                                                                        <SelectItem value="Under Verification">Under Verification</SelectItem>
+                                                                        <SelectItem value="Ongoing">Ongoing</SelectItem>
                                                                         <SelectItem value="Approved">Approved</SelectItem>
                                                                         <SelectItem value="Paid">Paid</SelectItem>
                                                                         <SelectItem value="Rejected">Rejected</SelectItem>
@@ -234,7 +234,7 @@ export default function UserData() {
                                                                             <SelectValue placeholder="Update Status" />
                                                                         </SelectTrigger>
                                                                         <SelectContent>
-                                                                            <SelectItem value="Under Verification">Under Verification</SelectItem>
+                                                                            <SelectItem value="Ongoing">Ongoing</SelectItem>
                                                                             <SelectItem value="Approved">Approved</SelectItem>
                                                                             <SelectItem value="Paid">Paid</SelectItem>
                                                                             <SelectItem value="Rejected">Rejected</SelectItem>

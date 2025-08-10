@@ -1,5 +1,5 @@
 
-export type TaskStatus = "Under Verification" | "Approved" | "Rejected" | "Paid";
+export type TaskStatus = "Ongoing" | "Approved" | "Rejected" | "Paid";
 
 export type Faq = {
   question: string;

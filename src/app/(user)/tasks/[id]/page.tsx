@@ -79,14 +79,14 @@ export default function TaskDetailPage() {
             taskId: task.id,
             title: task.name,
             amount: task.reward,
-            status: 'Under Verification',
+            status: 'Ongoing',
             date: new Date(),
         };
         MOCK_TRANSACTIONS.unshift(newTransaction); // Add to the beginning of the array
 
         toast({
             title: "Task Started!",
-            description: `"${task.name}" is now under verification in your wallet.`,
+            description: `"${task.name}" is now ongoing in your wallet.`,
         });
     }
     
