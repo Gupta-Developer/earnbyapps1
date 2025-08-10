@@ -110,7 +110,7 @@ export default function UserData({ users, transactions, onStatusChange }: UserDa
                      {groupedAndFilteredUsers.length > 0 ? (
                         groupedAndFilteredUsers.map(({ user, transactions }) => (
                             <AccordionItem value={user.id} key={user.id} className="border-b">
-                                <AccordionTrigger className="px-6 py-4 hover:bg-muted/50 text-left">
+                                <AccordionTrigger className="px-6 py-4 hover:bg-muted/50 text-left hover:no-underline">
                                     <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 text-sm w-full">
                                         <div>
                                             <p className="font-semibold text-base text-foreground break-all">{user.fullName || 'N/A'}</p>
@@ -191,3 +191,5 @@ export default function UserData({ users, transactions, onStatusChange }: UserDa
         </Card>
     );
 }
+
+    
