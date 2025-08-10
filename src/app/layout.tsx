@@ -6,7 +6,6 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { Inter } from 'next/font/google';
 import { AuthProvider } from '@/hooks/use-auth';
 import BottomNav from '@/components/bottom-nav';
-import Footer from '@/components/footer';
 import Header from '@/components/header';
 
 const inter = Inter({
@@ -44,7 +43,6 @@ export default function RootLayout({
                 <div className="flex-grow">
                   {children}
                 </div>
-                <Footer />
                 <BottomNav />
               </div>
           </AuthProvider>
