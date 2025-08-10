@@ -8,7 +8,6 @@ import Link from "next/link";
 import { ChevronRight, Instagram, Youtube, Gift } from "lucide-react";
 import { Task } from "@/lib/types";
 import { MOCK_TASKS } from "@/lib/mock-data";
-import ActivityTicker from "@/components/activity-ticker";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Carousel,
@@ -65,8 +64,7 @@ export default function HomePage() {
   }, [tasks, filter]);
 
   return (
-    <div className="space-y-4 pb-4">
-      <ActivityTicker />
+    <div className="pb-4">
       <div className="pt-4 space-y-4">
 
       <Carousel

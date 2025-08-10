@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useAuth } from "@/hooks/use-auth";
 import { MOCK_TRANSACTIONS } from "@/lib/mock-data";
-import ActivityTicker from "@/components/activity-ticker";
 import WhatsAppIcon from "@/components/whatsapp-icon";
 
 const getBadgeClasses = (status: string): string => {
@@ -75,8 +74,7 @@ export default function WalletPage() {
 
   return (
     <div className="py-4 space-y-6">
-      <ActivityTicker />
-      <div className="pt-10 space-y-6">
+      <div className="pt-4 space-y-6">
         <Card className="text-center shadow-lg rounded-lg">
           <CardHeader>
             <CardTitle className="text-muted-foreground">Total Earnings</CardTitle>
@@ -160,7 +158,3 @@ export default function WalletPage() {
 }
 
     
-
-
-
-
