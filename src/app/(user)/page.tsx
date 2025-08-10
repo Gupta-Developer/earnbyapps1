@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import WhatsAppIcon from "@/components/whatsapp-icon";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 
 
@@ -43,11 +44,19 @@ const socialLinks = [
 ]
 
 export default function HomePage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [filter, setFilter] = useState("all");
   const plugin = useRef(
       Autoplay({ delay: 2000, stopOnInteraction: true })
     );
+
+  const filter = searchParams.get("filter") || "all";
+
+  const handleFilterChange = (newFilter: string) => {
+    router.push(`${pathname}?filter=${newFilter}`, { scroll: false });
+  };
 
   useEffect(() => {
     setTasks(MOCK_TASKS);
@@ -101,7 +110,7 @@ export default function HomePage() {
         <CarouselNext className="hidden md:flex" />
       </Carousel>
 
-      <Tabs defaultValue={filter} onValueChange={setFilter} className="w-full">
+      <Tabs defaultValue={filter} onValueChange={handleFilterChange} value={filter} className="w-full">
         <div className="flex justify-center">
             <TabsList className="bg-muted">
                 <TabsTrigger value="all">All Apps</TabsTrigger>
