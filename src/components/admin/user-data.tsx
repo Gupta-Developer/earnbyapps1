@@ -140,14 +140,18 @@ export default function UserData() {
                         groupedAndFilteredUsers.map(({ user, transactions }) => (
                             <AccordionItem value={user.id} key={user.id} className="border-b">
                                 <AccordionTrigger className="px-6 py-4 hover:bg-muted/50 text-left hover:no-underline">
-                                    <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 text-sm w-full">
-                                        <div className="flex flex-col">
-                                            <p className="font-semibold text-base text-foreground break-all">{user.fullName || 'N/A'}</p>
-                                            <p className="text-muted-foreground break-all">{user.email}</p>
+                                    <div className="flex flex-col md:flex-row md:items-center justify-between flex-1 w-full gap-2">
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-semibold text-base text-foreground break-words">{user.fullName || 'N/A'}</p>
+                                            <p className="text-sm text-muted-foreground break-words">{user.email}</p>
+                                            <div className="md:hidden mt-2 text-sm space-y-1">
+                                                <p className="font-medium text-foreground break-words">{user.phone || 'No Phone'}</p>
+                                                <p className="text-muted-foreground break-words">{user.upiId || 'No UPI ID'}</p>
+                                            </div>
                                         </div>
-                                         <div className="flex flex-col md:text-right">
-                                            <p className="font-semibold text-foreground break-all">{user.phone || 'No Phone'}</p>
-                                            <p className="text-muted-foreground break-all">{user.upiId || 'No UPI ID'}</p>
+                                        <div className="hidden md:block flex-1 min-w-0 text-right">
+                                             <p className="font-semibold text-foreground break-words">{user.phone || 'No Phone'}</p>
+                                             <p className="text-sm text-muted-foreground break-words">{user.upiId || 'No UPI ID'}</p>
                                         </div>
                                     </div>
                                     <Badge variant="outline" className="ml-4 shrink-0">{transactions.length} task(s)</Badge>
@@ -220,5 +224,3 @@ export default function UserData() {
         </Card>
     );
 }
-
-    
