@@ -229,11 +229,11 @@ export default function EditTaskPage() {
                         </Button>
                     </div>
                     <div className="flex items-center space-x-2">
-                        <Switch id="isHighPaying" checked={task.isHighPaying} onCheckedChange={handleSwitchChange('isHighPaying')} />
+                        <Switch id="isHighPaying" checked={!!task.isHighPaying} onCheckedChange={handleSwitchChange('isHighPaying')} />
                         <Label htmlFor="isHighPaying">High Paying Task?</Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                        <Switch id="isInstant" checked={task.isInstant} onCheckedChange={handleSwitchChange('isInstant')} />
+                        <Switch id="isInstant" checked={!!task.isInstant} onCheckedChange={handleSwitchChange('isInstant')} />
                         <Label htmlFor="isInstant">Instant Payment?</Label>
                     </div>
                     <div className="flex justify-end pt-4">
