@@ -1,5 +1,5 @@
 
-export type TaskStatus = "Ongoing" | "Approved" | "Rejected" | "Paid";
+export type TaskStatus = "Started & Ongoing" | "Approved" | "Rejected" | "Paid";
 
 export type Faq = {
   question: string;
@@ -56,4 +56,3 @@ export type UserActivity = {
     taskName: string;
     reward: number;
 }
-    

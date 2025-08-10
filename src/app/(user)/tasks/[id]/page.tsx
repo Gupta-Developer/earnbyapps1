@@ -79,7 +79,7 @@ export default function TaskDetailPage() {
             taskId: task.id,
             title: task.name,
             amount: task.reward,
-            status: 'Ongoing',
+            status: 'Started & Ongoing',
             date: new Date(),
         };
         MOCK_TRANSACTIONS.unshift(newTransaction); // Add to the beginning of the array

@@ -197,7 +197,7 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
         taskId: 'task-3',
         title: 'Navi UPI',
         amount: 50,
-        status: 'Ongoing',
+        status: 'Started & Ongoing',
         date: new Date('2023-10-24T15:00:00Z'),
     },
     {
@@ -215,7 +215,7 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
         taskId: 'task-5',
         title: 'A23 Games',
         amount: 80,
-        status: 'Ongoing',
+        status: 'Started & Ongoing',
         date: new Date('2023-10-27T12:00:00Z'),
     },
     {
@@ -242,9 +242,7 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
         taskId: 'task-8',
         title: 'PhonePe',
         amount: 75,
-        status: 'Ongoing',
+        status: 'Started & Ongoing',
         date: new Date('2023-10-30T18:00:00Z'),
     },
 ]
-
-    

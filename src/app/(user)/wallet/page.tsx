@@ -19,7 +19,7 @@ const getBadgeClasses = (status: string): string => {
             return 'bg-accent text-accent-foreground border-transparent';
         case 'Approved':
             return 'bg-blue-500 text-white border-transparent';
-        case 'Ongoing':
+        case 'Started & Ongoing':
             return 'bg-yellow-500 text-white border-transparent';
         case 'Rejected':
             return 'bg-destructive text-destructive-foreground border-transparent';
@@ -40,8 +40,8 @@ const statusFaqs = [
         answer: "Congratulations! Your submission has been successfully verified. The reward amount has been approved and is now scheduled for payout in the next payment cycle."
     },
     {
-        status: "Ongoing",
-        question: "What does 'Ongoing' mean?",
+        status: "Started & Ongoing",
+        question: "What does 'Started & Ongoing' mean?",
         answer: "Your task submission or referral is being reviewed by our team. This process usually takes 24-48 hours."
     },
     {
@@ -156,5 +156,3 @@ export default function WalletPage() {
     </div>
   );
 }
-
-    
