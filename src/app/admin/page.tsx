@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import UserData from "@/components/admin/user-data";
 import ActiveUsersChart from "@/components/admin/active-users-chart";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 
 export default function AdminPage() {
@@ -151,11 +152,14 @@ export default function AdminPage() {
   return (
     <div className="px-4 w-full py-4 space-y-6">
       <header className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-          <p className="text-muted-foreground text-sm">
-            Manage tasks, users, and submissions.
-          </p>
+        <div className="flex items-center gap-2">
+          <SidebarTrigger className="md:hidden"/>
+          <div>
+            <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+            <p className="text-muted-foreground text-sm">
+              Manage tasks, users, and submissions.
+            </p>
+          </div>
         </div>
         <Button asChild size="sm">
           <Link href="/admin/add-task">
