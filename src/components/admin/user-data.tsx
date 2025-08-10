@@ -183,7 +183,7 @@ export default function UserData() {
                                                                 <TableCell className="text-right">
                                                                     <Select
                                                                         value={item.status}
-                                                                        onValueChange={(value) => onStatusChange(item.id!, value as TaskStatus)}
+                                                                        onValueChange={(value) => handleUpdateTransactionStatus(item.id!, value as TaskStatus)}
                                                                         >
                                                                         <SelectTrigger className="w-[180px] ml-auto">
                                                                             <SelectValue placeholder="Update Status" />
