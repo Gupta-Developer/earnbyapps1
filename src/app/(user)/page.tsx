@@ -71,7 +71,7 @@ export default function HomePage() {
 
       <Carousel
         plugins={[plugin.current]}
-        className="w-full md:hidden"
+        className="w-full"
         onMouseEnter={plugin.current.stop}
         onMouseLeave={plugin.current.reset}
       >
@@ -101,8 +101,8 @@ export default function HomePage() {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
+        <CarouselPrevious className="hidden md:flex" />
+        <CarouselNext className="hidden md:flex" />
       </Carousel>
 
       <Tabs defaultValue={filter} onValueChange={setFilter} className="w-full">
