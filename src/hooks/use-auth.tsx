@@ -8,6 +8,7 @@ export interface MockUser {
   id: string;
   email: string | null;
   displayName: string | null;
+  photoURL?: string | null;
 }
 
 interface AuthContextType {
@@ -28,6 +29,7 @@ const MOCK_ADMIN_USER: MockUser = {
   id: 'admin-user-id',
   email: 'aashish.gupta.mails@gmail.com',
   displayName: 'Admin User',
+  photoURL: 'https://placehold.co/100x100.png',
 };
 
 export function useAuth(): AuthContextType {
@@ -84,7 +86,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
     console.log("Simulating sign in with Google...");
     // Simulate a successful Google sign-in
-    setUser({ id: 'google-user-id', email: 'google.user@example.com', displayName: 'Google User' });
+    setUser({ id: 'google-user-id', email: 'google.user@example.com', displayName: 'Google User', photoURL: 'https://placehold.co/100x100.png' });
     setLoading(false);
   }
 

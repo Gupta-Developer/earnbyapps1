@@ -16,6 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { MOCK_USERS } from "@/lib/mock-data";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const GoogleIcon = () => (
     <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2">
@@ -303,9 +304,17 @@ export default function ProfilePage() {
       ) : (
         <div className="space-y-8">
             <Card>
-                <CardHeader>
-                    <CardTitle>Welcome, {profileForm.getValues().fullName || user.displayName || "User"}!</CardTitle>
-                    <CardDescription>{user.email}</CardDescription>
+                <CardHeader className="flex flex-row items-center gap-4 space-y-0">
+                    <Avatar className="h-16 w-16">
+                        <AvatarImage src={user.photoURL || undefined} alt="User profile picture" />
+                        <AvatarFallback>
+                            <UserCircle2 className="w-8 h-8" />
+                        </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                        <CardTitle>Welcome, {profileForm.getValues().fullName || user.displayName || "User"}!</CardTitle>
+                        <CardDescription>{user.email}</CardDescription>
+                    </div>
                 </CardHeader>
                 <CardContent>
                      <Button onClick={signOut} variant="outline">
