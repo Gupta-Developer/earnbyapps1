@@ -148,7 +148,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 w-full max-w-7xl py-4 space-y-6">
+    <div className="px-4 w-full py-4 space-y-6">
       <header className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold">Admin Dashboard</h1>
