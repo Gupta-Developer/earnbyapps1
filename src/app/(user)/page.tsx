@@ -103,7 +103,7 @@ export default function HomePage() {
 
       <Tabs defaultValue={filter} onValueChange={setFilter} className="w-full">
         <div className="flex justify-center">
-            <TabsList className="bg-card">
+            <TabsList>
                 <TabsTrigger value="all">All Apps</TabsTrigger>
                 <TabsTrigger value="high-paying">High Paying</TabsTrigger>
                 <TabsTrigger value="instant">Instant Paying</TabsTrigger>
