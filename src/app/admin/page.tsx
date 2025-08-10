@@ -38,6 +38,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import UserData from "@/components/admin/user-data";
+import ActiveUsersChart from "@/components/admin/active-users-chart";
 
 
 export default function AdminPage() {
@@ -207,87 +208,84 @@ export default function AdminPage() {
          </Card>
       </div>
 
-      <div className="space-y-6">
-          <Card className="shadow-lg rounded-lg">
-              <CardHeader>
-              <CardTitle>Manage Tasks</CardTitle>
-              <CardDescription>
-                  {totalTasks} tasks available. View, edit, or delete them below.
-              </CardDescription>
-              </CardHeader>
-              <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                  <Table>
-                  <TableHeader>
-                      <TableRow>
-                      <TableHead>Task Name</TableHead>
-                      <TableHead>User Payout</TableHead>
-                      <TableHead>Total Reward</TableHead>
-                      <TableHead>Platform Profit</TableHead>
-                      <TableHead>Tags</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                      {Object.values(tasks).map((task) => (
-                      <TableRow key={task.id}>
-                          <TableCell className="font-medium">{task.name}</TableCell>
-                          <TableCell>₹{task.reward}</TableCell>
-                          <TableCell>₹{task.totalReward || "N/A"}</TableCell>
-                          <TableCell>₹{(task.totalReward || 0) - task.reward}</TableCell>
-                          <TableCell className="flex items-center gap-2">
+       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+        <Card className="lg:col-span-4">
+          <CardHeader>
+            <CardTitle>Manage Tasks</CardTitle>
+            <CardDescription>
+                {totalTasks} tasks available. View, edit, or delete them below.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Task Name</TableHead>
+                    <TableHead>User Payout</TableHead>
+                    <TableHead>Tags</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {Object.values(tasks).map((task) => (
+                    <TableRow key={task.id}>
+                      <TableCell className="font-medium">{task.name}</TableCell>
+                      <TableCell>₹{task.reward}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
                           {task.isHighPaying && (
-                              <Badge variant="secondary">High Paying</Badge>
+                            <Badge variant="secondary">High Paying</Badge>
                           )}
                           {task.isInstant && (
-                              <Badge variant="outline">Instant</Badge>
+                            <Badge variant="outline">Instant</Badge>
                           )}
-                          </TableCell>
-                          <TableCell className="text-right space-x-2">
-                          <Button variant="ghost" size="icon" asChild>
-                              <Link href={`/admin/edit-task/${task.id}`}>
-                              <Pencil className="h-4 w-4" />
-                              <span className="sr-only">Edit Task</span>
-                              </Link>
-                          </Button>
-                          <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                  <Trash2 className="h-4 w-4 text-destructive" />
-                                  <span className="sr-only">Delete Task</span>
-                              </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                              <AlertDialogHeader>
-                                  <AlertDialogTitle>
-                                  Are you sure?
-                                  </AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                  This action cannot be undone. This will
-                                  permanently delete the task and all associated
-                                  user submissions.
-                                  </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction
-                                  onClick={() => handleDeleteTask(task.id)}
-                                  className="bg-destructive hover:bg-destructive/90"
-                                  >
-                                  Delete
-                                  </AlertDialogAction>
-                              </AlertDialogFooter>
-                              </AlertDialogContent>
-                          </AlertDialog>
-                          </TableCell>
-                      </TableRow>
-                      ))}
-                  </TableBody>
-                  </Table>
-              </div>
-              </CardContent>
-          </Card>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right space-x-2">
+                        <Button variant="ghost" size="icon" asChild>
+                          <Link href={`/admin/edit-task/${task.id}`}>
+                            <Pencil className="h-4 w-4" />
+                            <span className="sr-only">Edit Task</span>
+                          </Link>
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                              <span className="sr-only">Delete Task</span>
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete the task and all associated user submissions.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteTask(task.id)}
+                                className="bg-destructive hover:bg-destructive/90"
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+         <ActiveUsersChart />
+      </div>
 
+      <div className="space-y-6">
           <UserData
               users={users}
               transactions={transactions}
