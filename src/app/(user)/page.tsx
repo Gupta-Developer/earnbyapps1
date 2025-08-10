@@ -73,7 +73,7 @@ export default function HomePage() {
   }, [tasks, filter]);
 
   return (
-    <div className="pb-4 pt-4 space-y-4">
+    <div className="pb-20 pt-4 space-y-4">
       <Carousel
         plugins={[plugin.current]}
         className="w-full"
