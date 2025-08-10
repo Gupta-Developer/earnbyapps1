@@ -13,18 +13,18 @@ import { useAuth } from "@/hooks/use-auth";
 import { MOCK_TRANSACTIONS } from "@/lib/mock-data";
 import ActivityTicker from "@/components/activity-ticker";
 
-const getBadgeVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
+const getBadgeClasses = (status: string): string => {
     switch (status) {
         case 'Paid':
-            return 'default'; // Uses accent color via custom css
+            return 'bg-accent text-accent-foreground border-transparent';
         case 'Approved':
-            return 'secondary';
+            return 'bg-blue-500 text-white border-transparent';
         case 'Under Verification':
-            return 'outline';
+            return 'bg-yellow-500 text-white border-transparent';
         case 'Rejected':
-            return 'destructive';
+            return 'bg-destructive text-destructive-foreground border-transparent';
         default:
-            return 'destructive';
+            return 'bg-gray-500 text-white border-transparent';
     }
 }
 
@@ -116,7 +116,7 @@ export default function WalletPage() {
                       <div className="text-xs text-muted-foreground">{format(item.date, 'dd MMM, yyyy')}</div>
                     </TableCell>
                     <TableCell className="text-center">
-                      <Badge variant={getBadgeVariant(item.status)} className={item.status === 'Paid' ? 'bg-accent text-accent-foreground' : ''}>
+                      <Badge className={getBadgeClasses(item.status)}>
                         {item.status}
                       </Badge>
                     </TableCell>
@@ -154,7 +154,7 @@ export default function WalletPage() {
                         <AccordionItem value={`item-${index}`} key={index} className="bg-secondary/50 rounded-lg px-4 border-b-0">
                             <AccordionTrigger className="text-left hover:no-underline">
                                 <div className="flex items-center gap-3">
-                                <Badge variant={getBadgeVariant(faq.status)} className={`${faq.status === 'Paid' ? 'bg-accent text-accent-foreground' : ''}`}>
+                                <Badge className={getBadgeClasses(faq.status)}>
                                     {faq.status}
                                 </Badge>
                                 <span>{faq.question}</span>
@@ -174,4 +174,5 @@ export default function WalletPage() {
 }
 
     
+
 

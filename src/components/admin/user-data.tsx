@@ -30,18 +30,18 @@ interface UserDataProps {
     onStatusChange: (transactionId: string, status: TaskStatus) => void;
 }
 
-const getBadgeVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
+const getBadgeClasses = (status: string): string => {
     switch (status) {
         case 'Paid':
-            return 'default'; // Uses accent color via custom css
+            return 'bg-accent text-accent-foreground border-transparent';
         case 'Approved':
-            return 'secondary';
+            return 'bg-blue-500 text-white border-transparent';
         case 'Under Verification':
-            return 'outline';
+            return 'bg-yellow-500 text-white border-transparent';
         case 'Rejected':
-            return 'destructive';
+            return 'bg-destructive text-destructive-foreground border-transparent';
         default:
-            return 'destructive';
+            return 'bg-gray-500 text-white border-transparent';
     }
 }
 
@@ -147,7 +147,7 @@ export default function UserData({ users, transactions, onStatusChange }: UserDa
                                                                     {format(item.date, 'dd MMM, yyyy')}
                                                                 </TableCell>
                                                                 <TableCell>
-                                                                    <Badge variant={getBadgeVariant(item.status)} className={item.status === 'Paid' ? 'bg-accent text-accent-foreground' : ''}>
+                                                                    <Badge className={getBadgeClasses(item.status)}>
                                                                         {item.status}
                                                                     </Badge>
                                                                 </TableCell>
