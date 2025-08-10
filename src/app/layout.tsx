@@ -41,9 +41,9 @@ export default function RootLayout({
           <AuthProvider>
              <div className="flex flex-col min-h-screen bg-background">
                 <Header />
-                <main className="flex-grow container mx-auto px-4 max-w-5xl">
-                    {children}
-                </main>
+                <div className="flex-grow">
+                  {children}
+                </div>
                 <Footer />
                 <BottomNav />
               </div>

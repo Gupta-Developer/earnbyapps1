@@ -6,9 +6,11 @@ import type { ReactNode } from "react";
 
 export default function UserLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="space-y-4">
+    <div>
         <ActivityTicker />
-        {children}
+        <main className="container mx-auto px-4 max-w-5xl">
+            {children}
+        </main>
     </div>
   );
 }
