@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, UserCircle2, KeyRound, LogOut, Pencil, Phone, Landmark } from "lucide-react";
+import { Mail, UserCircle2, KeyRound, LogOut, Pencil, Phone, Landmark, Award } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/use-auth";
@@ -14,9 +14,11 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { MOCK_USERS } from "@/lib/mock-data";
+import { MOCK_USERS, MOCK_TRANSACTIONS } from "@/lib/mock-data";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 
 const GoogleIcon = () => (
     <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2">
@@ -57,6 +59,14 @@ const profileSchema = z.object({
     phone: z.string().min(10, { message: "Please enter a valid phone number." }).optional().or(z.literal('')),
     upiId: z.string().refine(val => !val || /.+@.+/.test(val), { message: "Please enter a valid UPI ID." }).optional().or(z.literal('')),
 });
+
+const levels = [
+    { name: "Newbie", required: 0, color: "bg-gray-500" },
+    { name: "Explorer", required: 5, color: "bg-green-500" },
+    { name: "Pro", required: 10, color: "bg-blue-500" },
+    { name: "Master", required: 25, color: "bg-purple-500" },
+    { name: "Legend", required: 50, color: "bg-yellow-500" },
+]
 
 
 export default function ProfilePage() {
@@ -148,6 +158,38 @@ export default function ProfilePage() {
     if(user) fetchUserData(user, null); // Refetch data to discard changes, pass null for redirectTo
     setIsEditing(false);
   }
+  
+  const { completedTasks, currentLevel, nextLevel, progress } = (() => {
+    if (!user) return { completedTasks: 0, currentLevel: levels[0], nextLevel: levels[1], progress: 0 };
+    
+    const completed = MOCK_TRANSACTIONS.filter(t => t.userId === user.id && (t.status === 'Paid' || t.status === 'Approved')).length;
+    
+    let currentLvl = levels[0];
+    for (let i = levels.length - 1; i >= 0; i--) {
+        if (completed >= levels[i].required) {
+            currentLvl = levels[i];
+            break;
+        }
+    }
+
+    const nextLvlIndex = levels.findIndex(l => l.name === currentLvl.name) + 1;
+    const nextLvl = nextLvlIndex < levels.length ? levels[nextLvlIndex] : null;
+
+    let progressPercentage = 100;
+    if (nextLvl) {
+        const tasksForNextLevel = nextLvl.required - currentLvl.required;
+        const tasksDoneForLevel = completed - currentLvl.required;
+        progressPercentage = (tasksDoneForLevel / tasksForNextLevel) * 100;
+    }
+
+    return {
+        completedTasks: completed,
+        currentLevel: currentLvl,
+        nextLevel: nextLvl,
+        progress: progressPercentage,
+    };
+  })();
+
 
   if (loading) {
       return (
@@ -321,6 +363,33 @@ export default function ProfilePage() {
                         <LogOut className="mr-2 h-4 w-4"/>
                         Sign Out
                     </Button>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Award className="w-6 h-6 text-primary" />
+                        Your Progress
+                    </CardTitle>
+                    <CardDescription>Complete tasks to level up and earn new badges!</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                     <div className="flex items-center gap-4">
+                        <Badge className={`px-3 py-1 text-sm text-white ${currentLevel.color}`}>{currentLevel.name}</Badge>
+                        <p className="text-sm text-muted-foreground font-medium">Completed Tasks: {completedTasks}</p>
+                    </div>
+                    {nextLevel ? (
+                        <div>
+                            <div className="flex justify-between items-end mb-1">
+                                <p className="text-sm font-medium">Next Level: {nextLevel.name}</p>
+                                <p className="text-sm text-muted-foreground">{completedTasks} / {nextLevel.required}</p>
+                            </div>
+                            <Progress value={progress} />
+                        </div>
+                    ) : (
+                        <p className="font-semibold text-accent">You've reached the highest level! Congratulations!</p>
+                    )}
                 </CardContent>
             </Card>
 
