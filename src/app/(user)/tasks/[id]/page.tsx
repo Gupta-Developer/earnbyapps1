@@ -2,7 +2,7 @@
 "use client";
 
 import { useParams, useRouter, usePathname } from 'next/navigation';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -26,6 +26,22 @@ export default function TaskDetailPage() {
   const [task, setTask] = useState<Task | null>(null);
   const [existingTransaction, setExistingTransaction] = useState<Transaction | null>(null);
 
+  const checkExistingTransaction = useCallback(async () => {
+    if (!user || !taskId) return;
+    
+    const transactionsRef = collection(db, "users", user.uid, "transactions");
+    const q = query(transactionsRef, where("taskId", "==", taskId));
+    
+    const querySnapshot = await getDocs(q);
+    
+    if (!querySnapshot.empty) {
+        const transactionDoc = querySnapshot.docs[0];
+        setExistingTransaction({ id: transactionDoc.id, ...transactionDoc.data() } as Transaction);
+    } else {
+        setExistingTransaction(null);
+    }
+  }, [user, taskId]);
+
   useEffect(() => {
     const fetchTask = async () => {
         if (!taskId) return;
@@ -43,24 +59,8 @@ export default function TaskDetailPage() {
   }, [taskId, toast]);
   
   useEffect(() => {
-    const checkExistingTransaction = async () => {
-        if (!user || !taskId) return;
-        
-        const transactionsRef = collection(db, "users", user.uid, "transactions");
-        const q = query(transactionsRef, where("taskId", "==", taskId));
-        
-        const querySnapshot = await getDocs(q);
-        
-        if (!querySnapshot.empty) {
-            const transactionDoc = querySnapshot.docs[0];
-            setExistingTransaction({ id: transactionDoc.id, ...transactionDoc.data() } as Transaction);
-        } else {
-            setExistingTransaction(null);
-        }
-    };
-
     checkExistingTransaction();
-  }, [user, taskId]);
+  }, [user, taskId, checkExistingTransaction]);
 
   const isTaskLocked = useMemo(() => {
     return existingTransaction?.status === 'Paid' || existingTransaction?.status === 'Approved';
@@ -87,53 +87,44 @@ export default function TaskDetailPage() {
   };
 
   const handleStartTask = async () => {
-    if (!user || isTaskLocked) return;
+    if (!user || isTaskLocked || existingTransaction) return;
     
-    if (!existingTransaction) {
-        try {
-            const userRef = doc(db, 'users', user.uid);
-            const userSnap = await getDoc(userRef);
+    try {
+        const userRef = doc(db, 'users', user.uid);
+        const userSnap = await getDoc(userRef);
 
-            if (!userSnap.exists() || !userSnap.data().phone || !userSnap.data().upiId) {
-                toast({
-                    title: "Profile Incomplete",
-                    description: "Please complete your profile with phone and UPI ID before starting a task.",
-                    variant: "destructive"
-                });
-                router.push(`/profile?redirect_to=${pathname}`);
-                return;
-            }
-
-            const transactionsRef = collection(db, "users", user.uid, "transactions");
-            const newTransactionRef = doc(transactionsRef);
-            
-            await setDoc(newTransactionRef, {
-                taskId: task.id,
-                title: task.name,
-                amount: task.reward,
-                status: 'Started & Ongoing',
-                date: serverTimestamp(),
-            });
-
+        if (!userSnap.exists() || !userSnap.data().phone || !userSnap.data().upiId) {
             toast({
-                title: "Task Started!",
-                description: `"${task.name}" is now ongoing in your wallet.`,
+                title: "Profile Incomplete",
+                description: "Please complete your profile with phone and UPI ID before starting a task.",
+                variant: "destructive"
             });
-            // Refetch the transaction status
-            setExistingTransaction({
-                id: newTransactionRef.id,
-                userId: user.uid,
-                taskId: task.id,
-                title: task.name,
-                amount: task.reward,
-                status: 'Started & Ongoing',
-                date: new Date(),
-            });
-
-        } catch (error) {
-            console.error("Error starting task:", error);
-            toast({ title: "Error", description: "Could not start the task.", variant: "destructive" });
+            router.push(`/profile?redirect_to=${pathname}`);
+            return;
         }
+
+        const transactionsRef = collection(db, "users", user.uid, "transactions");
+        const newTransactionRef = doc(transactionsRef);
+        
+        await setDoc(newTransactionRef, {
+            taskId: task.id,
+            title: task.name,
+            amount: task.reward,
+            status: 'Started & Ongoing',
+            date: serverTimestamp(),
+        });
+
+        toast({
+            title: "Task Started!",
+            description: `"${task.name}" is now ongoing in your wallet.`,
+        });
+        
+        // Re-fetch the transaction status to ensure UI is in sync
+        await checkExistingTransaction();
+
+    } catch (error) {
+        console.error("Error starting task:", error);
+        toast({ title: "Error", description: "Could not start the task.", variant: "destructive" });
     }
   };
 
