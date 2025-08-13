@@ -24,7 +24,52 @@ const MOCK_FAQS: Faq[] = [
       }
   ]
 
-export const MOCK_TASKS: Task[] = []; // This is now fetched from Firestore
+export const MOCK_TASKS: Task[] = [
+    {
+        id: 'task-1',
+        name: "PlayerzPot",
+        reward: 120,
+        totalReward: 150,
+        icon: "https://placehold.co/100x100.png",
+        hint: "cricket player",
+        banner: "https://placehold.co/600x400.png",
+        description: "Download the PlayerzPot app, register, and make your first deposit to earn a huge reward. Enjoy fantasy sports and win big!",
+        steps: "1. Click the link and download the app.\n2. Register with your mobile number.\n3. Make a minimum deposit of ₹50.\n4. Reward will be credited within 24 hours.",
+        link: "#",
+        isInstant: false,
+        isHighPaying: true,
+        youtubeLink: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+        faqs: MOCK_FAQS,
+    },
+    {
+        id: 'task-2',
+        name: "Upstox",
+        reward: 150,
+        totalReward: 200,
+        icon: "https://placehold.co/100x100.png",
+        hint: "graph stock",
+        banner: "https://placehold.co/600x400.png",
+        description: "Open a new Upstox account and complete your KYC to get a massive reward. Start your trading journey today!",
+        steps: "1. Download the app and sign up.\n2. Complete your KYC verification.\n3. Your account must be successfully activated.\n4. Reward will be processed after verification.",
+        link: "#",
+        isInstant: false,
+        isHighPaying: true,
+        faqs: MOCK_FAQS,
+    },
+     {
+        id: 'task-3',
+        name: "Ludo Supreme",
+        reward: 10,
+        totalReward: 15,
+        icon: "https://placehold.co/100x100.png",
+        hint: "ludo board",
+        description: "Play your favorite board game and earn real money. Just download, register, and play one game to claim your reward.",
+        steps: "1. Download the Ludo Supreme app.\n2. Register an account.\n3. Play at least one cash game.",
+        link: "#",
+        isInstant: true,
+        isHighPaying: false
+    },
+];
 
 export const MOCK_USERS: Record<string, User> = {
     'admin-user-id': {
@@ -50,4 +95,32 @@ export const MOCK_USERS: Record<string, User> = {
     }
 }
 
-export const MOCK_TRANSACTIONS: Transaction[] = []; // This is now fetched from Firestore
+export const MOCK_TRANSACTIONS: Transaction[] = [
+    {
+        id: 'trans-1',
+        userId: 'user-123',
+        taskId: 'task-1',
+        title: 'PlayerzPot Task',
+        amount: 120,
+        status: 'Paid',
+        date: new Date('2023-10-26'),
+    },
+    {
+        id: 'trans-2',
+        userId: 'user-123',
+        taskId: 'task-2',
+        title: 'Upstox Task',
+        amount: 150,
+        status: 'Approved',
+        date: new Date('2023-10-27'),
+    },
+    {
+        id: 'trans-3',
+        userId: 'google-user-id',
+        taskId: 'task-3',
+        title: 'Ludo Supreme Task',
+        amount: 10,
+        status: 'Started & Ongoing',
+        date: new Date('2023-10-28'),
+    }
+];

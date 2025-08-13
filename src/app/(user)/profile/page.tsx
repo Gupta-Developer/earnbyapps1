@@ -20,8 +20,6 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, setDoc, collection, getDocs } from "firebase/firestore";
-import { MOCK_TRANSACTIONS } from "@/lib/mock-data";
-
 
 const GoogleIcon = () => (
     <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2">
@@ -127,10 +125,14 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchTransactionData = async () => {
         if (user) {
-            const transactionsRef = collection(db, "users", user.uid, "transactions");
-            const querySnapshot = await getDocs(transactionsRef);
-            const paidTransactions = querySnapshot.docs.filter(doc => doc.data().status === 'Paid' || doc.data().status === 'Approved').length;
-            setCompletedTasks(paidTransactions);
+            try {
+                const transactionsRef = collection(db, "users", user.uid, "transactions");
+                const querySnapshot = await getDocs(transactionsRef);
+                const paidTransactions = querySnapshot.docs.filter(doc => doc.data().status === 'Paid' || doc.data().status === 'Approved').length;
+                setCompletedTasks(paidTransactions);
+            } catch (error) {
+                console.error("Error fetching transactions: ", error);
+            }
         }
     };
 

@@ -66,20 +66,24 @@ export default function WalletPage() {
         };
         
         setLoading(true);
-        const transactionsRef = collection(db, "users", user.uid, "transactions");
-        const q = query(transactionsRef, orderBy("date", "desc"));
-        const querySnapshot = await getDocs(q);
+        try {
+            const transactionsRef = collection(db, "users", user.uid, "transactions");
+            const q = query(transactionsRef, orderBy("date", "desc"));
+            const querySnapshot = await getDocs(q);
 
-        const userTransactions = querySnapshot.docs.map(doc => {
-            const data = doc.data();
-            return {
-                id: doc.id,
-                ...data,
-                date: data.date instanceof Timestamp ? data.date.toDate() : new Date(),
-            } as Transaction
-        });
+            const userTransactions = querySnapshot.docs.map(doc => {
+                const data = doc.data();
+                return {
+                    id: doc.id,
+                    ...data,
+                    date: data.date instanceof Timestamp ? data.date.toDate() : new Date(),
+                } as Transaction
+            });
 
-        setTransactions(userTransactions);
+            setTransactions(userTransactions);
+        } catch (error) {
+            console.error("Error fetching transactions: ", error);
+        }
         setLoading(false);
     }
 

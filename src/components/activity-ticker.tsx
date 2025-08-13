@@ -1,14 +1,15 @@
 
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { Zap } from "lucide-react";
-import { UserActivity } from "@/lib/types";
-import { MOCK_TRANSACTIONS, MOCK_USERS } from "@/lib/mock-data";
+import { UserActivity, Transaction, User } from "@/lib/types";
+import { collectionGroup, getDocs, limit, query, where } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
-const generateActivities = (): UserActivity[] => {
-  return MOCK_TRANSACTIONS.map(tx => {
-    const user = MOCK_USERS[tx.userId];
+const generateActivities = (transactions: Transaction[], users: Record<string, User>): UserActivity[] => {
+  return transactions.map(tx => {
+    const user = users[tx.userId];
     if (!user) return null;
     return {
       id: tx.id,
@@ -19,18 +20,51 @@ const generateActivities = (): UserActivity[] => {
   }).filter(Boolean) as UserActivity[];
 };
 
+
 export default function ActivityTicker() {
-  const activities = useMemo(() => {
-    const baseActivities = generateActivities();
-    // We duplicate the activities to create a seamless looping effect for the marquee.
-    if (baseActivities.length > 0) {
-        return [...baseActivities, ...baseActivities];
-    }
-    return [];
+  const [activities, setActivities] = useState<UserActivity[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRecentActivities = async () => {
+        setLoading(true);
+        try {
+            const transactionsQuery = query(
+                collectionGroup(db, 'transactions'),
+                where('status', 'in', ['Paid', 'Approved']),
+                limit(10)
+            );
+            const transactionSnap = await getDocs(transactionsQuery);
+            const recentTransactions = transactionSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Transaction));
+            
+            const userIds = [...new Set(recentTransactions.map(t => t.userId))];
+            const users: Record<string, User> = {};
+
+            // In a real app, you might fetch these users more efficiently
+            for (const userId of userIds) {
+                const userDoc = await db.collection('users').doc(userId).get();
+                if(userDoc.exists) {
+                    users[userId] = userDoc.data() as User;
+                }
+            }
+
+            const generated = generateActivities(recentTransactions, users);
+            // Duplicate for marquee effect
+            if (generated.length > 0) {
+                setActivities([...generated, ...generated]);
+            }
+
+        } catch (error) {
+            console.error("Error fetching recent activities: ", error);
+        }
+        setLoading(false);
+    };
+
+    fetchRecentActivities();
   }, []);
 
-  if (activities.length === 0) {
-    return null;
+  if (loading || activities.length === 0) {
+    return null; // Or a loading skeleton
   }
 
   return (
@@ -48,7 +82,7 @@ export default function ActivityTicker() {
                     </div>
                 ))}
             </div>
-             <div className="flex animate-marquee">
+             <div className="flex animate-marquee" aria-hidden="true">
                 {activities.map((activity, index) => (
                     <div key={`${activity.id}-${index}-clone`} className="flex items-center mx-4 text-sm shrink-0">
                         <Zap className="w-4 h-4 text-accent mr-2" />
