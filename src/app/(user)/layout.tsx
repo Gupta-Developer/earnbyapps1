@@ -8,7 +8,7 @@ export default function UserLayout({ children }: { children: ReactNode }) {
   return (
     <div>
         <ActivityTicker />
-        <main className="container mx-auto px-4 max-w-5xl pb-20">
+        <main className="container mx-auto px-4 max-w-7xl pb-20">
             {children}
         </main>
     </div>
