@@ -236,14 +236,14 @@ export default function TaskDetailPage() {
 
             {user ? (
                 <Button 
-                  asChild={!isTaskLocked && !existingTransaction && !isStarting} 
+                  asChild={!isTaskLocked && !existingTransaction && !isStarting && !!task.link}
                   size="lg" 
                   className="w-full shadow-lg" 
                   onClick={() => {
-                      if(existingTransaction) {
-                          router.push('/wallet')
-                      } else {
+                      if (!task.link) {
                           handleStartTask();
+                      } else if (existingTransaction) {
+                          router.push('/wallet')
                       }
                   }}
                   disabled={isTaskLocked || isStarting}
@@ -305,3 +305,5 @@ export default function TaskDetailPage() {
     </div>
   );
 }
+
+    
