@@ -63,7 +63,7 @@ export default function WalletPage() {
     
     // In a real app, you'd fetch this from an API for the current user.
     // For now, we use mock data.
-    const userTransactions = MOCK_TRANSACTIONS.filter(t => t.userId === user.id);
+    const userTransactions = MOCK_TRANSACTIONS.filter(t => t.userId === user.uid);
     setTransactions(userTransactions);
 
   }, [user]);

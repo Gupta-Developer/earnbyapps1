@@ -15,12 +15,13 @@ export default function SharePage() {
   const { user } = useAuth();
 
   const handleStartTask = async () => {
+    if (!user) return;
     // This is where you would normally interact with a database.
-    console.log(`Sharing task for user ${user!.id}`);
+    console.log(`Sharing task for user ${user!.uid}`);
     
     // Construct the referral link
     const baseUrl = window.location.origin;
-    const referralLink = `${baseUrl}/profile?ref=${user!.id}`;
+    const referralLink = `${baseUrl}/profile?ref=${user!.uid}`;
     const message = `Hey! I'm earning money by completing simple tasks on EarnByApps. Join me and earn rewards! Use my referral link: ${referralLink}`;
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     

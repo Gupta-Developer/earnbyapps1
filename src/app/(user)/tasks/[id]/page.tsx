@@ -39,7 +39,7 @@ export default function TaskDetailPage() {
   
   const existingTransaction = useMemo(() => {
     if (!user || !taskId) return null;
-    return MOCK_TRANSACTIONS.find(t => t.userId === user.id && t.taskId === taskId);
+    return MOCK_TRANSACTIONS.find(t => t.userId === user.uid && t.taskId === taskId);
   }, [user, taskId]);
 
   const isTaskLocked = useMemo(() => {
@@ -69,13 +69,13 @@ export default function TaskDetailPage() {
   const handleStartTask = async () => {
     if (!user || isTaskLocked) return;
     // This is where you would normally interact with a database.
-    console.log(`Starting task ${task.id} for user ${user.id}`);
+    console.log(`Starting task ${task.id} for user ${user.uid}`);
     
     // Create a new transaction only if one doesn't already exist
     if (!existingTransaction) {
         const newTransaction: Transaction = {
             id: `txn-${Date.now()}`,
-            userId: user.id,
+            userId: user.uid,
             taskId: task.id,
             title: task.name,
             amount: task.reward,
@@ -181,13 +181,19 @@ export default function TaskDetailPage() {
                   asChild={!isTaskLocked && !existingTransaction} 
                   size="lg" 
                   className="w-full shadow-lg" 
-                  onClick={handleStartTask}
+                  onClick={() => {
+                      if(existingTransaction) {
+                          router.push('/wallet')
+                      } else {
+                          handleStartTask();
+                      }
+                  }}
                   disabled={isTaskLocked}
                 >
-                    {isTaskLocked || existingTransaction ? (
+                    {isTaskLocked || (existingTransaction && !task.link) ? (
                         <span>{getButtonContent()}</span>
                     ) : (
-                         <a href={task.link} target="_blank" rel="noopener noreferrer">
+                         <a href={task.link} target="_blank" rel="noopener noreferrer" onClick={handleStartTask}>
                             {getButtonContent()}
                         </a>
                     )}

@@ -95,7 +95,7 @@ export default function ProfilePage() {
   
   const fetchUserData = (currentUser: any, currentRedirectTo: string | null) => {
       if (currentUser) {
-        const mockUser = MOCK_USERS[currentUser.id];
+        const mockUser = MOCK_USERS[currentUser.uid];
         const userDetails = {
             fullName: mockUser?.fullName || currentUser.displayName || "",
             phone: mockUser?.phone || "",
@@ -140,7 +140,7 @@ export default function ProfilePage() {
 
     console.log("Saving profile data:", data);
     
-    MOCK_USERS[user.id] = { ...MOCK_USERS[user.id], ...data, id: user.id, email: user.email };
+    MOCK_USERS[user.uid] = { ...MOCK_USERS[user.uid], ...data, id: user.uid, email: user.email };
 
     toast({ 
         title: "Profile Saved!",
@@ -162,7 +162,7 @@ export default function ProfilePage() {
   const { completedTasks, currentLevel, nextLevel, progress } = (() => {
     if (!user) return { completedTasks: 0, currentLevel: levels[0], nextLevel: levels[1], progress: 0 };
     
-    const completed = MOCK_TRANSACTIONS.filter(t => t.userId === user.id && (t.status === 'Paid' || t.status === 'Approved')).length;
+    const completed = MOCK_TRANSACTIONS.filter(t => t.userId === user.uid && (t.status === 'Paid' || t.status === 'Approved')).length;
     
     let currentLvl = levels[0];
     for (let i = levels.length - 1; i >= 0; i--) {

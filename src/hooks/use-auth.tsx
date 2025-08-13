@@ -2,17 +2,16 @@
 "use client";
 
 import { useState, useEffect, createContext, useContext, type ReactNode } from 'react';
+import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut as firebaseSignOut, GoogleAuthProvider, signInWithPopup, updateProfile, type User as FirebaseUser } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { auth, db } from '@/lib/firebase';
+import { MOCK_USERS } from '@/lib/mock-data';
 
-// Mock User type, similar to Firebase's but simplified
-export interface MockUser {
-  id: string;
-  email: string | null;
-  displayName: string | null;
-  photoURL?: string | null;
-}
+// Using Firebase's User type but making it nullable for our state
+export type AuthUser = FirebaseUser;
 
 interface AuthContextType {
-  user: MockUser | null;
+  user: AuthUser | null;
   loading: boolean;
   error: string | null;
   isAdmin: boolean;
@@ -24,13 +23,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// A mock admin user for frontend development
-const MOCK_ADMIN_USER: MockUser = {
-  id: 'admin-user-id',
-  email: 'aashish.gupta.mails@gmail.com',
-  displayName: 'Admin User',
-  photoURL: 'https://placehold.co/100x100.png',
-};
+const ADMIN_EMAIL = 'aashish.gupta.mails@gmail.com';
 
 export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);
@@ -41,61 +34,78 @@ export function useAuth(): AuthContextType {
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  // Default to being logged in as the admin user for easier development
-  const [user, setUser] = useState<MockUser | null>(MOCK_ADMIN_USER);
-  const [loading, setLoading] = useState(false); // No real auth, so no loading state needed initially
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState(true); // Default to admin for development
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    // In a real app, onAuthStateChanged would go here.
-    // For now, we'll just manage the state locally.
-    if (user) {
-      setIsAdmin(user.email === MOCK_ADMIN_USER.email);
-    } else {
-      setIsAdmin(false);
-    }
-  }, [user]);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setUser(user);
+      if (user) {
+        setIsAdmin(user.email === ADMIN_EMAIL);
+        // Also check for user profile in mock data for dev purposes
+        if (!MOCK_USERS[user.uid]) {
+             MOCK_USERS[user.uid] = { id: user.uid, email: user.email, fullName: user.displayName };
+        }
+      } else {
+        setIsAdmin(false);
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const signUp = async (email: string, password: string, displayName: string) => {
     setLoading(true);
     setError(null);
-    console.log("Simulating sign up for:", { email, displayName });
-    // In a real app, you would handle the referral code logic here.
-    // For now, we'll just log it.
-    const newUser: MockUser = { id: `user-${Date.now()}`, email, displayName };
-    setUser(newUser);
-    setLoading(false);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(userCredential.user, { displayName });
+      // This will trigger onAuthStateChanged, which sets the user state
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const signIn = async (email: string, password: string) => {
     setLoading(true);
     setError(null);
-    console.log("Simulating sign in for:", email);
-    // Simulate signing in the admin user for convenience
-    if (email === MOCK_ADMIN_USER.email) {
-        setUser(MOCK_ADMIN_USER);
-    } else {
-        setUser({ id: `user-${Date.now()}`, email, displayName: "Mock User" });
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
   
   const signInWithGoogle = async () => {
     setLoading(true);
     setError(null);
-    console.log("Simulating sign in with Google...");
-    // Simulate a successful Google sign-in
-    setUser({ id: 'google-user-id', email: 'google.user@example.com', displayName: 'Google User', photoURL: 'https://placehold.co/100x100.png' });
-    setLoading(false);
+    try {
+        const provider = new GoogleAuthProvider();
+        await signInWithPopup(auth, provider);
+    } catch (e: any) {
+        setError(e.message);
+    } finally {
+        setLoading(false);
+    }
   }
 
   const signOut = async () => {
     setLoading(true);
     setError(null);
-    console.log("Simulating sign out...");
-    setUser(null);
-    setLoading(false);
+    try {
+        await firebaseSignOut(auth);
+    } catch (e: any) {
+        setError(e.message)
+    } finally {
+        setLoading(false);
+    }
   };
 
   const value = {

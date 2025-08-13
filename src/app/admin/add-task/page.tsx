@@ -177,7 +177,9 @@ export default function AddTaskPage() {
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="steps">Steps to Complete (one per line)</Label>
-                        <Textarea id="steps" name="steps" placeholder="1. Download the app.&#10;2. Register an account.&#10;3. Complete one level." value={task.steps} onChange={handleChange} required className="min-h-[120px]" />
+                        <Textarea id="steps" name="steps" placeholder="1. Download the app.
+2. Register an account.
+3. Complete one level." value={task.steps} onChange={handleChange} required className="min-h-[120px]" />
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="youtubeLink">YouTube Video Link</Label>
