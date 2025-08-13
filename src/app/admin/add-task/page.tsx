@@ -21,7 +21,7 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 export default function AddTaskPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { isAdmin, loading } = useAuth();
   const [iconFile, setIconFile] = useState<File | null>(null);
   const [bannerFile, setBannerFile] = useState<File | null>(null);
