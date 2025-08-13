@@ -39,7 +39,7 @@ function AuthContent() {
 export default function Header() {
   return (
     <header className="sticky top-0 z-20 bg-card border-b">
-      <div className="flex items-center justify-between h-16 px-4 max-w-5xl mx-auto">
+      <div className="flex items-center justify-between h-16 px-4 max-w-7xl mx-auto">
         <AppLogo />
         <div className="flex items-center gap-2">
             <nav className="hidden md:flex items-center gap-4">
