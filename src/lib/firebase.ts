@@ -10,12 +10,12 @@ import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyAN-WXqRkj1enP2ui1AZroPb0-T9sRCXDU",
-  authDomain: "taskbucks-t58pq.firebaseapp.com",
-  projectId: "taskbucks-t58pq",
-  storageBucket: "taskbucks-t58pq.appspot.com",
-  messagingSenderId: "489072793372",
-  appId: "1:489072793372:web:f9bbcca321202a9f8c8cd9"
+  apiKey: "AIzaSyD16zBhk9QMHX7BpbDHgaGbnOQ-zbWcGTM",
+  authDomain: "earnbyapps-e43d5.firebaseapp.com",
+  projectId: "earnbyapps-e43d5",
+  storageBucket: "earnbyapps-e43d5.appspot.com",
+  messagingSenderId: "622413944578",
+  appId: "1:622413944578:web:1b63cb659348205871141b"
 };
 
 // Initialize Firebase
