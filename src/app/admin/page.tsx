@@ -32,13 +32,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { PlusCircle, ShieldAlert, DollarSign, Users, ListChecks, Pencil, Trash2 } from "lucide-react";
-import { Transaction, Task, User, TaskStatus } from "@/lib/types";
+import { Transaction, Task, User } from "@/lib/types";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import UserData from "@/components/admin/user-data";
 import { Separator } from "@/components/ui/separator";
-import { collection, deleteDoc, doc, getDocs, query } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDocs, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 export default function AdminPage() {
@@ -64,11 +64,18 @@ export default function AdminPage() {
     const allTransactions: Transaction[] = [];
 
     for (const userDoc of userSnapshot.docs) {
-        usersList[userDoc.id] = { id: userDoc.id, ...userDoc.data() } as User;
-        const transactionsRef = collection(db, "users", userDoc.id, "transactions");
+        const userId = userDoc.id;
+        usersList[userId] = { id: userId, ...userDoc.data() } as User;
+        const transactionsRef = collection(db, "users", userId, "transactions");
         const transactionsSnapshot = await getDocs(transactionsRef);
         transactionsSnapshot.forEach(transDoc => {
-            allTransactions.push({ id: transDoc.id, ...transDoc.data() } as Transaction);
+            const transData = transDoc.data();
+            allTransactions.push({ 
+                id: transDoc.id, 
+                userId,
+                ...transData,
+                date: transData.date instanceof Timestamp ? transData.date.toDate() : new Date(),
+            } as Transaction);
         })
     }
     setUsers(usersList);
@@ -338,7 +345,7 @@ export default function AdminPage() {
           </CardContent>
         </Card>
 
-        <UserData users={users} onUpdate={fetchData} />
+        <UserData users={users} transactions={transactions} onUpdate={fetchData} />
       </div>
     </div>
   );

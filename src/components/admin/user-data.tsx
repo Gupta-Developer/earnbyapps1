@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -26,7 +26,7 @@ import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { Separator } from "@/components/ui/separator";
-import { collection, doc, getDocs, query, updateDoc } from "firebase/firestore";
+import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 
@@ -47,35 +47,17 @@ const getBadgeClasses = (status: string): string => {
 
 type UserDataProps = {
     users: Record<string, User>;
+    transactions: Transaction[];
     onUpdate: () => void;
 }
 
-export default function UserData({ users, onUpdate }: UserDataProps) {
+export default function UserData({ users, transactions, onUpdate }: UserDataProps) {
     const [searchQuery, setSearchQuery] = useState("");
-    const [transactions, setTransactions] = useState<Transaction[]>([]);
     const { toast } = useToast();
     const { isAdmin } = useAuth();
     
-    useEffect(() => {
-        const fetchTransactions = async () => {
-            if (!isAdmin || !users) return;
-
-            const allTransactions: Transaction[] = [];
-            for (const userId in users) {
-                 const transactionsRef = collection(db, "users", userId, "transactions");
-                 const transactionsSnapshot = await getDocs(transactionsRef);
-                 transactionsSnapshot.forEach(transDoc => {
-                     allTransactions.push({ id: transDoc.id, userId, ...transDoc.data() } as Transaction);
-                 })
-            }
-            setTransactions(allTransactions);
-        };
-
-        fetchTransactions();
-    }, [isAdmin, users]);
-    
     const handleUpdateTransactionStatus = async (userId: string, transactionId: string, status: TaskStatus) => {
-        if (!userId || !transactionId) return;
+        if (!isAdmin || !userId || !transactionId) return;
         
         try {
             const transactionRef = doc(db, 'users', userId, 'transactions', transactionId);
@@ -232,7 +214,7 @@ export default function UserData({ users, onUpdate }: UserDataProps) {
                                                                     <div className="text-sm text-accent">₹{item.amount}</div>
                                                                 </TableCell>
                                                                 <TableCell>
-                                                                    {format(item.date, 'dd MMM, yyyy')}
+                                                                    {format(new Date(item.date), 'dd MMM, yyyy')}
                                                                 </TableCell>
                                                                 <TableCell>
                                                                     <Badge className={getBadgeClasses(item.status)}>
