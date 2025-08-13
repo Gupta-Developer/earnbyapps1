@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { CheckCircle, Copy } from 'lucide-react';
+import { CheckCircle, Copy, Loader2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useAuth } from '@/hooks/use-auth';
@@ -25,6 +25,8 @@ export default function TaskDetailPage() {
   const taskId = params.id as string;
   const [task, setTask] = useState<Task | null>(null);
   const [existingTransaction, setExistingTransaction] = useState<Transaction | null>(null);
+  const [isStarting, setIsStarting] = useState(false);
+
 
   const checkExistingTransaction = useCallback(async () => {
     if (!user || !taskId) return;
@@ -87,9 +89,25 @@ export default function TaskDetailPage() {
   };
 
   const handleStartTask = async () => {
-    if (!user || isTaskLocked || existingTransaction) return;
+    if (!user || isTaskLocked || existingTransaction || isStarting) return;
+    
+    setIsStarting(true);
     
     try {
+        // Double-check for transaction right before writing
+        const transactionsRefCheck = collection(db, "users", user.uid, "transactions");
+        const qCheck = query(transactionsRefCheck, where("taskId", "==", taskId));
+        const querySnapshotCheck = await getDocs(qCheck);
+
+        if (!querySnapshotCheck.empty) {
+            setExistingTransaction({ id: querySnapshotCheck.docs[0].id, ...querySnapshotCheck.docs[0].data() } as Transaction);
+            setIsStarting(false);
+            toast({ title: "Task already started", description: "You can view its status in your wallet.", variant: "default" });
+            router.push('/wallet');
+            return;
+        }
+
+
         const userRef = doc(db, 'users', user.uid);
         const userSnap = await getDoc(userRef);
 
@@ -100,6 +118,7 @@ export default function TaskDetailPage() {
                 variant: "destructive"
             });
             router.push(`/profile?redirect_to=${pathname}`);
+            setIsStarting(false);
             return;
         }
 
@@ -119,18 +138,22 @@ export default function TaskDetailPage() {
             description: `"${task.name}" is now ongoing in your wallet.`,
         });
         
-        // Re-fetch the transaction status to ensure UI is in sync
         await checkExistingTransaction();
 
     } catch (error) {
         console.error("Error starting task:", error);
         toast({ title: "Error", description: "Could not start the task.", variant: "destructive" });
+    } finally {
+        setIsStarting(false);
     }
   };
 
   const stepsArray = typeof task.steps === 'string' ? task.steps.split('\n').filter(s => s.trim() !== '') : [];
 
   const getButtonContent = () => {
+      if (isStarting) {
+          return <> <Loader2 className="animate-spin" /> Starting Task...</>;
+      }
       if (!user) {
           return "Login to Start Task";
       }
@@ -213,7 +236,7 @@ export default function TaskDetailPage() {
 
             {user ? (
                 <Button 
-                  asChild={!isTaskLocked && !existingTransaction} 
+                  asChild={!isTaskLocked && !existingTransaction && !isStarting} 
                   size="lg" 
                   className="w-full shadow-lg" 
                   onClick={() => {
@@ -223,9 +246,9 @@ export default function TaskDetailPage() {
                           handleStartTask();
                       }
                   }}
-                  disabled={isTaskLocked}
+                  disabled={isTaskLocked || isStarting}
                 >
-                    {isTaskLocked || (existingTransaction && !task.link) ? (
+                    {isTaskLocked || (existingTransaction && !task.link) || isStarting ? (
                         <span>{getButtonContent()}</span>
                     ) : (
                          <a href={task.link} target="_blank" rel="noopener noreferrer" onClick={handleStartTask}>
