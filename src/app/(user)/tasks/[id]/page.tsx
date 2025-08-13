@@ -12,8 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useAuth } from '@/hooks/use-auth';
 import { Task, Transaction } from '@/lib/types';
-import { db } from '@/lib/firebase';
-import { doc, getDoc, collection, query, where, getDocs, addDoc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { MOCK_TASKS, MOCK_TRANSACTIONS, MOCK_USERS } from '@/lib/mock-data';
 
 
 export default function TaskDetailPage() {
@@ -28,30 +27,25 @@ export default function TaskDetailPage() {
   const [isStarting, setIsStarting] = useState(false);
 
 
-  const checkExistingTransaction = useCallback(async () => {
+  const checkExistingTransaction = useCallback(() => {
     if (!user || !taskId) return;
     
-    const transactionsRef = collection(db, "users", user.uid, "transactions");
-    const q = query(transactionsRef, where("taskId", "==", taskId));
+    const transaction = MOCK_TRANSACTIONS.find(t => t.userId === user.uid && t.taskId === taskId);
     
-    const querySnapshot = await getDocs(q);
-    
-    if (!querySnapshot.empty) {
-        const transactionDoc = querySnapshot.docs[0];
-        setExistingTransaction({ id: transactionDoc.id, ...transactionDoc.data() } as Transaction);
+    if (transaction) {
+        setExistingTransaction(transaction);
     } else {
         setExistingTransaction(null);
     }
   }, [user, taskId]);
 
   useEffect(() => {
-    const fetchTask = async () => {
+    const fetchTask = () => {
         if (!taskId) return;
-        const taskRef = doc(db, "tasks", taskId);
-        const taskSnap = await getDoc(taskRef);
+        const foundTask = MOCK_TASKS.find(t => t.id === taskId);
 
-        if (taskSnap.exists()) {
-            setTask({ id: taskSnap.id, ...taskSnap.data() } as Task);
+        if (foundTask) {
+            setTask(foundTask);
         } else {
             console.error("No such task!");
             toast({ title: "Task not found", variant: "destructive" });
@@ -89,29 +83,19 @@ export default function TaskDetailPage() {
   };
 
   const handleStartTask = async () => {
-    if (!user || isTaskLocked || existingTransaction || isStarting) return;
+    if (!user || isTaskLocked || isStarting) return;
     
+    if (existingTransaction) {
+        router.push('/wallet');
+        return;
+    }
+
     setIsStarting(true);
     
     try {
-        // Double-check for transaction right before writing
-        const transactionsRefCheck = collection(db, "users", user.uid, "transactions");
-        const qCheck = query(transactionsRefCheck, where("taskId", "==", taskId));
-        const querySnapshotCheck = await getDocs(qCheck);
+        const mockUser = MOCK_USERS[user.uid];
 
-        if (!querySnapshotCheck.empty) {
-            setExistingTransaction({ id: querySnapshotCheck.docs[0].id, ...querySnapshotCheck.docs[0].data() } as Transaction);
-            setIsStarting(false);
-            toast({ title: "Task already started", description: "You can view its status in your wallet.", variant: "default" });
-            router.push('/wallet');
-            return;
-        }
-
-
-        const userRef = doc(db, 'users', user.uid);
-        const userSnap = await getDoc(userRef);
-
-        if (!userSnap.exists() || !userSnap.data().phone || !userSnap.data().upiId) {
+        if (!mockUser || !mockUser.phone || !mockUser.upiId) {
             toast({
                 title: "Profile Incomplete",
                 description: "Please complete your profile with phone and UPI ID before starting a task.",
@@ -122,23 +106,27 @@ export default function TaskDetailPage() {
             return;
         }
 
-        const transactionsRef = collection(db, "users", user.uid, "transactions");
-        const newTransactionRef = doc(transactionsRef);
+        // Simulate async operation
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
-        await setDoc(newTransactionRef, {
+        const newTransaction: Transaction = {
+            id: `trans-${Date.now()}`,
+            userId: user.uid,
             taskId: task.id,
             title: task.name,
             amount: task.reward,
             status: 'Started & Ongoing',
-            date: serverTimestamp(),
-        });
+            date: new Date(),
+        };
+
+        MOCK_TRANSACTIONS.push(newTransaction);
 
         toast({
             title: "Task Started!",
             description: `"${task.name}" is now ongoing in your wallet.`,
         });
         
-        await checkExistingTransaction();
+        checkExistingTransaction();
 
     } catch (error) {
         console.error("Error starting task:", error);
@@ -244,6 +232,10 @@ export default function TaskDetailPage() {
                           handleStartTask();
                       } else if (existingTransaction) {
                           router.push('/wallet')
+                      } else if (isTaskLocked || isStarting) {
+                          return;
+                      } else {
+                          handleStartTask();
                       }
                   }}
                   disabled={isTaskLocked || isStarting}
@@ -305,5 +297,3 @@ export default function TaskDetailPage() {
     </div>
   );
 }
-
-    

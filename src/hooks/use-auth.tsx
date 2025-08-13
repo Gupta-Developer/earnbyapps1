@@ -2,12 +2,15 @@
 "use client";
 
 import { useState, useEffect, createContext, useContext, type ReactNode } from 'react';
-import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut as firebaseSignOut, GoogleAuthProvider, signInWithPopup, updateProfile, type User as FirebaseUser } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebase';
+import { MOCK_USERS } from '@/lib/mock-data';
 
-// Using Firebase's User type but making it nullable for our state
-export type AuthUser = FirebaseUser;
+// A mock user type that is compatible with the old FirebaseUser but simplified
+export type AuthUser = {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  photoURL?: string | null;
+};
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -39,81 +42,68 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setUser(user);
-      if (user) {
-        setIsAdmin(user.email === ADMIN_EMAIL);
-      } else {
-        setIsAdmin(false);
-      }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
+    // Simulate initial auth state check
+    setLoading(false);
   }, []);
 
-  const createUserDocument = async (user: AuthUser, displayName?: string) => {
-    const userRef = doc(db, 'users', user.uid);
-    const userSnap = await getDoc(userRef);
-    if (!userSnap.exists()) {
-        await setDoc(userRef, {
-            email: user.email,
-            fullName: displayName || user.displayName,
-            createdAt: new Date(),
-        });
-    }
+  const setMockUser = (mockUser: { id: string, email: string, fullName: string }) => {
+      const authUser: AuthUser = {
+          uid: mockUser.id,
+          email: mockUser.email,
+          displayName: mockUser.fullName
+      };
+      setUser(authUser);
+      setIsAdmin(authUser.email === ADMIN_EMAIL);
   }
 
   const signUp = async (email: string, password: string, displayName: string) => {
     setLoading(true);
     setError(null);
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await updateProfile(userCredential.user, { displayName });
-      await createUserDocument(userCredential.user, displayName);
-    } catch (e: any) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
-    }
+    console.log("Mock SignUp:", { email, password, displayName });
+    // Simulate successful signup and login
+    const newUserId = `user-${Date.now()}`;
+    MOCK_USERS[newUserId] = {
+        id: newUserId,
+        email: email,
+        fullName: displayName,
+        phone: '',
+        upiId: ''
+    };
+    setMockUser(MOCK_USERS[newUserId]);
+    setLoading(false);
   };
 
   const signIn = async (email: string, password: string) => {
     setLoading(true);
     setError(null);
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (e: any) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
+    console.log("Mock SignIn:", { email, password });
+    
+    // Simple mock logic: Find user by email
+    const existingUser = Object.values(MOCK_USERS).find(u => u.email === email);
+    
+    if (existingUser) {
+      setMockUser(existingUser);
+    } else {
+      setError("Mock Auth: User not found.");
     }
+    setLoading(false);
   };
   
   const signInWithGoogle = async () => {
     setLoading(true);
     setError(null);
-    try {
-        const provider = new GoogleAuthProvider();
-        const result = await signInWithPopup(auth, provider);
-        await createUserDocument(result.user);
-    } catch (e: any) {
-        setError(e.message);
-    } finally {
-        setLoading(false);
-    }
+    console.log("Mock SignInWithGoogle");
+    // Sign in with a predefined google user for simplicity
+    setMockUser(MOCK_USERS['google-user-id']);
+    setLoading(false);
   }
 
   const signOut = async () => {
     setLoading(true);
     setError(null);
-    try {
-        await firebaseSignOut(auth);
-    } catch (e: any) {
-        setError(e.message)
-    } finally {
-        setLoading(false);
-    }
+    setUser(null);
+    setIsAdmin(false);
+    setLoading(false);
   };
 
   const value = {

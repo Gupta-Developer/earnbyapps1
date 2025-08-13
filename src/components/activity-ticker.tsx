@@ -1,11 +1,10 @@
 
 "use client";
 
-import { useMemo, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Zap } from "lucide-react";
 import { UserActivity, Transaction, User } from "@/lib/types";
-import { collectionGroup, getDocs, limit, query, where } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { MOCK_TRANSACTIONS, MOCK_USERS } from "@/lib/mock-data";
 
 const generateActivities = (transactions: Transaction[], users: Record<string, User>): UserActivity[] => {
   return transactions.map(tx => {
@@ -26,36 +25,14 @@ export default function ActivityTicker() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchRecentActivities = async () => {
+    const fetchRecentActivities = () => {
         setLoading(true);
-        try {
-            const transactionsQuery = query(
-                collectionGroup(db, 'transactions'),
-                where('status', 'in', ['Paid', 'Approved']),
-                limit(10)
-            );
-            const transactionSnap = await getDocs(transactionsQuery);
-            const recentTransactions = transactionSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Transaction));
-            
-            const userIds = [...new Set(recentTransactions.map(t => t.userId))];
-            const users: Record<string, User> = {};
-
-            // In a real app, you might fetch these users more efficiently
-            for (const userId of userIds) {
-                const userDoc = await db.collection('users').doc(userId).get();
-                if(userDoc.exists) {
-                    users[userId] = userDoc.data() as User;
-                }
-            }
-
-            const generated = generateActivities(recentTransactions, users);
-            // Duplicate for marquee effect
-            if (generated.length > 0) {
-                setActivities([...generated, ...generated]);
-            }
-
-        } catch (error) {
-            console.error("Error fetching recent activities: ", error);
+        const recentTransactions = MOCK_TRANSACTIONS.filter(t => t.status === 'Paid' || t.status === 'Approved').slice(0, 10);
+        
+        const generated = generateActivities(recentTransactions, MOCK_USERS);
+        // Duplicate for marquee effect
+        if (generated.length > 0) {
+            setActivities([...generated, ...generated]);
         }
         setLoading(false);
     };

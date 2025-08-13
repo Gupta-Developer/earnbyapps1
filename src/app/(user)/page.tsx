@@ -18,8 +18,7 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import WhatsAppIcon from "@/components/whatsapp-icon";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { MOCK_TASKS } from "@/lib/mock-data";
 
 
 const socialLinks = [
@@ -62,14 +61,8 @@ export default function HomePage() {
   useEffect(() => {
     const fetchTasks = async () => {
         setLoading(true);
-        try {
-            const tasksCollection = collection(db, "tasks");
-            const taskSnapshot = await getDocs(tasksCollection);
-            const tasksList = taskSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Task));
-            setTasks(tasksList);
-        } catch (error) {
-            console.error("Error fetching tasks: ", error);
-        }
+        // Using mock data instead of Firestore
+        setTasks(MOCK_TASKS);
         setLoading(false);
     }
     fetchTasks();

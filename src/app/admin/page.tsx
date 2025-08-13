@@ -37,9 +37,8 @@ import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import UserData from "@/components/admin/user-data";
-import { Separator } from "@/components/ui/separator";
-import { collection, deleteDoc, doc, getDocs, Timestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { MOCK_TASKS, MOCK_TRANSACTIONS, MOCK_USERS } from "@/lib/mock-data";
+
 
 export default function AdminPage() {
   const { isAdmin, loading } = useAuth();
@@ -50,36 +49,10 @@ export default function AdminPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [users, setUsers] = useState<Record<string, User>>({});
   
-  const fetchData = async () => {
-    // Fetch Tasks
-    const tasksCollection = collection(db, "tasks");
-    const taskSnapshot = await getDocs(tasksCollection);
-    const tasksList = taskSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Task));
-    setTasks(tasksList);
-
-    // Fetch All Users and their transactions
-    const usersCollection = collection(db, "users");
-    const userSnapshot = await getDocs(usersCollection);
-    const usersList: Record<string, User> = {};
-    const allTransactions: Transaction[] = [];
-
-    for (const userDoc of userSnapshot.docs) {
-        const userId = userDoc.id;
-        usersList[userId] = { id: userId, ...userDoc.data() } as User;
-        const transactionsRef = collection(db, "users", userId, "transactions");
-        const transactionsSnapshot = await getDocs(transactionsRef);
-        transactionsSnapshot.forEach(transDoc => {
-            const transData = transDoc.data();
-            allTransactions.push({ 
-                id: transDoc.id, 
-                userId,
-                ...transData,
-                date: transData.date instanceof Timestamp ? transData.date.toDate() : new Date(),
-            } as Transaction);
-        })
-    }
-    setUsers(usersList);
-    setTransactions(allTransactions);
+  const fetchData = () => {
+    setTasks(MOCK_TASKS);
+    setUsers(MOCK_USERS);
+    setTransactions(MOCK_TRANSACTIONS);
   };
 
 
@@ -91,21 +64,15 @@ export default function AdminPage() {
 
   const handleDeleteTask = async (taskId: string) => {
     if (!isAdmin) return;
-    try {
-        await deleteDoc(doc(db, "tasks", taskId));
-        
-        // You might also want to delete related transactions for all users, which is more complex.
-        // For now, we'll just delete the task itself.
-
-        toast({
-          title: "Task Deleted",
-          description: "The task has been removed from the database.",
-        });
-        fetchData(); // Refresh data
-    } catch (error) {
-        console.error("Error deleting task:", error);
-        toast({ title: "Error", description: "Could not delete task.", variant: "destructive" });
+    const taskIndex = MOCK_TASKS.findIndex(t => t.id === taskId);
+    if (taskIndex !== -1) {
+        MOCK_TASKS.splice(taskIndex, 1);
     }
+    toast({
+        title: "Task Deleted",
+        description: "The task has been removed from the mock data.",
+    });
+    fetchData(); // Refresh data
   };
 
   const totalPlatformProfit = useMemo(() => {

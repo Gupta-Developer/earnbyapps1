@@ -11,8 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useAuth } from "@/hooks/use-auth";
 import WhatsAppIcon from "@/components/whatsapp-icon";
-import { collection, getDocs, Timestamp, query, orderBy } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { MOCK_TRANSACTIONS } from "@/lib/mock-data";
+
 
 const getBadgeClasses = (status: string): string => {
     switch (status) {
@@ -66,24 +66,11 @@ export default function WalletPage() {
         };
         
         setLoading(true);
-        try {
-            const transactionsRef = collection(db, "users", user.uid, "transactions");
-            const q = query(transactionsRef, orderBy("date", "desc"));
-            const querySnapshot = await getDocs(q);
-
-            const userTransactions = querySnapshot.docs.map(doc => {
-                const data = doc.data();
-                return {
-                    id: doc.id,
-                    ...data,
-                    date: data.date instanceof Timestamp ? data.date.toDate() : new Date(),
-                } as Transaction
-            });
-
-            setTransactions(userTransactions);
-        } catch (error) {
-            console.error("Error fetching transactions: ", error);
-        }
+        // Fetching mock transactions for the current user
+        const userTransactions = MOCK_TRANSACTIONS.filter(t => t.userId === user.uid);
+        // Sort by date descending
+        userTransactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        setTransactions(userTransactions);
         setLoading(false);
     }
 
@@ -129,7 +116,7 @@ export default function WalletPage() {
                     <TableCell>
                       <div className="font-medium">{item.title}</div>
                       <div className="text-sm text-accent">₹{item.amount}</div>
-                      <div className="text-xs text-muted-foreground">{format(item.date, 'dd MMM, yyyy')}</div>
+                      <div className="text-xs text-muted-foreground">{format(new Date(item.date), 'dd MMM, yyyy')}</div>
                     </TableCell>
                     <TableCell className="text-center">
                       <Badge className={getBadgeClasses(item.status)}>

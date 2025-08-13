@@ -18,8 +18,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { db } from "@/lib/firebase";
-import { doc, getDoc, setDoc, collection, getDocs } from "firebase/firestore";
+import { MOCK_USERS, MOCK_TRANSACTIONS } from "@/lib/mock-data";
+
 
 const GoogleIcon = () => (
     <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2">
@@ -95,21 +95,16 @@ export default function ProfilePage() {
     defaultValues: { fullName: "", phone: "", upiId: "" },
   });
   
-  const fetchUserData = async (currentUser: any, currentRedirectTo: string | null) => {
+  const fetchUserData = (currentUser: any, currentRedirectTo: string | null) => {
       if (currentUser) {
-        const userRef = doc(db, "users", currentUser.uid);
-        const userSnap = await getDoc(userRef);
+        const mockUser = MOCK_USERS[currentUser.uid];
 
         let userDetails = {
-            fullName: currentUser.displayName || "",
-            phone: "",
-            upiId: "",
+            fullName: mockUser?.fullName || currentUser.displayName || "",
+            phone: mockUser?.phone || "",
+            upiId: mockUser?.upiId || "",
         };
 
-        if (userSnap.exists()) {
-            const userData = userSnap.data();
-            userDetails = { ...userDetails, ...userData };
-        }
         profileForm.reset(userDetails);
         
         if (currentRedirectTo && (!userDetails.phone || !userDetails.upiId)) {
@@ -125,14 +120,9 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchTransactionData = async () => {
         if (user) {
-            try {
-                const transactionsRef = collection(db, "users", user.uid, "transactions");
-                const querySnapshot = await getDocs(transactionsRef);
-                const paidTransactions = querySnapshot.docs.filter(doc => doc.data().status === 'Paid' || doc.data().status === 'Approved').length;
-                setCompletedTasks(paidTransactions);
-            } catch (error) {
-                console.error("Error fetching transactions: ", error);
-            }
+            const userTransactions = MOCK_TRANSACTIONS.filter(t => t.userId === user.uid);
+            const paidTransactions = userTransactions.filter(t => t.status === 'Paid' || t.status === 'Approved').length;
+            setCompletedTasks(paidTransactions);
         }
     };
 
@@ -161,21 +151,23 @@ export default function ProfilePage() {
         return;
     }
     
-    try {
-        await setDoc(doc(db, "users", user.uid), data, { merge: true });
-        toast({ 
-            title: "Profile Saved!",
-            description: "Your information has been updated.",
-            className: "bg-accent text-accent-foreground border-accent"
-        });
-        setIsEditing(false);
+    // In mock mode, we just update the local mock data
+    const mockUser = MOCK_USERS[user.uid];
+    if (mockUser) {
+        mockUser.fullName = data.fullName;
+        mockUser.phone = data.phone;
+        mockUser.upiId = data.upiId;
+    }
+    
+    toast({ 
+        title: "Profile Saved!",
+        description: "Your information has been updated locally.",
+        className: "bg-accent text-accent-foreground border-accent"
+    });
+    setIsEditing(false);
 
-        if (redirectTo) {
-            router.push(redirectTo);
-        }
-    } catch (e) {
-        console.error("Error saving profile:", e);
-        toast({ title: "Error", description: "Could not save profile.", variant: "destructive" });
+    if (redirectTo) {
+        router.push(redirectTo);
     }
   };
   

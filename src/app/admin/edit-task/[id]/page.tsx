@@ -13,9 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, ShieldAlert, PlusCircle, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Faq, Task } from "@/lib/types";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { db, storage } from "@/lib/firebase";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { MOCK_TASKS } from "@/lib/mock-data";
 
 
 export default function EditTaskPage() {
@@ -33,12 +31,11 @@ export default function EditTaskPage() {
   useEffect(() => {
     const taskId = params.id as string;
     if (taskId) {
-        const fetchTask = async () => {
-            const taskRef = doc(db, "tasks", taskId);
-            const taskSnap = await getDoc(taskRef);
-            if (taskSnap.exists()) {
-                setTask({ id: taskSnap.id, ...taskSnap.data() } as Task);
-                setFaqs(taskSnap.data().faqs || []);
+        const fetchTask = () => {
+            const foundTask = MOCK_TASKS.find(t => t.id === taskId);
+            if (foundTask) {
+                setTask(foundTask);
+                setFaqs(foundTask.faqs || []);
             } else {
                  toast({ title: "Task not found", variant: "destructive" });
                  router.push('/admin');
@@ -88,12 +85,13 @@ export default function EditTaskPage() {
     setTask(prev => prev ? ({ ...prev, [field]: checked }) : null);
   };
   
-  const uploadFile = async (file: File) => {
-      if (!file) return null;
-      const storageRef = ref(storage, `tasks/${Date.now()}_${file.name}`);
-      await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(storageRef);
-      return downloadURL;
+  const getFileAsDataURL = (file: File): Promise<string> => {
+      return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+      });
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -112,24 +110,24 @@ export default function EditTaskPage() {
     try {
         let iconUrl = task.icon;
         if (iconFile) {
-            iconUrl = await uploadFile(iconFile);
+            iconUrl = await getFileAsDataURL(iconFile);
         }
         
         let bannerUrl = task.banner;
         if (bannerFile) {
-            bannerUrl = await uploadFile(bannerFile);
+            bannerUrl = await getFileAsDataURL(bannerFile);
         }
         
-        const taskRef = doc(db, "tasks", task.id);
-        
-        const { id, ...taskDataToUpdate } = task;
-
-        await updateDoc(taskRef, {
-            ...taskDataToUpdate,
-            faqs,
-            icon: iconUrl,
-            banner: bannerUrl,
-        });
+        const taskIndex = MOCK_TASKS.findIndex(t => t.id === task.id);
+        if (taskIndex !== -1) {
+            MOCK_TASKS[taskIndex] = {
+                ...MOCK_TASKS[taskIndex],
+                ...task,
+                faqs,
+                icon: iconUrl,
+                banner: bannerUrl,
+            } as Task;
+        }
 
         toast({
             title: "Task Updated!",

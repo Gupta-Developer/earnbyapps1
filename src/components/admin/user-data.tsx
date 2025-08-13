@@ -26,8 +26,7 @@ import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { Separator } from "@/components/ui/separator";
-import { doc, updateDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { MOCK_TRANSACTIONS } from "@/lib/mock-data";
 
 
 const getBadgeClasses = (status: string): string => {
@@ -59,19 +58,16 @@ export default function UserData({ users, transactions, onUpdate }: UserDataProp
     const handleUpdateTransactionStatus = async (userId: string, transactionId: string, status: TaskStatus) => {
         if (!isAdmin || !userId || !transactionId) return;
         
-        try {
-            const transactionRef = doc(db, 'users', userId, 'transactions', transactionId);
-            await updateDoc(transactionRef, { status });
-            
-            toast({
-                title: "Status Updated",
-                description: `Transaction status has been changed to ${status}.`,
-            });
-            onUpdate(); // Trigger data refresh in parent component
-        } catch (error) {
-            console.error("Error updating status: ", error);
-            toast({ title: "Error", description: "Could not update status.", variant: "destructive" });
+        const transactionIndex = MOCK_TRANSACTIONS.findIndex(t => t.id === transactionId && t.userId === userId);
+        if (transactionIndex !== -1) {
+            MOCK_TRANSACTIONS[transactionIndex].status = status;
         }
+
+        toast({
+            title: "Status Updated",
+            description: `Transaction status has been changed to ${status}.`,
+        });
+        onUpdate(); // Trigger data refresh in parent component
     };
 
     const groupedAndFilteredUsers = useMemo(() => {
@@ -163,7 +159,7 @@ export default function UserData({ users, transactions, onUpdate }: UserDataProp
                                                             <div>
                                                                 <p className="font-semibold">{item.title}</p>
                                                                 <p className="text-sm text-accent">₹{item.amount}</p>
-                                                                <p className="text-xs text-muted-foreground">{format(item.date, 'dd MMM, yyyy')}</p>
+                                                                <p className="text-xs text-muted-foreground">{format(new Date(item.date), 'dd MMM, yyyy')}</p>
                                                             </div>
                                                             <Separator />
                                                              <div className="flex items-center justify-between gap-2">

@@ -13,9 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, ShieldAlert, PlusCircle, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Faq } from "@/lib/types";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { db, storage } from "@/lib/firebase";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { MOCK_TASKS } from "@/lib/mock-data";
 
 
 export default function AddTaskPage() {
@@ -81,12 +79,13 @@ export default function AddTaskPage() {
     setTask(prev => ({ ...prev, [field]: checked }));
   };
   
-  const uploadFile = async (file: File) => {
-      if (!file) return null;
-      const storageRef = ref(storage, `tasks/${Date.now()}_${file.name}`);
-      await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(storageRef);
-      return downloadURL;
+  const getFileAsDataURL = (file: File): Promise<string> => {
+      return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+      });
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -103,18 +102,18 @@ export default function AddTaskPage() {
     setIsSubmitting(true);
     
     try {
-        const iconUrl = await uploadFile(iconFile);
-        if (!iconUrl) throw new Error("Icon upload failed.");
+        const iconUrl = await getFileAsDataURL(iconFile);
+        const bannerUrl = bannerFile ? await getFileAsDataURL(bannerFile) : null;
         
-        const bannerUrl = bannerFile ? await uploadFile(bannerFile) : null;
-        
-        await addDoc(collection(db, "tasks"), {
+        const newTask = {
+            id: `task-${Date.now()}`,
             ...task,
             faqs,
             icon: iconUrl,
-            banner: bannerUrl,
-            createdAt: serverTimestamp()
-        });
+            banner: bannerUrl || undefined,
+        };
+
+        MOCK_TASKS.push(newTask);
 
         toast({
             title: "Task Added!",
@@ -264,5 +263,3 @@ export default function AddTaskPage() {
     </div>
   );
 }
-
-    
