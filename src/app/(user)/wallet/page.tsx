@@ -6,12 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from 'date-fns';
-import { Transaction } from "@/lib/types";
+import { Transaction, Task } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useAuth } from "@/hooks/use-auth";
 import WhatsAppIcon from "@/components/whatsapp-icon";
-import { MOCK_TRANSACTIONS } from "@/lib/mock-data";
+import { MOCK_TRANSACTIONS, MOCK_TASKS } from "@/lib/mock-data";
+import Image from "next/image";
+import Link from "next/link";
+import { ExternalLink } from "lucide-react";
 
 
 const getBadgeClasses = (status: string): string => {
@@ -52,9 +55,11 @@ const statusFaqs = [
     }
 ]
 
+type EnrichedTransaction = Transaction & { task?: Task };
+
 export default function WalletPage() {
   const { user } = useAuth();
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<EnrichedTransaction[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -68,9 +73,15 @@ export default function WalletPage() {
         setLoading(true);
         // Fetching mock transactions for the current user
         const userTransactions = MOCK_TRANSACTIONS.filter(t => t.userId === user.uid);
+        
+        const enriched = userTransactions.map(tx => {
+            const task = MOCK_TASKS.find(t => t.id === tx.taskId);
+            return { ...tx, task };
+        })
+        
         // Sort by date descending
-        userTransactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        setTransactions(userTransactions);
+        enriched.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        setTransactions(enriched);
         setLoading(false);
     }
 
@@ -101,7 +112,7 @@ export default function WalletPage() {
                 <TableRow>
                   <TableHead>Details</TableHead>
                   <TableHead className="text-center">Status</TableHead>
-                  <TableHead>Support</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -114,26 +125,46 @@ export default function WalletPage() {
                 ) : transactions.length > 0 ? transactions.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell>
-                      <div className="font-medium">{item.title}</div>
-                      <div className="text-sm text-accent">₹{item.amount}</div>
-                      <div className="text-xs text-muted-foreground">{format(new Date(item.date), 'dd MMM, yyyy')}</div>
+                      <div className="flex items-center gap-3">
+                         {item.task && (
+                            <Image src={item.task.icon} alt={item.task.name} width={40} height={40} className="rounded-lg" />
+                         )}
+                         <div>
+                            <div className="font-medium">{item.title}</div>
+                            <div className="text-sm text-accent">₹{item.amount}</div>
+                            <div className="text-xs text-muted-foreground">{format(new Date(item.date), 'dd MMM, yyyy')}</div>
+                         </div>
+                      </div>
+                      <div className="text-xs text-muted-foreground/70 mt-2 ml-1">ID: {item.id}</div>
                     </TableCell>
                     <TableCell className="text-center">
                       <Badge className={getBadgeClasses(item.status)}>
                         {item.status}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-right space-y-2">
                       <Button
                           variant="link"
                           className="p-0 h-auto text-xs text-muted-foreground gap-1"
                           asChild
                         >
-                          <a href={`https://wa.me/918319250462?text=Hi, I have a question about my transaction: ${item.title}`} target="_blank" rel="noopener noreferrer">
+                          <a href={`https://wa.me/918319250462?text=Hi, I have a question about my transaction: ${item.id}`} target="_blank" rel="noopener noreferrer">
                             <WhatsAppIcon className="h-4 w-4" />
-                            Contact
+                            Support
                           </a>
                         </Button>
+                        {item.task && (
+                           <Button
+                            variant="link"
+                            className="p-0 h-auto text-xs text-muted-foreground gap-1"
+                            asChild
+                            >
+                            <Link href={`/tasks/${item.taskId}`}>
+                                <ExternalLink className="h-4 w-4" />
+                                View Task
+                            </Link>
+                            </Button>
+                        )}
                     </TableCell>
                   </TableRow>
                 )) : (
