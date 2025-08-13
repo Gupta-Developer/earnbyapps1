@@ -13,6 +13,9 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, ShieldAlert, PlusCircle, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Faq } from "@/lib/types";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { db, storage } from "@/lib/firebase";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 
 export default function AddTaskPage() {
@@ -77,6 +80,14 @@ export default function AddTaskPage() {
   const handleSwitchChange = (field: 'isInstant' | 'isHighPaying') => (checked: boolean) => {
     setTask(prev => ({ ...prev, [field]: checked }));
   };
+  
+  const uploadFile = async (file: File) => {
+      if (!file) return null;
+      const storageRef = ref(storage, `tasks/${Date.now()}_${file.name}`);
+      await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(storageRef);
+      return downloadURL;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,21 +102,33 @@ export default function AddTaskPage() {
     }
     setIsSubmitting(true);
     
-    // In a real app, this is where you would upload the files and then
-    // send the task data (including the returned file URLs) to your API.
-    console.log("Submitting task:", { ...task, faqs, icon: iconFile.name, banner: bannerFile?.name });
+    try {
+        const iconUrl = await uploadFile(iconFile);
+        if (!iconUrl) throw new Error("Icon upload failed.");
+        
+        const bannerUrl = bannerFile ? await uploadFile(bannerFile) : null;
+        
+        const tasksCollection = collection(db, "tasks");
+        await addDoc(tasksCollection, {
+            ...task,
+            faqs,
+            icon: iconUrl,
+            banner: bannerUrl,
+            createdAt: serverTimestamp()
+        });
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    toast({
-        title: "Task Added (Simulated)!",
-        description: `${task.name} has been added successfully.`,
-        className: "bg-accent text-accent-foreground border-accent"
-    });
-    router.push("/admin");
-
-    setIsSubmitting(false);
+        toast({
+            title: "Task Added!",
+            description: `${task.name} has been added successfully.`,
+            className: "bg-accent text-accent-foreground border-accent"
+        });
+        router.push("/admin");
+    } catch (error) {
+        console.error("Error adding task:", error);
+        toast({ title: "Error", description: "Could not add task.", variant: "destructive" });
+    } finally {
+        setIsSubmitting(false);
+    }
   };
 
   if (loading) {

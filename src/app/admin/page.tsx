@@ -33,26 +33,46 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { PlusCircle, ShieldAlert, DollarSign, Users, ListChecks, Pencil, Trash2 } from "lucide-react";
 import { Transaction, Task, User, TaskStatus } from "@/lib/types";
-import { MOCK_TRANSACTIONS, MOCK_USERS, MOCK_TASKS } from "@/lib/mock-data";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import UserData from "@/components/admin/user-data";
 import { Separator } from "@/components/ui/separator";
+import { collection, deleteDoc, doc, getDocs, query } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 export default function AdminPage() {
   const { isAdmin, loading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
 
-  const [tasks, setTasks] = useState<Record<string, Task>>({});
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [users, setUsers] = useState<Record<string, User>>({});
   
   const fetchData = async () => {
-    const tasksRecord = MOCK_TASKS.reduce((acc, task) => {
-      acc[task.id] = task;
-      return acc;
-    }, {} as Record<string, Task>);
-    setTasks(JSON.parse(JSON.stringify(tasksRecord)));
+    // Fetch Tasks
+    const tasksCollection = collection(db, "tasks");
+    const taskSnapshot = await getDocs(tasksCollection);
+    const tasksList = taskSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Task));
+    setTasks(tasksList);
+
+    // Fetch All Users and their transactions
+    const usersCollection = collection(db, "users");
+    const userSnapshot = await getDocs(usersCollection);
+    const usersList: Record<string, User> = {};
+    const allTransactions: Transaction[] = [];
+
+    for (const userDoc of userSnapshot.docs) {
+        usersList[userDoc.id] = { id: userDoc.id, ...userDoc.data() } as User;
+        const transactionsRef = collection(db, "users", userDoc.id, "transactions");
+        const transactionsSnapshot = await getDocs(transactionsRef);
+        transactionsSnapshot.forEach(transDoc => {
+            allTransactions.push({ id: transDoc.id, ...transDoc.data() } as Transaction);
+        })
+    }
+    setUsers(usersList);
+    setTransactions(allTransactions);
   };
 
 
@@ -62,48 +82,46 @@ export default function AdminPage() {
     }
   }, [isAdmin]);
 
-  const handleDeleteTask = (taskId: string) => {
-    const taskIndex = MOCK_TASKS.findIndex(t => t.id === taskId);
-    if (taskIndex > -1) {
-        MOCK_TASKS.splice(taskIndex, 1);
-    }
-    
-    let i = MOCK_TRANSACTIONS.length;
-    while(i--) {
-        if(MOCK_TRANSACTIONS[i].taskId === taskId) {
-            MOCK_TRANSACTIONS.splice(i, 1);
-        }
-    }
+  const handleDeleteTask = async (taskId: string) => {
+    if (!isAdmin) return;
+    try {
+        await deleteDoc(doc(db, "tasks", taskId));
+        
+        // You might also want to delete related transactions for all users, which is more complex.
+        // For now, we'll just delete the task itself.
 
-    fetchData(); 
-
-    toast({
-      title: "Task Deleted",
-      description: "The task and its submissions have been removed.",
-    });
+        toast({
+          title: "Task Deleted",
+          description: "The task has been removed from the database.",
+        });
+        fetchData(); // Refresh data
+    } catch (error) {
+        console.error("Error deleting task:", error);
+        toast({ title: "Error", description: "Could not delete task.", variant: "destructive" });
+    }
   };
 
   const totalPlatformProfit = useMemo(() => {
-    return MOCK_TRANSACTIONS
+    return transactions
       .filter(t => t.status === 'Paid')
       .reduce((sum, transaction) => {
-        const task = MOCK_TASKS.find(t => t.id === transaction.taskId);
+        const task = tasks.find(t => t.id === transaction.taskId);
         if (task && task.totalReward) {
             const profit = task.totalReward - task.reward;
             return sum + profit;
         }
         return sum;
     }, 0);
-  }, []); 
+  }, [transactions, tasks]); 
 
   const totalUserPayout = useMemo(() => {
-    return MOCK_TRANSACTIONS
+    return transactions
       .filter(t => t.status === 'Paid')
       .reduce((sum, transaction) => sum + transaction.amount, 0);
-  }, []);
+  }, [transactions]);
   
-  const totalTasks = useMemo(() => MOCK_TASKS.length, [tasks]);
-  const totalUsers = useMemo(() => Object.keys(MOCK_USERS).length, []);
+  const totalTasks = useMemo(() => tasks.length, [tasks]);
+  const totalUsers = useMemo(() => Object.keys(users).length, [users]);
 
 
   if (loading) {
@@ -200,7 +218,7 @@ export default function AdminPage() {
           <CardContent>
              {/* Mobile View: Card List */}
             <div className="md:hidden space-y-4">
-              {Object.values(tasks).map((task) => (
+              {tasks.map((task) => (
                 <Card key={task.id}>
                     <CardHeader>
                       <CardTitle className="text-lg">{task.name}</CardTitle>
@@ -265,7 +283,7 @@ export default function AdminPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {Object.values(tasks).map((task) => (
+                  {tasks.map((task) => (
                     <TableRow key={task.id}>
                       <TableCell className="font-medium">{task.name}</TableCell>
                       <TableCell>₹{task.reward}</TableCell>
@@ -320,7 +338,7 @@ export default function AdminPage() {
           </CardContent>
         </Card>
 
-        <UserData />
+        <UserData users={users} onUpdate={fetchData} />
       </div>
     </div>
   );

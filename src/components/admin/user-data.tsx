@@ -23,10 +23,11 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { format } from "date-fns";
-import { MOCK_USERS, MOCK_TRANSACTIONS } from "@/lib/mock-data";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { Separator } from "@/components/ui/separator";
+import { collection, doc, getDocs, query, updateDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 
 const getBadgeClasses = (status: string): string => {
@@ -44,38 +45,51 @@ const getBadgeClasses = (status: string): string => {
     }
 }
 
-export default function UserData() {
+type UserDataProps = {
+    users: Record<string, User>;
+    onUpdate: () => void;
+}
+
+export default function UserData({ users, onUpdate }: UserDataProps) {
     const [searchQuery, setSearchQuery] = useState("");
-    const [users, setUsers] = useState<Record<string, User>>({});
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const { toast } = useToast();
     const { isAdmin } = useAuth();
     
-    const fetchData = async () => {
-        setUsers(JSON.parse(JSON.stringify(MOCK_USERS)));
-        setTransactions(JSON.parse(JSON.stringify(MOCK_TRANSACTIONS)));
-    };
-
     useEffect(() => {
-        if (isAdmin) {
-            fetchData();
-        }
-    }, [isAdmin]);
+        const fetchTransactions = async () => {
+            if (!isAdmin || !users) return;
+
+            const allTransactions: Transaction[] = [];
+            for (const userId in users) {
+                 const transactionsRef = collection(db, "users", userId, "transactions");
+                 const transactionsSnapshot = await getDocs(transactionsRef);
+                 transactionsSnapshot.forEach(transDoc => {
+                     allTransactions.push({ id: transDoc.id, userId, ...transDoc.data() } as Transaction);
+                 })
+            }
+            setTransactions(allTransactions);
+        };
+
+        fetchTransactions();
+    }, [isAdmin, users]);
     
-    const handleUpdateTransactionStatus = (transactionId: string, status: TaskStatus) => {
-        const transactionIndex = MOCK_TRANSACTIONS.findIndex(t => t.id === transactionId);
-        if (transactionIndex > -1) {
-            MOCK_TRANSACTIONS[transactionIndex].status = status;
+    const handleUpdateTransactionStatus = async (userId: string, transactionId: string, status: TaskStatus) => {
+        if (!userId || !transactionId) return;
+        
+        try {
+            const transactionRef = doc(db, 'users', userId, 'transactions', transactionId);
+            await updateDoc(transactionRef, { status });
+            
+            toast({
+                title: "Status Updated",
+                description: `Transaction status has been changed to ${status}.`,
+            });
+            onUpdate(); // Trigger data refresh in parent component
+        } catch (error) {
+            console.error("Error updating status: ", error);
+            toast({ title: "Error", description: "Could not update status.", variant: "destructive" });
         }
-        
-        setTransactions(prev =>
-        prev.map(t => (t.id === transactionId ? { ...t, status } : t))
-        );
-        
-        toast({
-        title: "Status Updated",
-        description: `Transaction status has been changed to ${status}.`,
-        });
     };
 
     const groupedAndFilteredUsers = useMemo(() => {
@@ -176,7 +190,7 @@ export default function UserData() {
                                                                 </Badge>
                                                                 <Select
                                                                     value={item.status}
-                                                                    onValueChange={(value) => handleUpdateTransactionStatus(item.id!, value as TaskStatus)}
+                                                                    onValueChange={(value) => handleUpdateTransactionStatus(user.id, item.id!, value as TaskStatus)}
                                                                     >
                                                                     <SelectTrigger className="w-[160px] h-9 text-xs">
                                                                         <SelectValue placeholder="Update" />
@@ -228,7 +242,7 @@ export default function UserData() {
                                                                 <TableCell className="text-right">
                                                                     <Select
                                                                         value={item.status}
-                                                                        onValueChange={(value) => handleUpdateTransactionStatus(item.id!, value as TaskStatus)}
+                                                                        onValueChange={(value) => handleUpdateTransactionStatus(user.id, item.id!, value as TaskStatus)}
                                                                         >
                                                                         <SelectTrigger className="w-[180px] ml-auto">
                                                                             <SelectValue placeholder="Update Status" />

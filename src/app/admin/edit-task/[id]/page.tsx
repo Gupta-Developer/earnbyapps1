@@ -13,7 +13,9 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, ShieldAlert, PlusCircle, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Faq, Task } from "@/lib/types";
-import { MOCK_TASKS } from "@/lib/mock-data";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { db, storage } from "@/lib/firebase";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 
 export default function EditTaskPage() {
@@ -31,15 +33,18 @@ export default function EditTaskPage() {
   useEffect(() => {
     const taskId = params.id as string;
     if (taskId) {
-        // In a real app, you would fetch this from your API
-        const foundTask = MOCK_TASKS.find(t => t.id === taskId);
-        if (foundTask) {
-            setTask(foundTask);
-            setFaqs(foundTask.faqs || []);
-        } else {
-            toast({ title: "Task not found", variant: "destructive" });
-            router.push('/admin');
-        }
+        const fetchTask = async () => {
+            const taskRef = doc(db, "tasks", taskId);
+            const taskSnap = await getDoc(taskRef);
+            if (taskSnap.exists()) {
+                setTask({ id: taskSnap.id, ...taskSnap.data() } as Task);
+                setFaqs(taskSnap.data().faqs || []);
+            } else {
+                 toast({ title: "Task not found", variant: "destructive" });
+                 router.push('/admin');
+            }
+        };
+        fetchTask();
     }
   }, [params.id, router, toast]);
 
@@ -82,11 +87,19 @@ export default function EditTaskPage() {
   const handleSwitchChange = (field: 'isInstant' | 'isHighPaying') => (checked: boolean) => {
     setTask(prev => prev ? ({ ...prev, [field]: checked }) : null);
   };
+  
+  const uploadFile = async (file: File) => {
+      if (!file) return null;
+      const storageRef = ref(storage, `tasks/${Date.now()}_${file.name}`);
+      await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(storageRef);
+      return downloadURL;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!task || !task?.name || (task?.reward ?? 0) <= 0 || !task?.description || !task?.steps || !task.link) {
+    if (!task || !task.id || !task?.name || (task?.reward ?? 0) <= 0 || !task?.description || !task?.steps || !task.link) {
         toast({
             title: "Missing Fields",
             description: "Please fill out all required fields.",
@@ -96,21 +109,41 @@ export default function EditTaskPage() {
     }
     setIsSubmitting(true);
     
-    // In a real app, this is where you would upload the files and then
-    // send the task data (including the returned file URLs) to your API.
-    console.log("Updating task:", { ...task, faqs, icon: iconFile ? iconFile.name : task.icon, banner: bannerFile ? bannerFile.name : task.banner });
+    try {
+        let iconUrl = task.icon;
+        if (iconFile) {
+            iconUrl = await uploadFile(iconFile);
+        }
+        
+        let bannerUrl = task.banner;
+        if (bannerFile) {
+            bannerUrl = await uploadFile(bannerFile);
+        }
+        
+        const taskRef = doc(db, "tasks", task.id);
+        
+        const { id, ...taskDataToUpdate } = task;
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+        await updateDoc(taskRef, {
+            ...taskDataToUpdate,
+            faqs,
+            icon: iconUrl,
+            banner: bannerUrl,
+        });
 
-    toast({
-        title: "Task Updated (Simulated)!",
-        description: `${task.name} has been updated successfully.`,
-        className: "bg-accent text-accent-foreground border-accent"
-    });
-    router.push("/admin");
+        toast({
+            title: "Task Updated!",
+            description: `${task.name} has been updated successfully.`,
+            className: "bg-accent text-accent-foreground border-accent"
+        });
+        router.push("/admin");
 
-    setIsSubmitting(false);
+    } catch (error) {
+        console.error("Error updating task:", error);
+        toast({ title: "Error", description: "Could not update task.", variant: "destructive" });
+    } finally {
+        setIsSubmitting(false);
+    }
   };
 
   if (loading || !task) {
@@ -165,12 +198,12 @@ export default function EditTaskPage() {
                     <div className="space-y-2">
                         <Label htmlFor="icon">Task Icon</Label>
                         <Input id="icon" name="icon" type="file" accept="image/*" onChange={handleFileChange} />
-                        <p className="text-sm text-muted-foreground mt-1">Current icon: {typeof task.icon === 'string' ? task.icon.split('/').pop() : 'None'}. Upload new to replace.</p>
+                        <p className="text-sm text-muted-foreground mt-1">Current icon: {task.icon ? 'Set' : 'None'}. Upload new to replace.</p>
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="banner">Task Banner (Optional)</Label>
                         <Input id="banner" name="banner" type="file" accept="image/*" onChange={handleFileChange} />
-                        <p className="text-sm text-muted-foreground mt-1">Current banner: {task.banner ? task.banner.split('/').pop() : 'None'}. Upload new to replace.</p>
+                        <p className="text-sm text-muted-foreground mt-1">Current banner: {task.banner ? 'Set' : 'None'}. Upload new to replace.</p>
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="hint">Icon AI Hint</Label>
