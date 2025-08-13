@@ -127,7 +127,7 @@ export default function HomePage() {
         <TabsContent value={filter}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
             {loading ? (
-                Array.from({ length: 6 }).map((_, index) => (
+                Array.from({ length: 12 }).map((_, index) => (
                     <Card key={index} className="shadow-md rounded-lg h-[100px] animate-pulse bg-muted/50"></Card>
                 ))
             ) : (
