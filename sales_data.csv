@@ -1,0 +1,32 @@
+import csv
+import random
+from datetime import date, timedelta
+
+def random_date(start, end):
+    """Generate a random date between start and end dates."""
+    return start + timedelta(days=random.randint(0, (end - start).days))
+
+# Define the start and end dates for random date generation
+start_date = date(2023, 1, 1)
+end_date = date(2024, 1, 1)
+
+# Define a list of possible products
+products = ["Laptop", "Keyboard", "Mouse", "Monitor", "Webcam", "Printer", "Speaker", "Headphones"]
+
+# Create a sample CSV file with 100 rows
+with open('sample_sales_data.csv', mode='w', newline='') as file:
+    writer = csv.writer(file)
+
+    # Write the header row
+    writer.writerow(['date', 'product', 'quantity', 'price', 'customer_id'])
+
+    # Write 100 rows of sample data
+    for i in range(100):
+        random_dt = random_date(start_date, end_date)
+        random_product = random.choice(products)
+        random_quantity = random.randint(1, 10)
+        random_price = round(random.uniform(10.0, 500.0), 2)
+        customer_id = f'CUST{i+1:04d}'
+        writer.writerow([random_dt, random_product, random_quantity, random_price, customer_id])
+
+print("sample_sales_data.csv created successfully.")
