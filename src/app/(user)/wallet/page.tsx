@@ -10,8 +10,9 @@ import { Transaction } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useAuth } from "@/hooks/use-auth";
-import { MOCK_TRANSACTIONS } from "@/lib/mock-data";
 import WhatsAppIcon from "@/components/whatsapp-icon";
+import { collection, getDocs, Timestamp, query, orderBy } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 const getBadgeClasses = (status: string): string => {
     switch (status) {
@@ -54,18 +55,35 @@ const statusFaqs = [
 export default function WalletPage() {
   const { user } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) {
-        setTransactions([]);
-        return;
-    };
-    
-    // In a real app, you'd fetch this from an API for the current user.
-    // For now, we use mock data.
-    const userTransactions = MOCK_TRANSACTIONS.filter(t => t.userId === user.uid);
-    setTransactions(userTransactions);
+    const fetchTransactions = async () => {
+        if (!user) {
+            setTransactions([]);
+            setLoading(false);
+            return;
+        };
+        
+        setLoading(true);
+        const transactionsRef = collection(db, "users", user.uid, "transactions");
+        const q = query(transactionsRef, orderBy("date", "desc"));
+        const querySnapshot = await getDocs(q);
 
+        const userTransactions = querySnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                date: data.date instanceof Timestamp ? data.date.toDate() : new Date(),
+            } as Transaction
+        });
+
+        setTransactions(userTransactions);
+        setLoading(false);
+    }
+
+    fetchTransactions();
   }, [user]);
 
   const totalEarnings = transactions
@@ -96,7 +114,13 @@ export default function WalletPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {transactions.length > 0 ? transactions.map((item) => (
+                {loading ? (
+                    <TableRow>
+                        <TableCell colSpan={3} className="text-center text-muted-foreground h-24">
+                           Loading transactions...
+                        </TableCell>
+                    </TableRow>
+                ) : transactions.length > 0 ? transactions.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell>
                       <div className="font-medium">{item.title}</div>

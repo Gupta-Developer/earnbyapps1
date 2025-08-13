@@ -1,4 +1,6 @@
 
+import { Timestamp } from "firebase/firestore";
+
 export type TaskStatus = "Started & Ongoing" | "Approved" | "Rejected" | "Paid";
 
 export type Faq = {
@@ -38,7 +40,7 @@ export type Transaction = {
   title: string; // e.g., "PlayerzPot Task" or "Referral Bonus"
   amount: number;
   status: TaskStatus;
-  date: Date;
+  date: Date | Timestamp;
 };
 
 // This can be used for a joined view if needed

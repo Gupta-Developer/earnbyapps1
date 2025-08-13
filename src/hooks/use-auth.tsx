@@ -5,7 +5,6 @@ import { useState, useEffect, createContext, useContext, type ReactNode } from '
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut as firebaseSignOut, GoogleAuthProvider, signInWithPopup, updateProfile, type User as FirebaseUser } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
-import { MOCK_USERS } from '@/lib/mock-data';
 
 // Using Firebase's User type but making it nullable for our state
 export type AuthUser = FirebaseUser;
@@ -44,10 +43,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(user);
       if (user) {
         setIsAdmin(user.email === ADMIN_EMAIL);
-        // Also check for user profile in mock data for dev purposes
-        if (!MOCK_USERS[user.uid]) {
-             MOCK_USERS[user.uid] = { id: user.uid, email: user.email, fullName: user.displayName };
-        }
       } else {
         setIsAdmin(false);
       }
@@ -57,13 +52,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => unsubscribe();
   }, []);
 
+  const createUserDocument = async (user: AuthUser, displayName?: string) => {
+    const userRef = doc(db, 'users', user.uid);
+    const userSnap = await getDoc(userRef);
+    if (!userSnap.exists()) {
+        await setDoc(userRef, {
+            email: user.email,
+            fullName: displayName || user.displayName,
+            createdAt: new Date(),
+        });
+    }
+  }
+
   const signUp = async (email: string, password: string, displayName: string) => {
     setLoading(true);
     setError(null);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(userCredential.user, { displayName });
-      // This will trigger onAuthStateChanged, which sets the user state
+      await createUserDocument(userCredential.user, displayName);
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -88,7 +95,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
     try {
         const provider = new GoogleAuthProvider();
-        await signInWithPopup(auth, provider);
+        const result = await signInWithPopup(auth, provider);
+        await createUserDocument(result.user);
     } catch (e: any) {
         setError(e.message);
     } finally {

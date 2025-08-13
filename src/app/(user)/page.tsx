@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { ChevronRight, Instagram, Youtube, Gift } from "lucide-react";
 import { Task } from "@/lib/types";
-import { MOCK_TASKS } from "@/lib/mock-data";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Carousel,
@@ -19,7 +18,8 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import WhatsAppIcon from "@/components/whatsapp-icon";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 
 const socialLinks = [
@@ -48,6 +48,7 @@ export default function HomePage() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(true);
   const plugin = useRef(
       Autoplay({ delay: 2000, stopOnInteraction: true })
     );
@@ -59,7 +60,19 @@ export default function HomePage() {
   };
 
   useEffect(() => {
-    setTasks(MOCK_TASKS);
+    const fetchTasks = async () => {
+        setLoading(true);
+        try {
+            const tasksCollection = collection(db, "tasks");
+            const taskSnapshot = await getDocs(tasksCollection);
+            const tasksList = taskSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Task));
+            setTasks(tasksList);
+        } catch (error) {
+            console.error("Error fetching tasks: ", error);
+        }
+        setLoading(false);
+    }
+    fetchTasks();
   }, []);
 
   const filteredTasks = useMemo(() => {
@@ -81,7 +94,7 @@ export default function HomePage() {
         onMouseLeave={plugin.current.reset}
       >
         <CarouselContent>
-          {MOCK_TASKS.map((task, index) => (
+          {tasks.map((task, index) => (
             <CarouselItem key={index}>
               <Link href={`/tasks/${task.id}`}>
                 <Card className="overflow-hidden">
@@ -120,45 +133,53 @@ export default function HomePage() {
         </div>
         <TabsContent value={filter}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
-            {filteredTasks.map((task) => (
-                <Link href={`/tasks/${task.id}`} key={task.id} className="block h-full">
-                <Card className="shadow-md rounded-lg overflow-hidden transition-transform hover:scale-[1.02] active:scale-[0.98] h-full">
-                    <CardContent className="p-4 flex items-center justify-between h-full">
-                    <div className="flex items-center gap-4">
-                        <Image 
-                        src={task.icon} 
-                        alt={`${task.name} icon`} 
-                        width={50} 
-                        height={50} 
-                        className="rounded-lg"
-                        data-ai-hint={task.hint} 
-                        />
-                        <div>
-                        <h2 className="font-bold text-lg">{task.name}</h2>
-                        <p className="text-accent font-semibold">Earn ₹{task.reward}</p>
-                        </div>
-                    </div>
-                    <ChevronRight className="h-6 w-6 text-muted-foreground" />
-                    </CardContent>
-                </Card>
-                </Link>
-            ))}
-            <Link href="/share" className="block h-full">
-                <Card className="shadow-md rounded-lg overflow-hidden transition-transform hover:scale-[1.02] active:scale-[0.98] h-full">
-                <CardContent className="p-4 flex items-center justify-between h-full">
-                    <div className="flex items-center gap-4">
-                        <div className="w-[50px] h-[50px] rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                            <Gift className="w-7 h-7 text-primary" />
-                        </div>
-                    <div>
-                        <h2 className="font-bold text-lg">EarnByApps</h2>
-                        <p className="text-accent font-semibold">Earn ₹5</p>
-                    </div>
-                    </div>
-                    <ChevronRight className="h-6 w-6 text-muted-foreground" />
-                </CardContent>
-                </Card>
-            </Link>
+            {loading ? (
+                Array.from({ length: 6 }).map((_, index) => (
+                    <Card key={index} className="shadow-md rounded-lg h-[100px] animate-pulse bg-muted/50"></Card>
+                ))
+            ) : (
+                <>
+                    {filteredTasks.map((task) => (
+                        <Link href={`/tasks/${task.id}`} key={task.id} className="block h-full">
+                        <Card className="shadow-md rounded-lg overflow-hidden transition-transform hover:scale-[1.02] active:scale-[0.98] h-full">
+                            <CardContent className="p-4 flex items-center justify-between h-full">
+                            <div className="flex items-center gap-4">
+                                <Image 
+                                src={task.icon} 
+                                alt={`${task.name} icon`} 
+                                width={50} 
+                                height={50} 
+                                className="rounded-lg"
+                                data-ai-hint={task.hint} 
+                                />
+                                <div>
+                                <h2 className="font-bold text-lg">{task.name}</h2>
+                                <p className="text-accent font-semibold">Earn ₹{task.reward}</p>
+                                </div>
+                            </div>
+                            <ChevronRight className="h-6 w-6 text-muted-foreground" />
+                            </CardContent>
+                        </Card>
+                        </Link>
+                    ))}
+                    <Link href="/share" className="block h-full">
+                        <Card className="shadow-md rounded-lg overflow-hidden transition-transform hover:scale-[1.02] active:scale-[0.98] h-full">
+                        <CardContent className="p-4 flex items-center justify-between h-full">
+                            <div className="flex items-center gap-4">
+                                <div className="w-[50px] h-[50px] rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                                    <Gift className="w-7 h-7 text-primary" />
+                                </div>
+                            <div>
+                                <h2 className="font-bold text-lg">EarnByApps</h2>
+                                <p className="text-accent font-semibold">Earn ₹5</p>
+                            </div>
+                            </div>
+                            <ChevronRight className="h-6 w-6 text-muted-foreground" />
+                        </CardContent>
+                        </Card>
+                    </Link>
+                </>
+            )}
             </div>
         </TabsContent>
        </Tabs>

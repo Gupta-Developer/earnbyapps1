@@ -12,7 +12,8 @@ import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useAuth } from '@/hooks/use-auth';
 import { Task, Transaction } from '@/lib/types';
-import { MOCK_TASKS, MOCK_TRANSACTIONS } from '@/lib/mock-data';
+import { db } from '@/lib/firebase';
+import { doc, getDoc, collection, query, where, getDocs, addDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 
 
 export default function TaskDetailPage() {
@@ -23,23 +24,42 @@ export default function TaskDetailPage() {
   const { user } = useAuth();
   const taskId = params.id as string;
   const [task, setTask] = useState<Task | null>(null);
+  const [existingTransaction, setExistingTransaction] = useState<Transaction | null>(null);
 
   useEffect(() => {
-    if (!taskId) return;
-    // In a real app, you'd fetch this from an API.
-    // For now, we find it in our mock data.
-    const foundTask = MOCK_TASKS.find(t => t.id === taskId);
-    if (foundTask) {
-        setTask(foundTask);
-    } else {
-        // Handle task not found
-        console.error("No such task!");
-    }
-  }, [taskId]);
+    const fetchTask = async () => {
+        if (!taskId) return;
+        const taskRef = doc(db, "tasks", taskId);
+        const taskSnap = await getDoc(taskRef);
+
+        if (taskSnap.exists()) {
+            setTask({ id: taskSnap.id, ...taskSnap.data() } as Task);
+        } else {
+            console.error("No such task!");
+            toast({ title: "Task not found", variant: "destructive" });
+        }
+    };
+    fetchTask();
+  }, [taskId, toast]);
   
-  const existingTransaction = useMemo(() => {
-    if (!user || !taskId) return null;
-    return MOCK_TRANSACTIONS.find(t => t.userId === user.uid && t.taskId === taskId);
+  useEffect(() => {
+    const checkExistingTransaction = async () => {
+        if (!user || !taskId) return;
+        
+        const transactionsRef = collection(db, "users", user.uid, "transactions");
+        const q = query(transactionsRef, where("taskId", "==", taskId));
+        
+        const querySnapshot = await getDocs(q);
+        
+        if (!querySnapshot.empty) {
+            const transactionDoc = querySnapshot.docs[0];
+            setExistingTransaction({ id: transactionDoc.id, ...transactionDoc.data() } as Transaction);
+        } else {
+            setExistingTransaction(null);
+        }
+    };
+
+    checkExistingTransaction();
   }, [user, taskId]);
 
   const isTaskLocked = useMemo(() => {
@@ -68,29 +88,53 @@ export default function TaskDetailPage() {
 
   const handleStartTask = async () => {
     if (!user || isTaskLocked) return;
-    // This is where you would normally interact with a database.
-    console.log(`Starting task ${task.id} for user ${user.uid}`);
     
-    // Create a new transaction only if one doesn't already exist
     if (!existingTransaction) {
-        const newTransaction: Transaction = {
-            id: `txn-${Date.now()}`,
-            userId: user.uid,
-            taskId: task.id,
-            title: task.name,
-            amount: task.reward,
-            status: 'Started & Ongoing',
-            date: new Date(),
-        };
-        MOCK_TRANSACTIONS.unshift(newTransaction); // Add to the beginning of the array
+        try {
+            const userRef = doc(db, 'users', user.uid);
+            const userSnap = await getDoc(userRef);
 
-        toast({
-            title: "Task Started!",
-            description: `"${task.name}" is now ongoing in your wallet.`,
-        });
+            if (!userSnap.exists() || !userSnap.data().phone || !userSnap.data().upiId) {
+                toast({
+                    title: "Profile Incomplete",
+                    description: "Please complete your profile with phone and UPI ID before starting a task.",
+                    variant: "destructive"
+                });
+                router.push(`/profile?redirect_to=${pathname}`);
+                return;
+            }
+
+            const transactionsRef = collection(db, "users", user.uid, "transactions");
+            const newTransactionRef = doc(transactionsRef);
+            
+            await setDoc(newTransactionRef, {
+                taskId: task.id,
+                title: task.name,
+                amount: task.reward,
+                status: 'Started & Ongoing',
+                date: serverTimestamp(),
+            });
+
+            toast({
+                title: "Task Started!",
+                description: `"${task.name}" is now ongoing in your wallet.`,
+            });
+            // Refetch the transaction status
+            setExistingTransaction({
+                id: newTransactionRef.id,
+                userId: user.uid,
+                taskId: task.id,
+                title: task.name,
+                amount: task.reward,
+                status: 'Started & Ongoing',
+                date: new Date(),
+            });
+
+        } catch (error) {
+            console.error("Error starting task:", error);
+            toast({ title: "Error", description: "Could not start the task.", variant: "destructive" });
+        }
     }
-    
-    // We don't redirect to the wallet anymore, since the user is sent to an external link.
   };
 
   const stepsArray = typeof task.steps === 'string' ? task.steps.split('\n').filter(s => s.trim() !== '') : [];
