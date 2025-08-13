@@ -69,13 +69,14 @@ export default function HomePage() {
   }, []);
 
   const filteredTasks = useMemo(() => {
+    let tasksToShow = tasks;
     if (filter === "high-paying") {
-      return tasks.filter((task) => task.isHighPaying);
+      tasksToShow = tasks.filter((task) => task.isHighPaying);
+    } else if (filter === "instant") {
+        tasksToShow = tasks.filter((task) => task.isInstant);
     }
-    if (filter === "instant") {
-      return tasks.filter((task) => task.isInstant);
-    }
-    return tasks;
+    // Only show 6 tasks
+    return tasksToShow.slice(0, 6);
   }, [tasks, filter]);
 
   return (
@@ -127,7 +128,7 @@ export default function HomePage() {
         <TabsContent value={filter}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
             {loading ? (
-                Array.from({ length: 12 }).map((_, index) => (
+                Array.from({ length: 6 }).map((_, index) => (
                     <Card key={index} className="shadow-md rounded-lg h-[100px] animate-pulse bg-muted/50"></Card>
                 ))
             ) : (
