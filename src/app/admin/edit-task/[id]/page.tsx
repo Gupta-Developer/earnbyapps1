@@ -121,8 +121,12 @@ export default function EditTaskPage() {
         
         const taskDocRef = doc(db, 'tasks', task.id);
         
-        const updatedData = {
+        const updatedData: any = {
             ...task,
+            reward: Number(task.reward) || 0,
+            totalReward: Number(task.totalReward) || 0,
+            isInstant: Boolean(task.isInstant),
+            isHighPaying: Boolean(task.isHighPaying),
             icon: iconUrl,
             banner: bannerUrl,
             faqs,
@@ -280,3 +284,5 @@ export default function EditTaskPage() {
     </div>
   );
 }
+
+    

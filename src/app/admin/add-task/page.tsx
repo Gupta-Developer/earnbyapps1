@@ -110,6 +110,10 @@ export default function AddTaskPage() {
         
         const newTask: any = {
             ...task,
+            reward: Number(task.reward) || 0,
+            totalReward: Number(task.totalReward) || 0,
+            isInstant: Boolean(task.isInstant),
+            isHighPaying: Boolean(task.isHighPaying),
             faqs,
             icon: iconUrl,
             banner: bannerUrl || "",
@@ -271,3 +275,5 @@ export default function AddTaskPage() {
     </div>
   );
 }
+
+    
