@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -37,7 +37,8 @@ import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import UserData from "@/components/admin/user-data";
-import { MOCK_TASKS, MOCK_TRANSACTIONS, MOCK_USERS } from "@/lib/mock-data";
+import { db } from "@/lib/firebase";
+import { collection, getDocs, doc, deleteDoc, Timestamp } from "firebase/firestore";
 
 
 export default function AdminPage() {
@@ -49,30 +50,59 @@ export default function AdminPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [users, setUsers] = useState<Record<string, User>>({});
   
-  const fetchData = () => {
-    setTasks(MOCK_TASKS);
-    setUsers(MOCK_USERS);
-    setTransactions(MOCK_TRANSACTIONS);
-  };
+  const fetchData = useCallback(async () => {
+    try {
+        const [tasksSnapshot, usersSnapshot, transactionsSnapshot] = await Promise.all([
+            getDocs(collection(db, "tasks")),
+            getDocs(collection(db, "users")),
+            getDocs(collection(db, "transactions"))
+        ]);
+
+        const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Task));
+        setTasks(tasksList);
+
+        const usersList: Record<string, User> = {};
+        usersSnapshot.forEach(doc => {
+            usersList[doc.id] = { id: doc.id, ...doc.data() } as User;
+        });
+        setUsers(usersList);
+        
+        const transactionsList = transactionsSnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                date: (data.date as Timestamp)?.toDate()
+            } as Transaction
+        });
+        setTransactions(transactionsList);
+
+    } catch (error) {
+        console.error("Error fetching data:", error);
+        toast({ title: "Error", description: "Could not fetch platform data.", variant: "destructive" });
+    }
+  }, [toast]);
 
 
   useEffect(() => {
     if (isAdmin) {
       fetchData();
     }
-  }, [isAdmin]);
+  }, [isAdmin, fetchData]);
 
   const handleDeleteTask = async (taskId: string) => {
     if (!isAdmin) return;
-    const taskIndex = MOCK_TASKS.findIndex(t => t.id === taskId);
-    if (taskIndex !== -1) {
-        MOCK_TASKS.splice(taskIndex, 1);
+    try {
+      await deleteDoc(doc(db, "tasks", taskId));
+      toast({
+          title: "Task Deleted",
+          description: "The task has been removed.",
+      });
+      fetchData(); // Refresh data
+    } catch (error) {
+        console.error("Error deleting task: ", error);
+        toast({ title: "Error", description: "Could not delete the task.", variant: "destructive" });
     }
-    toast({
-        title: "Task Deleted",
-        description: "The task has been removed from the mock data.",
-    });
-    fetchData(); // Refresh data
   };
 
   const totalPlatformProfit = useMemo(() => {

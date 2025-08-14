@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useAuth } from "@/hooks/use-auth";
 import WhatsAppIcon from "@/components/whatsapp-icon";
-import { MOCK_TRANSACTIONS, MOCK_TASKS } from "@/lib/mock-data";
+import { db } from "@/lib/firebase";
+import { collection, query, where, getDocs, orderBy, doc, getDoc, Timestamp } from "firebase/firestore";
 import Image from "next/image";
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
@@ -71,18 +72,38 @@ export default function WalletPage() {
         };
         
         setLoading(true);
-        // Fetching mock transactions for the current user
-        const userTransactions = MOCK_TRANSACTIONS.filter(t => t.userId === user.uid);
-        
-        const enriched = userTransactions.map(tx => {
-            const task = MOCK_TASKS.find(t => t.id === tx.taskId);
-            return { ...tx, task };
-        })
-        
-        // Sort by date descending
-        enriched.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        setTransactions(enriched);
-        setLoading(false);
+        try {
+            const transactionsRef = collection(db, "transactions");
+            const q = query(transactionsRef, where("userId", "==", user.uid), orderBy("date", "desc"));
+            const querySnapshot = await getDocs(q);
+            
+            const transactionsList = querySnapshot.docs.map(doc => {
+                const data = doc.data();
+                return { 
+                    id: doc.id, 
+                    ...data,
+                    date: (data.date as Timestamp).toDate() // Convert Firestore Timestamp to JS Date
+                } as Transaction;
+            });
+            
+            const enriched = await Promise.all(transactionsList.map(async (tx) => {
+                let task;
+                if (tx.taskId) {
+                    const taskDoc = await getDoc(doc(db, 'tasks', tx.taskId));
+                    if (taskDoc.exists()) {
+                        task = { id: taskDoc.id, ...taskDoc.data() } as Task;
+                    }
+                }
+                return { ...tx, task };
+            }));
+
+            setTransactions(enriched);
+
+        } catch (error) {
+            console.error("Error fetching transactions: ", error);
+        } finally {
+            setLoading(false);
+        }
     }
 
     fetchTransactions();

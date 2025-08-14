@@ -18,7 +18,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { MOCK_USERS, MOCK_TRANSACTIONS } from "@/lib/mock-data";
+import { collection, query, where, getDocs, Timestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 
 const GoogleIcon = () => (
@@ -71,7 +72,7 @@ const levels = [
 
 
 export default function ProfilePage() {
-  const { user, loading, error, signUp, signIn, signInWithGoogle, signOut } = useAuth();
+  const { user, appUser, loading, error, signUp, signIn, signInWithGoogle, signOut, updateAppUser } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -95,19 +96,17 @@ export default function ProfilePage() {
     defaultValues: { fullName: "", phone: "", upiId: "" },
   });
   
-  const fetchUserData = (currentUser: any, currentRedirectTo: string | null) => {
-      if (currentUser) {
-        const mockUser = MOCK_USERS[currentUser.uid];
-
+  const fetchUserData = () => {
+      if (appUser) {
         let userDetails = {
-            fullName: mockUser?.fullName || currentUser.displayName || "",
-            phone: mockUser?.phone || "",
-            upiId: mockUser?.upiId || "",
+            fullName: appUser.fullName || "",
+            phone: appUser.phone || "",
+            upiId: appUser.upiId || "",
         };
 
         profileForm.reset(userDetails);
         
-        if (currentRedirectTo && (!userDetails.phone || !userDetails.upiId)) {
+        if (redirectTo && (!userDetails.phone || !userDetails.upiId)) {
             setIsEditing(true);
             toast({
                 title: "Complete Your Profile",
@@ -120,18 +119,19 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchTransactionData = async () => {
         if (user) {
-            const userTransactions = MOCK_TRANSACTIONS.filter(t => t.userId === user.uid);
-            const paidTransactions = userTransactions.filter(t => t.status === 'Paid' || t.status === 'Approved').length;
-            setCompletedTasks(paidTransactions);
+            const transactionsRef = collection(db, "transactions");
+            const q = query(transactionsRef, where("userId", "==", user.uid), where("status", "in", ["Paid", "Approved"]));
+            const querySnapshot = await getDocs(q);
+            setCompletedTasks(querySnapshot.size);
         }
     };
 
     if (user) {
-        fetchUserData(user, redirectTo);
+        fetchUserData();
         fetchTransactionData();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, redirectTo]);
+  }, [user, appUser, redirectTo]);
 
   const handleSignIn = async (data: z.infer<typeof signInSchema>) => {
     const { email, password } = data;
@@ -151,17 +151,11 @@ export default function ProfilePage() {
         return;
     }
     
-    // In mock mode, we just update the local mock data
-    const mockUser = MOCK_USERS[user.uid];
-    if (mockUser) {
-        mockUser.fullName = data.fullName;
-        mockUser.phone = data.phone;
-        mockUser.upiId = data.upiId;
-    }
+    await updateAppUser(data);
     
     toast({ 
         title: "Profile Saved!",
-        description: "Your information has been updated locally.",
+        description: "Your information has been updated.",
         className: "bg-accent text-accent-foreground border-accent"
     });
     setIsEditing(false);
@@ -172,7 +166,7 @@ export default function ProfilePage() {
   };
   
   const handleCancelEdit = () => {
-    if(user) fetchUserData(user, null); // Refetch data to discard changes, pass null for redirectTo
+    fetchUserData(); // Refetch data to discard changes
     setIsEditing(false);
   }
   
@@ -368,7 +362,7 @@ export default function ProfilePage() {
                         </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                        <CardTitle>Welcome, {profileForm.getValues().fullName || user.displayName || "User"}!</CardTitle>
+                        <CardTitle>Welcome, {appUser?.fullName || user.displayName || "User"}!</CardTitle>
                         <CardDescription>{user.email}</CardDescription>
                     </div>
                 </CardHeader>
@@ -482,21 +476,21 @@ export default function ProfilePage() {
                             <UserCircle2 className="h-6 w-6 text-muted-foreground" />
                             <div>
                                 <p className="text-sm text-muted-foreground">Full Name</p>
-                                <p className="font-semibold">{profileForm.getValues().fullName || 'Not set'}</p>
+                                <p className="font-semibold">{appUser?.fullName || 'Not set'}</p>
                             </div>
                         </div>
                          <div className="flex items-center gap-4">
                             <Phone className="h-6 w-6 text-muted-foreground" />
                             <div>
                                 <p className="text-sm text-muted-foreground">Phone Number</p>
-                                <p className="font-semibold">{profileForm.getValues().phone || 'Not set'}</p>
+                                <p className="font-semibold">{appUser?.phone || 'Not set'}</p>
                             </div>
                         </div>
                          <div className="flex items-center gap-4">
                             <Landmark className="h-6 w-6 text-muted-foreground" />
                             <div>
                                 <p className="text-sm text-muted-foreground">UPI ID</p>
-                                <p className="font-semibold">{profileForm.getValues().upiId || 'Not set'}</p>
+                                <p className="font-semibold">{appUser?.upiId || 'Not set'}</p>
                             </div>
                         </div>
                     </CardContent>

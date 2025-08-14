@@ -13,7 +13,9 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, ShieldAlert, PlusCircle, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Faq } from "@/lib/types";
-import { MOCK_TASKS } from "@/lib/mock-data";
+import { db, storage } from "@/lib/firebase";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 
 export default function AddTaskPage() {
@@ -43,7 +45,7 @@ export default function AddTaskPage() {
     const { name, value, type } = e.target;
 
     if (type === 'number') {
-      setTask(prev => ({ ...prev, [name]: value === '' ? 0 : parseFloat(value) }));
+      setTask(prev => ({ ...prev, [name]: value === '' ? '' : parseFloat(value) }));
     } else {
       setTask(prev => ({ ...prev, [name]: value }));
     }
@@ -79,19 +81,17 @@ export default function AddTaskPage() {
     setTask(prev => ({ ...prev, [field]: checked }));
   };
   
-  const getFileAsDataURL = (file: File): Promise<string> => {
-      return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-      });
+  const uploadFile = async (file: File, path: string): Promise<string> => {
+      const storageRef = ref(storage, path);
+      await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(storageRef);
+      return downloadURL;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!task.name || task.reward <= 0 || !task.description || !task.steps || !iconFile || !task.link) {
+    if (!task.name || (task.reward as number) <= 0 || !task.description || !task.steps || !iconFile || !task.link) {
         toast({
             title: "Missing Fields",
             description: "Please fill out all required fields, including the icon and link.",
@@ -102,18 +102,21 @@ export default function AddTaskPage() {
     setIsSubmitting(true);
     
     try {
-        const iconUrl = await getFileAsDataURL(iconFile);
-        const bannerUrl = bannerFile ? await getFileAsDataURL(bannerFile) : null;
+        const iconUrl = await uploadFile(iconFile, `task-icons/${Date.now()}-${iconFile.name}`);
+        let bannerUrl = null;
+        if(bannerFile) {
+           bannerUrl = await uploadFile(bannerFile, `task-banners/${Date.now()}-${bannerFile.name}`);
+        }
         
         const newTask = {
-            id: `task-${Date.now()}`,
             ...task,
             faqs,
             icon: iconUrl,
-            banner: bannerUrl || undefined,
+            banner: bannerUrl || "",
+            createdAt: serverTimestamp()
         };
 
-        MOCK_TASKS.push(newTask);
+        await addDoc(collection(db, "tasks"), newTask);
 
         toast({
             title: "Task Added!",

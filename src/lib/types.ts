@@ -1,5 +1,5 @@
 
-import { Timestamp } from "firebase/firestore";
+import { FieldValue } from "firebase/firestore";
 
 export type TaskStatus = "Started & Ongoing" | "Approved" | "Rejected" | "Paid";
 
@@ -23,6 +23,7 @@ export type Task = {
   isHighPaying: boolean;
   youtubeLink?: string;
   faqs?: Faq[];
+  createdAt?: FieldValue;
 };
 
 export type User = {
@@ -40,7 +41,7 @@ export type Transaction = {
   title: string; // e.g., "PlayerzPot Task" or "Referral Bonus"
   amount: number;
   status: TaskStatus;
-  date: Date | Timestamp;
+  date: Date | FieldValue;
 };
 
 // This can be used for a joined view if needed

@@ -26,7 +26,8 @@ import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { Separator } from "@/components/ui/separator";
-import { MOCK_TRANSACTIONS } from "@/lib/mock-data";
+import { db } from "@/lib/firebase";
+import { doc, updateDoc } from "firebase/firestore";
 
 
 const getBadgeClasses = (status: string): string => {
@@ -55,19 +56,22 @@ export default function UserData({ users, transactions, onUpdate }: UserDataProp
     const { toast } = useToast();
     const { isAdmin } = useAuth();
     
-    const handleUpdateTransactionStatus = async (userId: string, transactionId: string, status: TaskStatus) => {
-        if (!isAdmin || !userId || !transactionId) return;
+    const handleUpdateTransactionStatus = async (transactionId: string, status: TaskStatus) => {
+        if (!isAdmin || !transactionId) return;
         
-        const transactionIndex = MOCK_TRANSACTIONS.findIndex(t => t.id === transactionId && t.userId === userId);
-        if (transactionIndex !== -1) {
-            MOCK_TRANSACTIONS[transactionIndex].status = status;
-        }
+        try {
+            const transactionDocRef = doc(db, 'transactions', transactionId);
+            await updateDoc(transactionDocRef, { status: status });
 
-        toast({
-            title: "Status Updated",
-            description: `Transaction status has been changed to ${status}.`,
-        });
-        onUpdate(); // Trigger data refresh in parent component
+            toast({
+                title: "Status Updated",
+                description: `Transaction status has been changed to ${status}.`,
+            });
+            onUpdate(); // Trigger data refresh in parent component
+        } catch(error) {
+            console.error("Error updating status: ", error);
+            toast({ title: "Error", description: "Could not update transaction status.", variant: "destructive" });
+        }
     };
 
     const groupedAndFilteredUsers = useMemo(() => {
@@ -104,7 +108,7 @@ export default function UserData({ users, transactions, onUpdate }: UserDataProp
             });
         }
         
-        return filteredUsers;
+        return filteredUsers.sort((a,b) => (b.transactions[0]?.date as any) - (a.transactions[0]?.date as any));
 
     }, [searchQuery, transactions, users]);
     
@@ -168,7 +172,7 @@ export default function UserData({ users, transactions, onUpdate }: UserDataProp
                                                                 </Badge>
                                                                 <Select
                                                                     value={item.status}
-                                                                    onValueChange={(value) => handleUpdateTransactionStatus(user.id, item.id!, value as TaskStatus)}
+                                                                    onValueChange={(value) => handleUpdateTransactionStatus(item.id!, value as TaskStatus)}
                                                                     >
                                                                     <SelectTrigger className="w-[160px] h-9 text-xs">
                                                                         <SelectValue placeholder="Update" />
@@ -220,7 +224,7 @@ export default function UserData({ users, transactions, onUpdate }: UserDataProp
                                                                 <TableCell className="text-right">
                                                                     <Select
                                                                         value={item.status}
-                                                                        onValueChange={(value) => handleUpdateTransactionStatus(user.id, item.id!, value as TaskStatus)}
+                                                                        onValueChange={(value) => handleUpdateTransactionStatus(item.id!, value as TaskStatus)}
                                                                         >
                                                                         <SelectTrigger className="w-[180px] ml-auto">
                                                                             <SelectValue placeholder="Update Status" />

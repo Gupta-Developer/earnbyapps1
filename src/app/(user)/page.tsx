@@ -18,7 +18,8 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import WhatsAppIcon from "@/components/whatsapp-icon";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { MOCK_TASKS } from "@/lib/mock-data";
+import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 
 const socialLinks = [
@@ -61,9 +62,17 @@ export default function HomePage() {
   useEffect(() => {
     const fetchTasks = async () => {
         setLoading(true);
-        // Using mock data instead of Firestore
-        setTasks(MOCK_TASKS);
-        setLoading(false);
+        try {
+            const tasksCollection = collection(db, "tasks");
+            const q = query(tasksCollection, orderBy("createdAt", "desc"));
+            const tasksSnapshot = await getDocs(q);
+            const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Task));
+            setTasks(tasksList);
+        } catch (error) {
+            console.error("Error fetching tasks: ", error);
+        } finally {
+            setLoading(false);
+        }
     }
     fetchTasks();
   }, []);
@@ -88,7 +97,7 @@ export default function HomePage() {
         onMouseLeave={plugin.current.reset}
       >
         <CarouselContent>
-          {tasks.map((task, index) => (
+          {tasks.slice(0, 5).map((task, index) => (
             <CarouselItem key={index}>
               <Link href={`/tasks/${task.id}`}>
                 <Card className="overflow-hidden">
