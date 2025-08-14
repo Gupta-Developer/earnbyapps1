@@ -39,7 +39,7 @@ export default function ContactPage() {
                 </a>
                  <a href="https://wa.me/918319250462" target="_blank" rel="noopener noreferrer" className="block">
                     <div className="flex items-center gap-4 p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors">
-                        <WhatsAppIcon className="h-6 w-6 text-[#25D366]" />
+                        <WhatsAppIcon size={24} className="text-[#25D366]" />
                         <div>
                             <p className="font-semibold">WhatsApp Support</p>
                             <p className="text-sm text-muted-foreground">Chat with us directly</p>

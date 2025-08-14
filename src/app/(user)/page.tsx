@@ -25,8 +25,8 @@ import { db } from "@/lib/firebase";
 const socialLinks = [
     {
         name: "WhatsApp Channel",
-        href: "#",
-        icon: <WhatsAppIcon className="h-8 w-8 text-[#25D366]" />,
+        href: "https://wa.me/918319250462",
+        icon: <WhatsAppIcon size={32} className="text-[#25D366]" />,
         className: "bg-green-100 dark:bg-green-900/50"
     },
     {

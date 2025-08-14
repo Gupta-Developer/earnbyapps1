@@ -13,9 +13,8 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, ShieldAlert, PlusCircle, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Faq } from "@/lib/types";
-import { db, storage } from "@/lib/firebase";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db } from "@/lib/firebase";
+import { addDoc, collection, serverTimestamp, deleteDoc } from "firebase/firestore";
 
 
 export default function AddTaskPage() {
@@ -68,11 +67,23 @@ export default function AddTaskPage() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const maxSize = 5 * 1024 * 1024; // 5MB limit
+      
+      if (file.size > maxSize) {
+        toast({
+          title: "File Too Large",
+          description: "Please select an image smaller than 5MB.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
       if (e.target.name === 'icon') {
-          setIconFile(e.target.files[0]);
+          setIconFile(file);
       }
       if (e.target.name === 'banner') {
-          setBannerFile(e.target.files[0]);
+          setBannerFile(file);
       }
     }
   };
@@ -81,51 +92,123 @@ export default function AddTaskPage() {
     setTask(prev => ({ ...prev, [field]: checked }));
   };
   
-  const uploadFile = async (file: File, path: string): Promise<string> => {
-      const storageRef = ref(storage, path);
-      await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(storageRef);
-      return downloadURL;
+  const convertFileToBase64 = async (file: File): Promise<string> => {
+      console.log("Converting file to base64:", { fileName: file.name, fileSize: file.size });
+      return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+              const base64String = reader.result as string;
+              console.log("File converted to base64 successfully");
+              resolve(base64String);
+          };
+          reader.onerror = () => reject(new Error('Failed to read file'));
+          reader.readAsDataURL(file);
+      });
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!task.name || (task.reward as number) <= 0 || !task.description || !task.steps || !iconFile || !task.link) {
+    console.log("Form submission started");
+    console.log("Task data:", task);
+    console.log("Icon file:", iconFile);
+    console.log("Banner file:", bannerFile);
+    console.log("FAQs:", faqs);
+    
+    // Test Firebase connectivity
+    try {
+        console.log("Testing Firebase connectivity...");
+        const testDoc = await addDoc(collection(db, "test"), { test: true, timestamp: serverTimestamp() });
+        console.log("Firebase test successful, document ID:", testDoc.id);
+        // Clean up test document
+        await deleteDoc(testDoc);
+    } catch (error) {
+        console.error("Firebase connectivity test failed:", error);
+        toast({ 
+            title: "Firebase Error", 
+            description: `Cannot connect to database: ${error.message}`, 
+            variant: "destructive" 
+        });
+        return;
+    }
+    
+    if (!task.name || (task.reward as number) <= 0 || !task.description || !task.steps || !task.link) {
+        console.log("Validation failed:", {
+            name: !!task.name,
+            reward: task.reward,
+            description: !!task.description,
+            steps: !!task.steps,
+            iconFile: !!iconFile,
+            link: !!task.link
+        });
         toast({
             title: "Missing Fields",
-            description: "Please fill out all required fields, including the icon and link.",
+            description: "Please fill out all required fields (icon is optional for now due to CORS issues).",
             variant: "destructive"
         });
         return;
     }
+    
+    console.log("Validation passed, starting submission");
     setIsSubmitting(true);
     
-    try {
-        const iconUrl = await uploadFile(iconFile, `task-icons/${Date.now()}-${iconFile.name}`);
-        let bannerUrl = null;
-        if(bannerFile) {
-           bannerUrl = await uploadFile(bannerFile, `task-banners/${Date.now()}-${bannerFile.name}`);
-        }
-        
-        const newTask: any = {
-            ...task,
-            reward: Number(task.reward) || 0,
-            totalReward: Number(task.totalReward) || 0,
-            isInstant: Boolean(task.isInstant),
-            isHighPaying: Boolean(task.isHighPaying),
-            faqs,
-            icon: iconUrl,
-            banner: bannerUrl || "",
-            createdAt: serverTimestamp()
-        };
+         try {
+         let iconUrl = "https://placehold.co/400x400/png?text=Task+Icon";
+         let bannerUrl = null;
+         
+         // Convert icon file to base64 if provided
+         if (iconFile) {
+             try {
+                 console.log("Converting icon file to base64...");
+                 iconUrl = await convertFileToBase64(iconFile);
+                 console.log("Icon converted to base64 successfully");
+             } catch (error) {
+                 console.error("Icon conversion failed:", error);
+                 toast({
+                     title: "Icon Error",
+                     description: "Failed to process icon file. Using placeholder.",
+                     variant: "destructive"
+                 });
+             }
+         }
+         
+         // Convert banner file to base64 if provided
+         if (bannerFile) {
+             try {
+                 console.log("Converting banner file to base64...");
+                 bannerUrl = await convertFileToBase64(bannerFile);
+                 console.log("Banner converted to base64 successfully");
+             } catch (error) {
+                 console.error("Banner conversion failed:", error);
+                 toast({
+                     title: "Banner Error",
+                     description: "Failed to process banner file.",
+                     variant: "destructive"
+                 });
+             }
+         }
+         
+         const newTask: any = {
+             ...task,
+             reward: Number(task.reward) || 0,
+             totalReward: Number(task.totalReward) || 0,
+             isInstant: Boolean(task.isInstant),
+             isHighPaying: Boolean(task.isHighPaying),
+             faqs,
+             icon: iconUrl,
+             banner: bannerUrl || "",
+             createdAt: serverTimestamp()
+         };
 
         if (!newTask.youtubeLink) {
             delete newTask.youtubeLink;
         }
 
+        console.log("Prepared task data:", newTask);
+        console.log("Adding to Firestore...");
 
-        await addDoc(collection(db, "tasks"), newTask);
+        const docRef = await addDoc(collection(db, "tasks"), newTask);
+        console.log("Task added successfully with ID:", docRef.id);
 
         toast({
             title: "Task Added!",
@@ -135,7 +218,16 @@ export default function AddTaskPage() {
         router.push("/admin");
     } catch (error) {
         console.error("Error adding task:", error);
-        toast({ title: "Error", description: "Could not add task.", variant: "destructive" });
+        console.error("Error details:", {
+            message: error.message,
+            code: error.code,
+            stack: error.stack
+        });
+        toast({ 
+            title: "Error", 
+            description: `Could not add task: ${error.message}`, 
+            variant: "destructive" 
+        });
     } finally {
         setIsSubmitting(false);
     }
@@ -190,16 +282,18 @@ export default function AddTaskPage() {
                         <Label htmlFor="link">Task Link</Label>
                         <Input id="link" name="link" placeholder="e.g. https://example.com/download" value={task.link} onChange={handleChange} required />
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="icon">Task Icon</Label>
-                        <Input id="icon" name="icon" type="file" accept="image/*" onChange={handleFileChange} required />
-                        {iconFile && <p className="text-sm text-muted-foreground mt-2">Selected: {iconFile.name}</p>}
-                    </div>
+                                                              <div className="space-y-2">
+                         <Label htmlFor="icon">Task Icon</Label>
+                         <Input id="icon" name="icon" type="file" accept="image/*" onChange={handleFileChange} />
+                         {iconFile && <p className="text-sm text-muted-foreground mt-2">Selected: {iconFile.name}</p>}
+                         <p className="text-xs text-muted-foreground">Images will be stored as base64 data (no CORS issues)</p>
+                     </div>
                      <div className="space-y-2">
-                        <Label htmlFor="banner">Task Banner (Optional)</Label>
-                        <Input id="banner" name="banner" type="file" accept="image/*" onChange={handleFileChange} />
-                        {bannerFile && <p className="text-sm text-muted-foreground mt-2">Selected: {bannerFile.name}</p>}
-                    </div>
+                         <Label htmlFor="banner">Task Banner (Optional)</Label>
+                         <Input id="banner" name="banner" type="file" accept="image/*" onChange={handleFileChange} />
+                         {bannerFile && <p className="text-sm text-muted-foreground mt-2">Selected: {bannerFile.name}</p>}
+                         <p className="text-xs text-muted-foreground">Images will be stored as base64 data (no CORS issues)</p>
+                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="hint">Icon AI Hint</Label>
                         <Input id="hint" name="hint" placeholder="e.g. cricket player" value={task.hint} onChange={handleChange} />

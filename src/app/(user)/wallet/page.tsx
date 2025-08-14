@@ -184,7 +184,7 @@ export default function WalletPage() {
                           asChild
                         >
                           <a href={`https://wa.me/918319250462?text=Hi, I have a question about my transaction: ${item.id}`} target="_blank" rel="noopener noreferrer">
-                            <WhatsAppIcon className="h-4 w-4" />
+                            <WhatsAppIcon size={16} />
                             Support
                           </a>
                         </Button>
