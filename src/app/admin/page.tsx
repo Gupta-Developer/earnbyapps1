@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -31,15 +31,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { PlusCircle, ShieldAlert, DollarSign, Users, ListChecks, Pencil, Trash2, Database } from "lucide-react";
+import { PlusCircle, ShieldAlert, DollarSign, Users, ListChecks, Pencil, Trash2 } from "lucide-react";
 import { Transaction, Task, User } from "@/lib/types";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import UserData from "@/components/admin/user-data";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, doc, deleteDoc, Timestamp, writeBatch } from "firebase/firestore";
-import { MOCK_TASKS } from "@/lib/mock-data";
+import { collection, getDocs, doc, deleteDoc, Timestamp } from "firebase/firestore";
 import { Separator } from "@/components/ui/separator";
 
 
@@ -51,7 +50,6 @@ export default function AdminPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [users, setUsers] = useState<Record<string, User>>({});
-  const [isSeeding, setIsSeeding] = useState(false);
   
   const fetchData = useCallback(async () => {
     try {
@@ -107,37 +105,6 @@ export default function AdminPage() {
         toast({ title: "Error", description: "Could not delete the task.", variant: "destructive" });
     }
   };
-
-  const handleSeedData = async () => {
-    if (!isAdmin || isSeeding) return;
-    setIsSeeding(true);
-
-    try {
-        const batch = writeBatch(db);
-        const tasksCollection = collection(db, "tasks");
-
-        MOCK_TASKS.forEach(task => {
-            const docRef = doc(tasksCollection, task.id);
-            // We remove the ID from the object itself before writing
-            const { id, ...taskData } = task;
-            batch.set(docRef, { ...taskData, createdAt: Timestamp.now() });
-        });
-
-        await batch.commit();
-
-        toast({
-            title: "Database Seeded!",
-            description: `${MOCK_TASKS.length} mock tasks have been added.`,
-            className: "bg-accent text-accent-foreground border-accent"
-        });
-        fetchData(); // Refresh the data
-    } catch(error) {
-        console.error("Error seeding data:", error);
-        toast({ title: "Error", description: "Could not seed the database.", variant: "destructive" });
-    } finally {
-        setIsSeeding(false);
-    }
-  }
 
   const totalPlatformProfit = useMemo(() => {
     return transactions
@@ -195,10 +162,6 @@ export default function AdminPage() {
             </p>
         </div>
         <div className="flex items-center gap-2">
-            <Button onClick={handleSeedData} size="sm" variant="outline" disabled={isSeeding}>
-                <Database className="mr-2 h-4 w-4" />
-                {isSeeding ? 'Seeding...' : 'Seed Mock Data'}
-            </Button>
             <Button asChild size="sm">
             <Link href="/admin/add-task">
                 <PlusCircle className="mr-2 h-4 w-4" />
@@ -387,5 +350,3 @@ export default function AdminPage() {
     </div>
   );
 }
-
-    
