@@ -31,14 +31,15 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { PlusCircle, ShieldAlert, DollarSign, Users, ListChecks, Pencil, Trash2 } from "lucide-react";
+import { PlusCircle, ShieldAlert, DollarSign, Users, ListChecks, Pencil, Trash2, Database } from "lucide-react";
 import { Transaction, Task, User } from "@/lib/types";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import UserData from "@/components/admin/user-data";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, doc, deleteDoc, Timestamp } from "firebase/firestore";
+import { collection, getDocs, doc, deleteDoc, Timestamp, writeBatch } from "firebase/firestore";
+import { MOCK_TASKS } from "@/lib/mock-data";
 
 
 export default function AdminPage() {
@@ -49,6 +50,7 @@ export default function AdminPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [users, setUsers] = useState<Record<string, User>>({});
+  const [isSeeding, setIsSeeding] = useState(false);
   
   const fetchData = useCallback(async () => {
     try {
@@ -105,6 +107,37 @@ export default function AdminPage() {
     }
   };
 
+  const handleSeedData = async () => {
+    if (!isAdmin || isSeeding) return;
+    setIsSeeding(true);
+
+    try {
+        const batch = writeBatch(db);
+        const tasksCollection = collection(db, "tasks");
+
+        MOCK_TASKS.forEach(task => {
+            const docRef = doc(tasksCollection, task.id);
+            // We remove the ID from the object itself before writing
+            const { id, ...taskData } = task;
+            batch.set(docRef, { ...taskData, createdAt: Timestamp.now() });
+        });
+
+        await batch.commit();
+
+        toast({
+            title: "Database Seeded!",
+            description: `${MOCK_TASKS.length} mock tasks have been added.`,
+            className: "bg-accent text-accent-foreground border-accent"
+        });
+        fetchData(); // Refresh the data
+    } catch(error) {
+        console.error("Error seeding data:", error);
+        toast({ title: "Error", description: "Could not seed the database.", variant: "destructive" });
+    } finally {
+        setIsSeeding(false);
+    }
+  }
+
   const totalPlatformProfit = useMemo(() => {
     return transactions
       .filter(t => t.status === 'Paid')
@@ -160,12 +193,18 @@ export default function AdminPage() {
               Overview of your platform's activity.
             </p>
         </div>
-        <Button asChild size="sm">
-          <Link href="/admin/add-task">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add Task
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+            <Button onClick={handleSeedData} size="sm" variant="outline" disabled={isSeeding}>
+                <Database className="mr-2 h-4 w-4" />
+                {isSeeding ? 'Seeding...' : 'Seed Mock Data'}
+            </Button>
+            <Button asChild size="sm">
+            <Link href="/admin/add-task">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add Task
+            </Link>
+            </Button>
+        </div>
       </header>
 
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
@@ -347,3 +386,5 @@ export default function AdminPage() {
     </div>
   );
 }
+
+    
