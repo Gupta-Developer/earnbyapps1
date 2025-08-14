@@ -24,7 +24,7 @@ export default function TaskDetailPage() {
   const { user, appUser } = useAuth();
   const taskId = params.id as string;
   const [task, setTask] = useState<Task | null>(null);
-  const [existingTransaction, setExistingTransaction] = useState<Transaction | null>(null);
+  const [latestTransaction, setLatestTransaction] = useState<Transaction | null>(null);
   const [isStarting, setIsStarting] = useState(false);
 
 
@@ -32,14 +32,24 @@ export default function TaskDetailPage() {
     if (!user || !taskId) return;
     
     const transactionsRef = collection(db, 'transactions');
-    const q = query(transactionsRef, where('userId', '==', user.uid), where('taskId', '==', taskId), limit(1));
+    const q = query(transactionsRef, where('userId', '==', user.uid), where('taskId', '==', taskId));
     const querySnapshot = await getDocs(q);
     
     if (!querySnapshot.empty) {
-        const doc = querySnapshot.docs[0];
-        setExistingTransaction({ id: doc.id, ...doc.data() } as Transaction);
+        // Find the one with status "Paid", if it exists.
+        const paidTransaction = querySnapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() } as Transaction))
+            .find(tx => tx.status === 'Paid');
+        
+        if (paidTransaction) {
+            setLatestTransaction(paidTransaction);
+        } else {
+             // If no paid one, it doesn't matter, user can start again.
+            setLatestTransaction(null);
+        }
+
     } else {
-        setExistingTransaction(null);
+        setLatestTransaction(null);
     }
   }, [user, taskId]);
 
@@ -64,8 +74,8 @@ export default function TaskDetailPage() {
   }, [user, taskId, checkExistingTransaction]);
 
   const isTaskLocked = useMemo(() => {
-    return existingTransaction?.status === 'Paid' || existingTransaction?.status === 'Approved';
-  }, [existingTransaction]);
+    return latestTransaction?.status === 'Paid';
+  }, [latestTransaction]);
 
 
   if (!task) {
@@ -89,12 +99,6 @@ export default function TaskDetailPage() {
 
   const handleStartTask = async () => {
     if (!user || !task || isTaskLocked || isStarting) return;
-
-    // If a transaction already exists (even ongoing), send user to wallet
-    if (existingTransaction) {
-        router.push('/wallet');
-        return;
-    }
 
     setIsStarting(true);
     
@@ -126,8 +130,8 @@ export default function TaskDetailPage() {
             description: `"${task.name}" is now ongoing. Check your wallet for status updates.`,
         });
         
-        // After successfully creating the transaction, update the local state
-        setExistingTransaction({ ...newTransaction, id: docRef.id, date: new Date() } as Transaction);
+        // After successfully creating the transaction, maybe redirect to wallet
+        router.push('/wallet');
 
         // Open the link in a new tab
         if (task.link) {
@@ -152,10 +156,7 @@ export default function TaskDetailPage() {
           return "Login to Start Task";
       }
       if (isTaskLocked) {
-          return `Task ${existingTransaction?.status}`;
-      }
-      if (existingTransaction) {
-           return `View Task Status`;
+          return `Task Paid`;
       }
       return `Start Task & Earn ₹${task.reward}`;
   }
@@ -165,7 +166,6 @@ export default function TaskDetailPage() {
       router.push(`/profile?redirect_to=${pathname}`);
       return;
     }
-    // All other logic is handled in handleStartTask
     handleStartTask();
   };
 
