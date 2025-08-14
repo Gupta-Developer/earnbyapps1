@@ -45,7 +45,7 @@ export default function AddTaskPage() {
     const { name, value, type } = e.target;
 
     if (type === 'number') {
-      setTask(prev => ({ ...prev, [name]: value === '' ? '' : parseFloat(value) }));
+      setTask(prev => ({ ...prev, [name]: value === '' ? 0 : parseFloat(value) }));
     } else {
       setTask(prev => ({ ...prev, [name]: value }));
     }
@@ -266,3 +266,5 @@ export default function AddTaskPage() {
     </div>
   );
 }
+
+    
