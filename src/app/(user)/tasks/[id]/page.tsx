@@ -182,7 +182,7 @@ export default function TaskDetailPage() {
                   />
                   <div>
                     <h2 className="font-bold text-2xl">{task.name}</h2>
-                    <p className="text-accent font-semibold text-xl mt-1">Earn ₹{task.reward}</p>
+                    <p className="text-accent font-semibold text-xl mt-1">Earn ₹${task.reward}</p>
                   </div>
               </div>
               <p className="text-muted-foreground text-sm">{task.description}</p>
@@ -295,4 +295,5 @@ export default function TaskDetailPage() {
 
     </div>
   );
-}
+
+    
