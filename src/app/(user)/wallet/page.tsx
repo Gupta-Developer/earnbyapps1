@@ -110,7 +110,7 @@ export default function WalletPage() {
   }, [user]);
 
   const totalEarnings = transactions
-    .filter(t => t.status === 'Paid')
+    .filter(t => t.status === 'Paid' || t.status === 'Approved')
     .reduce((sum, t) => sum + t.amount, 0);
 
   return (
@@ -147,7 +147,7 @@ export default function WalletPage() {
                   <TableRow key={item.id}>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                         {item.task && (
+                         {item.task && item.task.icon && (
                             <Image src={item.task.icon} alt={item.task.name} width={40} height={40} className="rounded-lg" />
                          )}
                          <div>
