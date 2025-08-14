@@ -108,13 +108,18 @@ export default function AddTaskPage() {
            bannerUrl = await uploadFile(bannerFile, `task-banners/${Date.now()}-${bannerFile.name}`);
         }
         
-        const newTask = {
+        const newTask: any = {
             ...task,
             faqs,
             icon: iconUrl,
             banner: bannerUrl || "",
             createdAt: serverTimestamp()
         };
+
+        if (!newTask.youtubeLink) {
+            delete newTask.youtubeLink;
+        }
+
 
         await addDoc(collection(db, "tasks"), newTask);
 
@@ -266,5 +271,3 @@ export default function AddTaskPage() {
     </div>
   );
 }
-
-    
