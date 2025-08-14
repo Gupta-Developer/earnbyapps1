@@ -13,7 +13,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { useAuth } from '@/hooks/use-auth';
 import { Task, Transaction } from '@/lib/types';
 import { db } from '@/lib/firebase';
-import { doc, getDoc, collection, query, where, getDocs, addDoc, serverTimestamp, limit } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 
 
 export default function TaskDetailPage() {
@@ -123,7 +123,7 @@ export default function TaskDetailPage() {
             date: serverTimestamp(),
         };
 
-        const docRef = await addDoc(collection(db, 'transactions'), newTransaction);
+        await addDoc(collection(db, 'transactions'), newTransaction);
 
         toast({
             title: "Task Started!",
@@ -135,7 +135,11 @@ export default function TaskDetailPage() {
 
         // Open the link in a new tab
         if (task.link) {
-          window.open(task.link, '_blank');
+            let url = task.link;
+            if (!/^https?:\/\//i.test(url)) {
+                url = 'https://' + url;
+            }
+            window.open(url, '_blank');
         }
 
     } catch (error) {
@@ -198,7 +202,7 @@ export default function TaskDetailPage() {
                   />
                   <div>
                     <h2 className="font-bold text-2xl">{task.name}</h2>
-                    <p className="text-accent font-semibold text-xl mt-1">Earn ₹{task.reward}</p>
+                    <p className="text-accent font-semibold text-xl mt-1">Earn ₹${task.reward}</p>
                   </div>
               </div>
               <p className="text-muted-foreground text-sm">{task.description}</p>
