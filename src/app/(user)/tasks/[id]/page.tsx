@@ -88,8 +88,9 @@ export default function TaskDetailPage() {
   };
 
   const handleStartTask = async () => {
-    if (!user || isTaskLocked || isStarting || !task) return;
+    if (!user || !task || isTaskLocked || isStarting) return;
 
+    // If a transaction already exists (even ongoing), send user to wallet
     if (existingTransaction) {
         router.push('/wallet');
         return;
@@ -118,14 +119,20 @@ export default function TaskDetailPage() {
             date: serverTimestamp(),
         };
 
-        await addDoc(collection(db, 'transactions'), newTransaction);
+        const docRef = await addDoc(collection(db, 'transactions'), newTransaction);
 
         toast({
             title: "Task Started!",
-            description: `"${task.name}" is now ongoing in your wallet.`,
+            description: `"${task.name}" is now ongoing. Check your wallet for status updates.`,
         });
         
-        await checkExistingTransaction();
+        // After successfully creating the transaction, update the local state
+        setExistingTransaction({ ...newTransaction, id: docRef.id, date: new Date() } as Transaction);
+
+        // Open the link in a new tab
+        if (task.link) {
+          window.open(task.link, '_blank');
+        }
 
     } catch (error) {
         console.error("Error starting task:", error);
@@ -139,7 +146,7 @@ export default function TaskDetailPage() {
 
   const getButtonContent = () => {
       if (isStarting) {
-          return <> <Loader2 className="animate-spin" /> Starting Task...</>;
+          return <> <Loader2 className="mr-2 animate-spin" /> Starting Task...</>;
       }
       if (!user) {
           return "Login to Start Task";
@@ -152,6 +159,15 @@ export default function TaskDetailPage() {
       }
       return `Start Task & Earn ₹${task.reward}`;
   }
+
+  const handleButtonClick = () => {
+    if (!user) {
+      router.push(`/profile?redirect_to=${pathname}`);
+      return;
+    }
+    // All other logic is handled in handleStartTask
+    handleStartTask();
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -221,37 +237,14 @@ export default function TaskDetailPage() {
             
             <Separator />
 
-            {user ? (
-                <Button 
-                  asChild={!isTaskLocked && !existingTransaction && !isStarting && !!task.link}
-                  size="lg" 
-                  className="w-full shadow-lg" 
-                  onClick={() => {
-                      if (!task.link) {
-                          handleStartTask();
-                      } else if (existingTransaction) {
-                          router.push('/wallet')
-                      } else if (isTaskLocked || isStarting) {
-                          return;
-                      } else {
-                          handleStartTask();
-                      }
-                  }}
-                  disabled={isTaskLocked || isStarting}
-                >
-                    {isTaskLocked || (existingTransaction && !task.link) || isStarting ? (
-                        <span>{getButtonContent()}</span>
-                    ) : (
-                         <a href={task.link} target="_blank" rel="noopener noreferrer" onClick={handleStartTask}>
-                            {getButtonContent()}
-                        </a>
-                    )}
-                </Button>
-            ) : (
-                <Button size="lg" className="w-full shadow-lg" onClick={() => router.push(`/profile?redirect_to=${pathname}`)}>
-                    {getButtonContent()}
-                </Button>
-            )}
+             <Button 
+                size="lg" 
+                className="w-full shadow-lg" 
+                onClick={handleButtonClick}
+                disabled={isTaskLocked || isStarting}
+              >
+                {getButtonContent()}
+            </Button>
           </div>
         </Card>
 
