@@ -78,14 +78,16 @@ export default function HomePage() {
   }, []);
 
   const filteredTasks = useMemo(() => {
-    let tasksToShow = tasks;
-    if (filter === "high-paying") {
-      tasksToShow = tasks.filter((task) => task.isHighPaying);
-    } else if (filter === "instant") {
-        tasksToShow = tasks.filter((task) => task.isInstant);
+    if (filter === "all") {
+        return tasks;
     }
-    // Only show 6 tasks
-    return tasksToShow.slice(0, 6);
+    if (filter === "high-paying") {
+      return tasks.filter((task) => task.isHighPaying);
+    } 
+    if (filter === "instant") {
+        return tasks.filter((task) => task.isInstant);
+    }
+    return tasks;
   }, [tasks, filter]);
 
   return (
