@@ -109,21 +109,35 @@ export default function WalletPage() {
     fetchTransactions();
   }, [user]);
 
-  const totalEarnings = transactions
-    .filter(t => t.status === 'Paid' || t.status === 'Approved')
+  const totalPaid = transactions
+    .filter(t => t.status === 'Paid')
+    .reduce((sum, t) => sum + t.amount, 0);
+  
+  const pendingAmount = transactions
+    .filter(t => t.status === 'Approved')
     .reduce((sum, t) => sum + t.amount, 0);
 
   return (
     <div className="py-4 space-y-6">
       <div className="pt-4 space-y-6">
-        <Card className="text-center shadow-lg rounded-lg">
-          <CardHeader>
-            <CardTitle className="text-muted-foreground">Total Earnings</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-4xl font-bold text-accent">₹{totalEarnings.toFixed(2)}</p>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-2 gap-4">
+            <Card className="text-center shadow-lg rounded-lg">
+              <CardHeader>
+                <CardTitle className="text-muted-foreground text-sm">Total Paid</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-3xl font-bold text-accent">₹{totalPaid.toFixed(2)}</p>
+              </CardContent>
+            </Card>
+            <Card className="text-center shadow-lg rounded-lg">
+              <CardHeader>
+                <CardTitle className="text-muted-foreground text-sm">Pending Amount</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-3xl font-bold text-blue-500">₹{pendingAmount.toFixed(2)}</p>
+              </CardContent>
+            </Card>
+        </div>
         
         <div>
           <h2 className="text-lg font-semibold mb-2 px-1">Earnings History</h2>
