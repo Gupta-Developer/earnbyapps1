@@ -13,7 +13,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { useAuth } from '@/hooks/use-auth';
 import { Task, Transaction } from '@/lib/types';
 import { db } from '@/lib/firebase';
-import { doc, getDoc, collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs, addDoc, serverTimestamp, orderBy, limit } from 'firebase/firestore';
 
 
 export default function TaskDetailPage() {
@@ -32,22 +32,18 @@ export default function TaskDetailPage() {
     if (!user || !taskId) return;
     
     const transactionsRef = collection(db, 'transactions');
-    const q = query(transactionsRef, where('userId', '==', user.uid), where('taskId', '==', taskId));
+    const q = query(
+        transactionsRef, 
+        where('userId', '==', user.uid), 
+        where('taskId', '==', taskId),
+        orderBy('date', 'desc'),
+        limit(1)
+    );
     const querySnapshot = await getDocs(q);
     
     if (!querySnapshot.empty) {
-        // Find the one with status "Paid", if it exists.
-        const paidTransaction = querySnapshot.docs
-            .map(doc => ({ id: doc.id, ...doc.data() } as Transaction))
-            .find(tx => tx.status === 'Paid');
-        
-        if (paidTransaction) {
-            setLatestTransaction(paidTransaction);
-        } else {
-             // If no paid one, it doesn't matter, user can start again.
-            setLatestTransaction(null);
-        }
-
+        const latestTx = { id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() } as Transaction;
+        setLatestTransaction(latestTx);
     } else {
         setLatestTransaction(null);
     }
@@ -77,6 +73,10 @@ export default function TaskDetailPage() {
     return latestTransaction?.status === 'Paid';
   }, [latestTransaction]);
 
+  const isTaskInProgress = useMemo(() => {
+    return latestTransaction?.status === 'Started & Ongoing' || latestTransaction?.status === 'Approved';
+  }, [latestTransaction]);
+
 
   if (!task) {
     return (
@@ -97,6 +97,14 @@ export default function TaskDetailPage() {
     });
   };
 
+  const openTaskLink = (taskLink: string) => {
+    let url = taskLink;
+    if (!/^https?:\/\//i.test(url)) {
+        url = 'https://' + url;
+    }
+    window.open(url, '_blank');
+  }
+
   const handleStartTask = async () => {
     if (!user || !task || isTaskLocked || isStarting) return;
 
@@ -114,6 +122,18 @@ export default function TaskDetailPage() {
             return;
         }
 
+        // If task is already in progress, just open the link and don't create a new transaction
+        if (isTaskInProgress) {
+            openTaskLink(task.link);
+            toast({
+                title: "Continuing Task",
+                description: "Opening the task link for you to continue.",
+            });
+            setIsStarting(false);
+            return;
+        }
+
+
         const newTransaction: Omit<Transaction, 'id'> = {
             userId: user.uid,
             taskId: task.id,
@@ -123,23 +143,19 @@ export default function TaskDetailPage() {
             date: serverTimestamp(),
         };
 
-        await addDoc(collection(db, 'transactions'), newTransaction);
+        const docRef = await addDoc(collection(db, 'transactions'), newTransaction);
 
         toast({
             title: "Task Started!",
             description: `"${task.name}" is now ongoing. Check your wallet for status updates.`,
         });
         
-        // After successfully creating the transaction, maybe redirect to wallet
+        // After successfully creating the transaction, redirect to wallet
         router.push('/wallet');
 
         // Open the link in a new tab
         if (task.link) {
-            let url = task.link;
-            if (!/^https?:\/\//i.test(url)) {
-                url = 'https://' + url;
-            }
-            window.open(url, '_blank');
+           openTaskLink(task.link);
         }
 
     } catch (error) {
@@ -161,6 +177,9 @@ export default function TaskDetailPage() {
       }
       if (isTaskLocked) {
           return `Task Paid`;
+      }
+      if (isTaskInProgress) {
+          return `Continue Task & Earn ₹${task.reward}`;
       }
       return `Start Task & Earn ₹${task.reward}`;
   }
@@ -202,7 +221,7 @@ export default function TaskDetailPage() {
                   />
                   <div>
                     <h2 className="font-bold text-2xl">{task.name}</h2>
-                    <p className="text-accent font-semibold text-xl mt-1">Earn ₹${task.reward}</p>
+                    <p className="text-accent font-semibold text-xl mt-1">Earn ₹{task.reward}</p>
                   </div>
               </div>
               <p className="text-muted-foreground text-sm">{task.description}</p>
