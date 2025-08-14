@@ -13,7 +13,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { useAuth } from '@/hooks/use-auth';
 import { Task, Transaction } from '@/lib/types';
 import { db } from '@/lib/firebase';
-import { doc, getDoc, collection, query, where, getDocs, addDoc, serverTimestamp, orderBy, limit } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 
 
 export default function TaskDetailPage() {
@@ -35,15 +35,19 @@ export default function TaskDetailPage() {
     const q = query(
         transactionsRef, 
         where('userId', '==', user.uid), 
-        where('taskId', '==', taskId),
-        orderBy('date', 'desc'),
-        limit(1)
+        where('taskId', '==', taskId)
     );
     const querySnapshot = await getDocs(q);
     
     if (!querySnapshot.empty) {
-        const latestTx = { id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() } as Transaction;
-        setLatestTransaction(latestTx);
+        // Sort by date client-side to find the latest transaction
+        const transactions = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Transaction));
+        transactions.sort((a, b) => {
+            const dateA = (a.date as Timestamp)?.toDate() || new Date(0);
+            const dateB = (b.date as Timestamp)?.toDate() || new Date(0);
+            return dateB.getTime() - dateA.getTime();
+        });
+        setLatestTransaction(transactions[0]);
     } else {
         setLatestTransaction(null);
     }
